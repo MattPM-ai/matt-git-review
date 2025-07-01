@@ -1,10 +1,20 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import Image from "next/image"
 
 interface ConfigurePageProps {
-  searchParams: {
+  searchParams: Promise<{
     installation_id?: string
-  }
+  }>
+}
+
+interface Repository {
+  id: number
+  name: string
+  description: string | null
+  language: string | null
+  visibility: string
+  updated_at: string
 }
 
 async function getInstallationRepos(accessToken: string, installationId: string) {
@@ -38,7 +48,7 @@ async function getInstallation(accessToken: string, installationId: string) {
   }
 
   const data = await response.json()
-  return data.installations.find((inst: any) => inst.id === parseInt(installationId))
+  return data.installations.find((inst: { id: number }) => inst.id === parseInt(installationId))
 }
 
 export default async function ConfigurePage({ searchParams }: ConfigurePageProps) {
@@ -48,7 +58,8 @@ export default async function ConfigurePage({ searchParams }: ConfigurePageProps
     redirect("/")
   }
 
-  const { installation_id } = searchParams
+  const params = await searchParams
+  const { installation_id } = params
 
   if (!installation_id) {
     redirect("/dashboard")
@@ -66,7 +77,7 @@ export default async function ConfigurePage({ searchParams }: ConfigurePageProps
       const repoData = await getInstallationRepos(session.accessToken!, installation_id)
       repositories = repoData.repositories || []
     }
-  } catch (e) {
+  } catch {
     error = "Failed to load installation data"
   }
 
@@ -110,10 +121,12 @@ export default async function ConfigurePage({ searchParams }: ConfigurePageProps
           <div className="px-6 py-8">
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <img
+                <Image
                   src={installation.account.avatar_url}
                   alt={installation.account.login}
-                  className="h-12 w-12 rounded-full"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
                 />
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
@@ -140,7 +153,7 @@ export default async function ConfigurePage({ searchParams }: ConfigurePageProps
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {repositories.map((repo: any) => (
+                    {repositories.map((repo: Repository) => (
                       <div
                         key={repo.id}
                         className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"

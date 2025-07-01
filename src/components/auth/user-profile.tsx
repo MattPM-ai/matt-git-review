@@ -1,5 +1,6 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { auth } from "@/lib/auth"
 import { SignOutButton } from "./sign-out-button"
+import Image from "next/image"
 
 export async function UserProfile() {
   const session = await auth()
@@ -12,10 +13,12 @@ export async function UserProfile() {
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-3">
         {session.user.image && (
-          <img
+          <Image
             src={session.user.image}
             alt={session.user.name || "User avatar"}
-            className="h-8 w-8 rounded-full"
+            width={32}
+            height={32}
+            className="rounded-full"
           />
         )}
         <div>

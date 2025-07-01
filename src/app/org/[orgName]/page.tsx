@@ -1,18 +1,19 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ActivityFilters } from "@/components/activity-filters";
+import Image from "next/image";
 
 interface OrgActivityPageProps {
-  params: {
+  params: Promise<{
     orgName: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     user?: string;
     type?: string;
     dateFrom?: string;
     dateTo?: string;
-  };
+  }>;
 }
 
 interface GitHubUser {
@@ -70,10 +71,10 @@ interface GitHubPullRequest {
   repository: GitHubRepo;
 }
 
-type ActivityWithType = 
+type ActivityWithType =
   | (GitHubCommit & { type: "commits" })
   | (GitHubIssue & { type: "issues" })
-  | (GitHubPullRequest & { type: "pulls" })
+  | (GitHubPullRequest & { type: "pulls" });
 
 async function getOrgRepositories(accessToken: string, orgName: string) {
   const response = await fetch(
@@ -152,7 +153,7 @@ async function getRepoActivity(
   }
 
   const data = await response.json();
-  return data.map((item: any) => ({
+  return data.map((item: GitHubCommit | GitHubIssue | GitHubPullRequest) => ({
     ...item,
     repository: {
       name: repo.split("/")[1],
@@ -192,7 +193,10 @@ async function getAllOrgActivity(
 
         allActivity.commits.push(...commits);
         // Filter out pull requests from issues (GitHub API includes PRs in issues endpoint)
-        const realIssues = issues.filter((issue: any) => !issue.pull_request);
+        const realIssues = issues.filter(
+          (issue: GitHubIssue & { pull_request?: unknown }) =>
+            !issue.pull_request
+        );
         allActivity.issues.push(...realIssues);
         allActivity.pulls.push(...pulls);
       } catch (error) {
@@ -222,7 +226,13 @@ async function getAllOrgActivity(
   }
 }
 
-function ActivityItem({ item, type }: { item: any; type: string }) {
+function ActivityItem({
+  item,
+  type,
+}: {
+  item: GitHubCommit | GitHubIssue | GitHubPullRequest;
+  type: string;
+}) {
   const getIcon = () => {
     switch (type) {
       case "commits":
@@ -278,30 +288,35 @@ function ActivityItem({ item, type }: { item: any; type: string }) {
 
   const getDate = () => {
     if (type === "commits") {
-      return new Date(item.commit.author.date).toLocaleDateString();
+      return new Date(
+        (item as GitHubCommit).commit.author.date
+      ).toLocaleDateString();
     }
-    return new Date(item.created_at).toLocaleDateString();
+    return new Date(
+      (item as GitHubIssue | GitHubPullRequest).created_at
+    ).toLocaleDateString();
   };
 
   const getTitle = () => {
     if (type === "commits") {
-      return item.commit.message.split("\n")[0];
+      return (item as GitHubCommit).commit.message.split("\n")[0];
     }
-    return item.title;
+    return (item as GitHubIssue | GitHubPullRequest).title;
   };
 
   const getAuthor = () => {
     if (type === "commits") {
-      return item.author?.login || item.commit.author.name;
+      const commitItem = item as GitHubCommit;
+      return commitItem.author?.login || commitItem.commit.author.name;
     }
-    return item.user.login;
+    return (item as GitHubIssue | GitHubPullRequest).user.login;
   };
 
   const getAuthorAvatar = () => {
     if (type === "commits") {
-      return item.author?.avatar_url;
+      return (item as GitHubCommit).author?.avatar_url || "";
     }
-    return item.user.avatar_url;
+    return (item as GitHubIssue | GitHubPullRequest).user.avatar_url || "";
   };
 
   return (
@@ -310,10 +325,12 @@ function ActivityItem({ item, type }: { item: any; type: string }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           {getAuthorAvatar() && (
-            <img
+            <Image
               src={getAuthorAvatar()}
               alt={getAuthor()}
-              className="w-5 h-5 rounded-full"
+              width={20}
+              height={20}
+              className="rounded-full"
             />
           )}
           <span className="text-sm font-medium text-gray-900">
@@ -350,14 +367,14 @@ function ActivityItem({ item, type }: { item: any; type: string }) {
           <div className="mt-1 flex items-center gap-2">
             <span
               className={`px-2 py-1 text-xs rounded-full ${
-                item.state === "open"
+                (item as GitHubIssue | GitHubPullRequest).state === "open"
                   ? "bg-green-100 text-green-800"
-                  : item.state === "closed"
+                  : (item as GitHubIssue | GitHubPullRequest).state === "closed"
                   ? "bg-red-100 text-red-800"
                   : "bg-purple-100 text-purple-800"
               }`}
             >
-              {item.state}
+              {(item as GitHubIssue | GitHubPullRequest).state}
             </span>
           </div>
         )}
@@ -376,13 +393,15 @@ export default async function OrgActivityPage({
     redirect("/");
   }
 
-  const { orgName } = params;
+  const paramsData = await params;
+  const searchParamsData = await searchParams;
+  const { orgName } = paramsData;
   const {
     user: selectedUser,
     type: selectedType,
     dateFrom: selectedDateFrom,
     dateTo: selectedDateTo,
-  } = searchParams;
+  } = searchParamsData;
 
   let members: GitHubUser[] = [];
   let activity: {
@@ -403,7 +422,7 @@ export default async function OrgActivityPage({
     ]);
     members = results[0];
     activity = results[1];
-  } catch (e) {
+  } catch {
     error = "Failed to fetch organization data";
   }
 
@@ -434,8 +453,16 @@ export default async function OrgActivityPage({
     filteredActivities = filteredActivities.filter((activity) => {
       const activityDate =
         activity.type === "commits"
-          ? new Date((activity as GitHubCommit & { type: "commits" }).commit.author.date)
-          : new Date((activity as (GitHubIssue | GitHubPullRequest) & { type: string }).created_at);
+          ? new Date(
+              (
+                activity as GitHubCommit & { type: "commits" }
+              ).commit.author.date
+            )
+          : new Date(
+              (
+                activity as (GitHubIssue | GitHubPullRequest) & { type: string }
+              ).created_at
+            );
 
       let passesDateFilter = true;
 
@@ -519,7 +546,9 @@ export default async function OrgActivityPage({
               <div className="divide-y divide-gray-200">
                 {filteredActivities.slice(0, 100).map((item, index) => (
                   <ActivityItem
-                    key={`${item.type}-${(item as any).id || (item as any).sha}-${index}`}
+                    key={`${item.type}-${
+                      "id" in item ? item.id : (item as GitHubCommit).sha
+                    }-${index}`}
                     item={item}
                     type={item.type}
                   />

@@ -1,20 +1,21 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { auth } from "@/lib/auth"
 import { SignInButton } from "@/components/auth/sign-in-button"
 import { redirect } from "next/navigation"
 
 interface HomeProps {
-  searchParams: {
+  searchParams: Promise<{
     setup_redirect?: string
-  }
+  }>
 }
 
 export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams
   const session = await auth()
 
   if (session) {
     // If there's a setup redirect, go there instead of dashboard
-    if (searchParams.setup_redirect) {
-      redirect(decodeURIComponent(searchParams.setup_redirect))
+    if (params.setup_redirect) {
+      redirect(decodeURIComponent(params.setup_redirect))
     }
     redirect("/dashboard")
   }
@@ -48,7 +49,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-medium text-gray-900">
-                  What we'll access:
+                  What we&apos;ll access:
                 </h2>
                 <ul className="mt-3 space-y-2 text-sm text-gray-600">
                   <li className="flex items-start">

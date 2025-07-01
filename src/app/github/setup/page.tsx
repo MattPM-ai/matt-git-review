@@ -1,24 +1,26 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import Image from "next/image"
 
 interface SetupPageProps {
-  searchParams: {
+  searchParams: Promise<{
     installation_id?: string
     setup_action?: string
     state?: string
-  }
+  }>
 }
 
 export default async function GitHubSetupPage({ searchParams }: SetupPageProps) {
+  const params = await searchParams
   const session = await auth()
 
   if (!session) {
     // Store installation details and redirect to login
-    const params = new URLSearchParams(searchParams as Record<string, string>)
-    redirect(`/?setup_redirect=${encodeURIComponent(`/github/setup?${params.toString()}`)}`)
+    const urlParams = new URLSearchParams(params as Record<string, string>)
+    redirect(`/?setup_redirect=${encodeURIComponent(`/github/setup?${urlParams.toString()}`)}`)
   }
 
-  const { installation_id, setup_action } = searchParams
+  const { installation_id, setup_action } = params
 
   if (!installation_id || !setup_action) {
     redirect("/dashboard")
@@ -39,10 +41,10 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
     if (response.ok) {
       const data = await response.json()
       installationData = data.installations.find(
-        (inst: any) => inst.id === parseInt(installation_id)
+        (inst: { id: number }) => inst.id === parseInt(installation_id)
       )
     }
-  } catch (e) {
+  } catch {
     error = "Failed to verify installation access"
   }
 
@@ -114,10 +116,12 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
 
             <div className="border rounded-lg p-6 mb-6">
               <div className="flex items-center gap-4 mb-4">
-                <img
+                <Image
                   src={installationData.account.avatar_url}
                   alt={installationData.account.login}
-                  className="h-12 w-12 rounded-full"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
                 />
                 <div>
                   <h2 className="font-semibold text-gray-900">

@@ -1,6 +1,14 @@
-import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { UserProfile } from "@/components/auth/user-profile"
+import Image from "next/image"
+
+interface Organization {
+  id: number
+  login: string
+  description?: string
+  avatar_url: string
+}
 
 async function getGitHubOrgs(accessToken: string) {
   const response = await fetch("https://api.github.com/user/orgs", {
@@ -17,27 +25,6 @@ async function getGitHubOrgs(accessToken: string) {
   return response.json()
 }
 
-async function checkAppInstallation(accessToken: string, orgLogin: string) {
-  const response = await fetch(
-    `https://api.github.com/orgs/${orgLogin}/installations`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    }
-  )
-
-  if (!response.ok) {
-    return { installed: false }
-  }
-
-  const data = await response.json()
-  return {
-    installed: data.total_count > 0,
-    installations: data.installations || [],
-  }
-}
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -51,7 +38,7 @@ export default async function DashboardPage() {
 
   try {
     organizations = await getGitHubOrgs(session.accessToken!)
-  } catch (e) {
+  } catch {
     error = "Failed to fetch organizations"
   }
 
@@ -91,23 +78,25 @@ export default async function DashboardPage() {
           {organizations.length === 0 && !error && (
             <div className="rounded-md bg-yellow-50 p-4">
               <p className="text-sm text-yellow-800">
-                Please add organization first if you don't see your organization.
+                Please add organization first if you don&apos;t see your organization.
               </p>
             </div>
           )}
 
           {organizations.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {organizations.map((org: any) => (
+              {organizations.map((org: Organization) => (
                 <div
                   key={org.id}
                   className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-4">
-                    <img
+                    <Image
                       src={org.avatar_url}
                       alt={org.login}
-                      className="h-12 w-12 rounded-full"
+                      width={48}
+                      height={48}
+                      className="rounded-full"
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{org.login}</h3>

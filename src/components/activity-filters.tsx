@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { CalendarDatePicker } from './calendar-date-picker'
 
 interface GitHubUser {
   id: number
@@ -15,9 +16,10 @@ interface ActivityFiltersProps {
   selectedType?: string
   selectedDateFrom?: string
   selectedDateTo?: string
+  commitDates?: string[]
 }
 
-export function ActivityFilters({ members, selectedUser, selectedType, selectedDateFrom, selectedDateTo }: ActivityFiltersProps) {
+export function ActivityFilters({ members, selectedUser, selectedType, selectedDateFrom, selectedDateTo, commitDates = [] }: ActivityFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -41,28 +43,20 @@ export function ActivityFilters({ members, selectedUser, selectedType, selectedD
     router.push(`?${params.toString()}`)
   }
 
-  const handleDateFromFilter = (date: string) => {
+  const handleDateFilter = (date: string) => {
     const params = new URLSearchParams(searchParams.toString())
     if (date) {
       params.set('dateFrom', date)
-    } else {
-      params.delete('dateFrom')
-    }
-    router.push(`?${params.toString()}`)
-  }
-
-  const handleDateToFilter = (date: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (date) {
       params.set('dateTo', date)
     } else {
+      params.delete('dateFrom')
       params.delete('dateTo')
     }
     router.push(`?${params.toString()}`)
   }
 
   return (
-    <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div>
         <label htmlFor="user-filter" className="block text-sm font-medium text-gray-700 mb-2">
           Filter by User
@@ -99,31 +93,12 @@ export function ActivityFilters({ members, selectedUser, selectedType, selectedD
         </select>
       </div>
 
-      <div>
-        <label htmlFor="date-from-filter" className="block text-sm font-medium text-gray-700 mb-2">
-          From Date
-        </label>
-        <input
-          type="date"
-          id="date-from-filter"
-          value={selectedDateFrom || ''}
-          onChange={(e) => handleDateFromFilter(e.target.value)}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="date-to-filter" className="block text-sm font-medium text-gray-700 mb-2">
-          To Date
-        </label>
-        <input
-          type="date"
-          id="date-to-filter"
-          value={selectedDateTo || ''}
-          onChange={(e) => handleDateToFilter(e.target.value)}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        />
-      </div>
+      <CalendarDatePicker
+        selectedDate={selectedDateFrom}
+        onDateChange={handleDateFilter}
+        commitDates={commitDates}
+        label="Select Date"
+      />
     </div>
   )
 }

@@ -4,6 +4,16 @@ import { UserProfile } from "@/components/auth/user-profile";
 import { ActivityFilters } from "@/components/activity-filters";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  getOrgMembers,
+  getAllOrgActivity,
+  extractCommitDates,
+  type GitHubUser,
+  type GitHubCommit,
+  type GitHubIssue,
+  type GitHubPullRequest,
+  type ActivityWithType
+} from "@/lib/github-api";
 
 interface OrgActivityPageProps {
   params: Promise<{
@@ -17,215 +27,6 @@ interface OrgActivityPageProps {
   }>;
 }
 
-interface GitHubUser {
-  id: number;
-  login: string;
-  avatar_url: string;
-  html_url: string;
-}
-
-interface GitHubRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  html_url: string;
-}
-
-interface GitHubCommit {
-  sha: string;
-  commit: {
-    author: {
-      name: string;
-      email: string;
-      date: string;
-    };
-    message: string;
-  };
-  author: GitHubUser | null;
-  html_url: string;
-  repository: GitHubRepo;
-}
-
-interface GitHubIssue {
-  id: number;
-  number: number;
-  title: string;
-  body: string;
-  state: string;
-  user: GitHubUser;
-  created_at: string;
-  updated_at: string;
-  html_url: string;
-  repository: GitHubRepo;
-}
-
-interface GitHubPullRequest {
-  id: number;
-  number: number;
-  title: string;
-  body: string;
-  state: string;
-  user: GitHubUser;
-  created_at: string;
-  updated_at: string;
-  html_url: string;
-  repository: GitHubRepo;
-}
-
-type ActivityWithType =
-  | (GitHubCommit & { type: "commits" })
-  | (GitHubIssue & { type: "issues" })
-  | (GitHubPullRequest & { type: "pulls" });
-
-async function getOrgRepositories(accessToken: string, orgName: string) {
-  const response = await fetch(
-    `https://api.github.com/orgs/${orgName}/repos?per_page=100`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch repositories");
-  }
-
-  return response.json();
-}
-
-async function getOrgMembers(accessToken: string, orgName: string) {
-  const response = await fetch(
-    `https://api.github.com/orgs/${orgName}/members?per_page=100`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch organization members");
-  }
-
-  return response.json();
-}
-
-async function getRepoActivity(
-  accessToken: string,
-  repo: string,
-  type: string,
-  author?: string
-) {
-  const baseUrl = `https://api.github.com/repos/${repo}`;
-  let url = "";
-
-  switch (type) {
-    case "commits":
-      url = `${baseUrl}/commits?per_page=50${
-        author ? `&author=${author}` : ""
-      }`;
-      break;
-    case "issues":
-      url = `${baseUrl}/issues?state=all&per_page=50${
-        author ? `&creator=${author}` : ""
-      }`;
-      break;
-    case "pulls":
-      url = `${baseUrl}/pulls?state=all&per_page=50${
-        author ? `&creator=${author}` : ""
-      }`;
-      break;
-    default:
-      throw new Error("Invalid activity type");
-  }
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-  });
-
-  if (!response.ok) {
-    return [];
-  }
-
-  const data = await response.json();
-  return data.map((item: GitHubCommit | GitHubIssue | GitHubPullRequest) => ({
-    ...item,
-    repository: {
-      name: repo.split("/")[1],
-      full_name: repo,
-      html_url: `https://github.com/${repo}`,
-    },
-  }));
-}
-
-async function getAllOrgActivity(
-  accessToken: string,
-  orgName: string,
-  selectedUser?: string
-) {
-  try {
-    const repos = await getOrgRepositories(accessToken, orgName);
-    const allActivity: {
-      commits: GitHubCommit[];
-      issues: GitHubIssue[];
-      pulls: GitHubPullRequest[];
-    } = {
-      commits: [],
-      issues: [],
-      pulls: [],
-    };
-
-    // Limit to first 10 repos to avoid API rate limits
-    const limitedRepos = repos.slice(0, 10);
-
-    for (const repo of limitedRepos) {
-      try {
-        const [commits, issues, pulls] = await Promise.all([
-          getRepoActivity(accessToken, repo.full_name, "commits", selectedUser),
-          getRepoActivity(accessToken, repo.full_name, "issues", selectedUser),
-          getRepoActivity(accessToken, repo.full_name, "pulls", selectedUser),
-        ]);
-
-        allActivity.commits.push(...commits);
-        // Filter out pull requests from issues (GitHub API includes PRs in issues endpoint)
-        const realIssues = issues.filter(
-          (issue: GitHubIssue & { pull_request?: unknown }) =>
-            !issue.pull_request
-        );
-        allActivity.issues.push(...realIssues);
-        allActivity.pulls.push(...pulls);
-      } catch (error) {
-        console.error(`Error fetching activity for ${repo.full_name}:`, error);
-      }
-    }
-
-    // Sort by date (most recent first)
-    allActivity.commits.sort(
-      (a, b) =>
-        new Date(b.commit.author.date).getTime() -
-        new Date(a.commit.author.date).getTime()
-    );
-    allActivity.issues.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    allActivity.pulls.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    return allActivity;
-  } catch (error) {
-    console.error("Error fetching organization activity:", error);
-    return { commits: [], issues: [], pulls: [] };
-  }
-}
 
 function ActivityItem({
   item,
@@ -428,13 +229,7 @@ export default async function OrgActivityPage({
   }
 
   // Extract unique commit dates
-  const commitDates = Array.from(
-    new Set(
-      activity.commits.map((commit) => 
-        commit.commit.author.date.split('T')[0]
-      )
-    )
-  );
+  const commitDates = extractCommitDates(activity.commits);
 
   // Combine all activities for display
   const allActivities: ActivityWithType[] = [

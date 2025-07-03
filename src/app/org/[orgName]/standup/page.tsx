@@ -3,6 +3,14 @@ import { redirect } from "next/navigation";
 import { UserProfile } from "@/components/auth/user-profile";
 import { StandupDashboard } from "@/components/standup-dashboard";
 import Link from "next/link";
+import { 
+  getOrgMembers, 
+  getAllOrgCommits, 
+  extractCommitDates, 
+  groupCommitAuthorsByDate,
+  type GitHubUser,
+  type GitHubCommit 
+} from "@/lib/github-api";
 
 interface StandupPageProps {
   params: Promise<{
@@ -14,124 +22,6 @@ interface StandupPageProps {
   }>;
 }
 
-interface GitHubUser {
-  id: number;
-  login: string;
-  avatar_url: string;
-  html_url: string;
-}
-
-interface GitHubRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  html_url: string;
-}
-
-interface GitHubCommit {
-  sha: string;
-  commit: {
-    author: {
-      name: string;
-      email: string;
-      date: string;
-    };
-    message: string;
-  };
-  author: GitHubUser | null;
-  html_url: string;
-  repository: GitHubRepo;
-}
-
-async function getOrgMembers(
-  accessToken: string,
-  org: string
-): Promise<GitHubUser[]> {
-  const response = await fetch(
-    `https://api.github.com/orgs/${org}/members`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch organization members");
-  }
-
-  return response.json();
-}
-
-async function getRepoCommits(
-  accessToken: string,
-  repo: GitHubRepo
-): Promise<GitHubCommit[]> {
-  try {
-    const response = await fetch(
-      `https://api.github.com/repos/${repo.full_name}/commits?per_page=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/vnd.github.v3+json",
-        },
-      }
-    );
-
-    if (!response.ok) {
-      console.error(`Failed to fetch commits for ${repo.full_name}: ${response.status}`);
-      return [];
-    }
-
-    const commits = await response.json();
-    return commits.map((commit: any) => ({
-      ...commit,
-      repository: repo,
-    }));
-  } catch (error) {
-    console.error(`Error fetching commits for ${repo.full_name}:`, error);
-    return [];
-  }
-}
-
-async function getAllOrgCommits(
-  accessToken: string,
-  org: string
-): Promise<GitHubCommit[]> {
-  try {
-    const reposResponse = await fetch(
-      `https://api.github.com/orgs/${org}/repos?per_page=30&sort=pushed`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/vnd.github.v3+json",
-        },
-      }
-    );
-
-    if (!reposResponse.ok) {
-      console.error(`Failed to fetch organization repositories: ${reposResponse.status}`);
-      return [];
-    }
-
-    const repos: GitHubRepo[] = await reposResponse.json();
-    
-    const commitPromises = repos.map((repo) =>
-      getRepoCommits(accessToken, repo)
-    );
-
-    const commitArrays = await Promise.all(commitPromises);
-    const allCommits = commitArrays.flat();
-
-    return allCommits.sort((a, b) => {
-      return new Date(b.commit.author.date).getTime() - new Date(a.commit.author.date).getTime();
-    });
-  } catch (error) {
-    console.error("Error fetching organization commits:", error);
-    return [];
-  }
-}
 
 export default async function StandupPage({
   params,
@@ -162,29 +52,8 @@ export default async function StandupPage({
   }
 
   // Extract unique commit dates and daily authors
-  const commitDates = Array.from(
-    new Set(
-      commits.map((commit) => 
-        commit.commit.author.date.split('T')[0]
-      )
-    )
-  );
-
-  // Group commit authors by date
-  const dailyCommitAuthors: Record<string, Array<{login: string, name: string, email: string, avatar_url?: string}>> = {};
-  commits.forEach(commit => {
-    const date = commit.commit.author.date.split('T')[0];
-    if (!dailyCommitAuthors[date]) {
-      dailyCommitAuthors[date] = [];
-    }
-    const authorInfo = {
-      login: commit.author?.login || commit.commit.author.email.split('@')[0],
-      name: commit.commit.author.name,
-      email: commit.commit.author.email,
-      avatar_url: commit.author?.avatar_url
-    };
-    dailyCommitAuthors[date].push(authorInfo);
-  });
+  const commitDates = extractCommitDates(commits);
+  const dailyCommitAuthors = groupCommitAuthorsByDate(commits);
 
   return (
     <div className="min-h-screen bg-gray-50">

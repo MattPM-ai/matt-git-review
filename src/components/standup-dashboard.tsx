@@ -3,20 +3,8 @@
 import { useState, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, subDays } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
+import type { GitHubUser, CommitAuthor } from '@/lib/github-api'
 
-interface GitHubUser {
-  id: number
-  login: string
-  avatar_url: string
-  html_url: string
-}
-
-interface CommitAuthor {
-  login: string
-  name: string
-  email: string
-  avatar_url?: string
-}
 
 interface StandupDashboardProps {
   members: GitHubUser[]

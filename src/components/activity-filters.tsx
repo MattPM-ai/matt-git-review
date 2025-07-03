@@ -2,13 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CalendarDatePicker } from './calendar-date-picker'
+import type { GitHubUser } from '@/lib/github-api'
 
-interface GitHubUser {
-  id: number
-  login: string
-  avatar_url: string
-  html_url: string
-}
 
 interface ActivityFiltersProps {
   members: GitHubUser[]

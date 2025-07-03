@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, subDays } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { GitHubUser, CommitAuthor } from '@/lib/github-api'
+import type { StandupSummary } from '@/lib/openai'
 
 
 interface StandupDashboardProps {
@@ -24,6 +25,9 @@ export function StandupDashboard({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [standupSummaries, setStandupSummaries] = useState<StandupSummary[]>([])
+  const [isGeneratingStandups, setIsGeneratingStandups] = useState(false)
+  const [standupError, setStandupError] = useState<string | null>(null)
   
   const selectedDateObj = selectedDate ? new Date(selectedDate) : subDays(new Date(), 1)
 
@@ -33,6 +37,45 @@ export function StandupDashboard({
       handleDateSelect(format(yesterday, 'yyyy-MM-dd'))
     }
   }, [selectedDate])
+
+  useEffect(() => {
+    if (selectedDate && members.length > 0) {
+      generateStandupSummaries()
+    }
+  }, [selectedDate, members])
+
+  const generateStandupSummaries = async () => {
+    if (!selectedDate || isGeneratingStandups) return
+    
+    setIsGeneratingStandups(true)
+    setStandupError(null)
+    
+    try {
+      const response = await fetch('/api/standup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orgName,
+          date: selectedDate,
+          users: members
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate standup summaries')
+      }
+      
+      const data = await response.json()
+      setStandupSummaries(data.summaries)
+    } catch (error) {
+      console.error('Error generating standup summaries:', error)
+      setStandupError('Failed to generate AI summaries')
+    } finally {
+      setIsGeneratingStandups(false)
+    }
+  }
 
   const handleDateSelect = (date: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -206,37 +249,128 @@ export function StandupDashboard({
               </div>
             </div>
 
-            {/* Team Overview */}
+            {/* Daily Standup Summaries */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Team Overview</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {uniqueAuthors.slice(0, 4).map((author, index) => (
-                  <div key={author.login} className="bg-white rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={author.avatar_url || `https://github.com/${author.login}.png`}
-                        alt={author.login}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-gray-900">{author.name || author.login}</h4>
-                          <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <p className="text-sm text-gray-500">Developer</p>
-                        
-                        <div className="mt-3 space-y-2">
-                          <div>
-                            <p className="text-xs font-medium text-gray-500">Current Task</p>
-                            <p className="text-sm text-gray-900">View commit history for details</p>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Daily Standup Summaries</h3>
+                <button
+                  onClick={generateStandupSummaries}
+                  disabled={isGeneratingStandups}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isGeneratingStandups ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh AI Summaries
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              {standupError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800">{standupError}</p>
+                </div>
+              )}
+              
+              {isGeneratingStandups && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">Generating AI-powered standup summaries...</p>
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                {standupSummaries.length > 0 ? (
+                  standupSummaries.map((summary) => {
+                    const member = members.find(m => m.login === summary.userLogin)
+                    return (
+                      <div key={summary.userLogin} className="bg-white rounded-lg p-4 border border-gray-200">
+                        <div className="flex items-start gap-3">
+                          <img
+                            src={member?.avatar_url || `https://github.com/${summary.userLogin}.png`}
+                            alt={summary.userLogin}
+                            className="w-12 h-12 rounded-full"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-semibold text-gray-900">{summary.userLogin}</h4>
+                              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div>
+                                <p className="text-sm text-gray-700">{summary.summary}</p>
+                              </div>
+                              
+                              {summary.workDone.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-gray-500 mb-1">Work Completed:</p>
+                                  <ul className="text-sm text-gray-700 space-y-1">
+                                    {summary.workDone.map((item, index) => (
+                                      <li key={index} className="flex items-start gap-2">
+                                        <span className="text-green-500 mt-1">✓</span>
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {summary.nextSteps.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-gray-500 mb-1">Next Steps:</p>
+                                  <ul className="text-sm text-gray-700 space-y-1">
+                                    {summary.nextSteps.map((item, index) => (
+                                      <li key={index} className="flex items-start gap-2">
+                                        <span className="text-blue-500 mt-1">→</span>
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {summary.blockers.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-gray-500 mb-1">Blockers:</p>
+                                  <ul className="text-sm text-gray-700 space-y-1">
+                                    {summary.blockers.map((item, index) => (
+                                      <li key={index} className="flex items-start gap-2">
+                                        <span className="text-red-500 mt-1">⚠</span>
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )
+                  })
+                ) : uniqueAuthors.length > 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="mb-2">No AI summaries generated yet.</p>
+                    <p className="text-sm">Click "Refresh AI Summaries" to generate standup summaries for team members who committed today.</p>
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No commits found for this date.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

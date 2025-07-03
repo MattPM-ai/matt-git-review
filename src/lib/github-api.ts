@@ -433,3 +433,38 @@ export function groupCommitAuthorsByDate(
 
   return dailyCommitAuthors;
 }
+
+export function groupCommitsByUserAndDate(
+  commits: GitHubCommit[]
+): Record<string, Record<string, GitHubCommit[]>> {
+  const userCommitsByDate: Record<string, Record<string, GitHubCommit[]>> = {};
+
+  commits.forEach((commit) => {
+    const date = commit.commit.author.date.split("T")[0];
+    const userLogin = commit.author?.login || commit.commit.author.email.split("@")[0];
+    
+    if (!userCommitsByDate[userLogin]) {
+      userCommitsByDate[userLogin] = {};
+    }
+    
+    if (!userCommitsByDate[userLogin][date]) {
+      userCommitsByDate[userLogin][date] = [];
+    }
+    
+    userCommitsByDate[userLogin][date].push(commit);
+  });
+
+  return userCommitsByDate;
+}
+
+export function getCommitsForUserAndDate(
+  commits: GitHubCommit[],
+  userLogin: string,
+  date: string
+): GitHubCommit[] {
+  return commits.filter(commit => {
+    const commitDate = commit.commit.author.date.split("T")[0];
+    const commitUser = commit.author?.login || commit.commit.author.email.split("@")[0];
+    return commitDate === date && commitUser === userLogin;
+  });
+}

@@ -15,20 +15,19 @@ interface CalendarDatePickerProps {
 export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [], label }: CalendarDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState<Date | undefined>(
-    selectedDate ? new Date(selectedDate) : subDays(new Date(), 1)
+    selectedDate ? new Date(selectedDate) : undefined
   )
 
   useEffect(() => {
-    if (!selectedDate) {
-      const yesterday = subDays(new Date(), 1)
-      setSelected(yesterday)
-      onDateChange(format(yesterday, 'yyyy-MM-dd'))
+    if (selectedDate) {
+      setSelected(new Date(selectedDate))
+    } else {
+      setSelected(undefined)
     }
-  }, [selectedDate, onDateChange])
+  }, [selectedDate])
 
   const handleDayClick = (day: Date | undefined) => {
     if (day) {
-      setSelected(day)
       onDateChange(format(day, 'yyyy-MM-dd'))
       setIsOpen(false)
     }
@@ -53,13 +52,20 @@ export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [
       <label className="block text-sm font-medium text-gray-700 mb-2">
         {label}
       </label>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white border px-3 py-2 text-left"
-      >
-        {selected ? format(selected, 'MMM d, yyyy') : 'Select date'}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white border px-3 py-2 text-left flex items-center justify-between"
+        >
+          <span className="text-gray-700">
+            Go to date
+          </span>
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+      </div>
       
       {isOpen && (
         <>
@@ -78,7 +84,7 @@ export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [
               footer={
                 <div className="text-xs text-gray-500 p-2 border-t">
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 bg-green-500 rounded-sm inline-block"></span>
+                    <span className="w-3 h-3 bg-green-500 rounded-sm inline-block"></span>
                     <span>Days with commits</span>
                   </div>
                 </div>

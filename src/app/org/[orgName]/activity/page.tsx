@@ -12,7 +12,7 @@ import {
   type GitHubCommit,
   type GitHubIssue,
   type GitHubPullRequest,
-  type ActivityWithType
+  type ActivityWithType,
 } from "@/lib/github-api";
 
 interface OrgActivityPageProps {
@@ -26,7 +26,6 @@ interface OrgActivityPageProps {
     dateTo?: string;
   }>;
 }
-
 
 function ActivityItem({
   item,
@@ -224,6 +223,8 @@ export default async function OrgActivityPage({
     ]);
     members = results[0];
     activity = results[1];
+
+    console.log("activity", activity);
   } catch {
     error = "Failed to fetch organization data";
   }

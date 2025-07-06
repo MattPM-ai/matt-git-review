@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import Image from "next/image";
@@ -178,39 +178,47 @@ interface DateLoadState {
 
 export function ActivityContent({
   allActivities,
-  selectedUser,
   selectedType,
   selectedDateFrom,
 }: ActivityContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loadedDates, setLoadedDates] = useState<DateLoadState[]>([]);
-  const [startFromDateIndex, setStartFromDateIndex] = useState(0);
+  const [, setStartFromDateIndex] = useState(0);
 
   // Filter activities based on type
-  const filteredActivities = selectedType
-    ? allActivities.filter((activity) => activity.type === selectedType)
-    : allActivities;
+  const filteredActivities = useMemo(() => 
+    selectedType
+      ? allActivities.filter((activity) => activity.type === selectedType)
+      : allActivities,
+    [allActivities, selectedType]
+  );
 
   // Group all activities by date first
-  const activitiesByDate = filteredActivities.reduce((acc, activity) => {
-    const date = activity.type === "commits"
-      ? (activity as GitHubCommit & { type: "commits" }).commit.author.date.split('T')[0]
-      : (activity as (GitHubIssue | GitHubPullRequest) & { type: string }).created_at.split('T')[0];
-    
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(activity);
-    return acc;
-  }, {} as Record<string, ActivityWithType[]>);
+  const activitiesByDate = useMemo(() => 
+    filteredActivities.reduce((acc, activity) => {
+      const date = activity.type === "commits"
+        ? (activity as GitHubCommit & { type: "commits" }).commit.author.date.split('T')[0]
+        : (activity as (GitHubIssue | GitHubPullRequest) & { type: string }).created_at.split('T')[0];
+      
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(activity);
+      return acc;
+    }, {} as Record<string, ActivityWithType[]>),
+    [filteredActivities]
+  );
 
   // Get sorted dates (newest first)
-  const sortedDates = Object.keys(activitiesByDate)
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  const sortedDates = useMemo(() => 
+    Object.keys(activitiesByDate)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()),
+    [activitiesByDate]
+  );
 
   // Function to determine initial dates to load (aim for ~20-50 activities)
-  const getInitialDatesToLoad = (dates: string[], startIndex: number): DateLoadState[] => {
+  const getInitialDatesToLoad = useCallback((dates: string[], startIndex: number): DateLoadState[] => {
     const datesToLoad: DateLoadState[] = [];
     let totalActivities = 0;
     
@@ -236,7 +244,7 @@ export function ActivityContent({
     }
     
     return datesToLoad;
-  };
+  }, [activitiesByDate]);
 
   // Function to load more dates
   const getMoreDatesToLoad = (currentDates: DateLoadState[], direction: 'newer' | 'older'): DateLoadState[] => {
@@ -351,7 +359,7 @@ export function ActivityContent({
       setLoadedDates(initialDates);
       setStartFromDateIndex(0);
     }
-  }, [selectedType, selectedDateFrom, sortedDates.join(',')]);
+  }, [selectedType, selectedDateFrom, sortedDates, getInitialDatesToLoad]);
 
   // Get unique dates in order for rendering (remove duplicates)
   const uniqueLoadedDates = loadedDates.filter((dateState, index, self) => 
@@ -359,9 +367,6 @@ export function ActivityContent({
   );
 
   // Get displayed activities based on loaded dates
-  const displayedActivities = uniqueLoadedDates.flatMap(dateState => 
-    (activitiesByDate[dateState.date] || []).slice(0, dateState.loadedCount)
-  );
   
   const canLoadNewer = uniqueLoadedDates.length > 0 && 
     sortedDates.indexOf(uniqueLoadedDates[uniqueLoadedDates.length - 1]?.date) > 0;

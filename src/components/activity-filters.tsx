@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CalendarDatePicker } from './calendar-date-picker'
-import type { GitHubUser } from '@/lib/github-api'
+import type { GitHubUser, ActivityWithType } from '@/lib/github-api'
 
 
 interface ActivityFiltersProps {
@@ -12,7 +12,7 @@ interface ActivityFiltersProps {
   selectedDateFrom?: string
   selectedDateTo?: string
   commitDates?: string[]
-  allActivities?: any[]
+  allActivities?: ActivityWithType[]
 }
 
 export function ActivityFilters({ 
@@ -20,7 +20,6 @@ export function ActivityFilters({
   selectedUser, 
   selectedType, 
   selectedDateFrom, 
-  selectedDateTo, 
   commitDates = [],
   allActivities = []
 }: ActivityFiltersProps) {

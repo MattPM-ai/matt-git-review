@@ -26,7 +26,6 @@ export function StandupSidebar({
   members,
   commitDates = [],
   selectedDate,
-  orgName,
   dailyCommitAuthors = {},
 }: StandupSidebarProps) {
   const router = useRouter();

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getAllOrgCommits, getCommitsForUserAndDate, GitHubCommit } from '@/lib/github-api';
-import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
+import { getAllOrgCommits, GitHubCommit } from '@/lib/github-api';
 import { subDays, parseISO } from 'date-fns';
 
 interface n8nCommitStruct {
@@ -9,7 +8,7 @@ interface n8nCommitStruct {
   commits: GitHubCommit[];
 }
 
-export function getCommitsForUser(
+function getCommitsForUser(
   commits: GitHubCommit[],
   userLogin: string,
 ): GitHubCommit[] {
@@ -19,7 +18,7 @@ export function getCommitsForUser(
   });
 }
 
-export function getCommitsFromLast30Days(
+function getCommitsFromLast30Days(
   commits: GitHubCommit[],
   endDate: string,
 ): GitHubCommit[] {

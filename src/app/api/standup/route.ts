@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getAllOrgCommits, getCommitsForUserAndDate, type GitHubUser } from '@/lib/github-api';
+import { getAllOrgCommits, getCommitsForUserAndDate } from '@/lib/github-api';
 import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
 
 export async function POST(request: NextRequest) {

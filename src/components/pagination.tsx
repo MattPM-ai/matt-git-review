@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 interface PaginationProps {
@@ -11,7 +11,6 @@ interface PaginationProps {
 }
 
 export function Pagination({ currentPage, totalPages, totalItems, itemsPerPage }: PaginationProps) {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const createPageUrl = (page: number) => {

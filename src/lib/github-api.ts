@@ -338,11 +338,11 @@ async function getRepoCommitsUncached(
     }
 
     const commits = await response.json();
-    return commits.map((commit: any) => ({
+    return commits.map((commit: GitHubCommit) => ({
       ...commit,
       repository: repo,
     }));
-  } catch (error) {
+  } catch {
     // Silently handle network errors or other issues
     return [];
   }
@@ -399,7 +399,7 @@ async function getAllOrgCommitsUncached(
         new Date(a.commit.author.date).getTime()
       );
     });
-  } catch (error) {
+  } catch {
     // Silently handle errors and return empty array
     return [];
   }

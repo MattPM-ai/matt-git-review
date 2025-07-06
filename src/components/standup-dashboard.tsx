@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  getDay,
-  addMonths,
-  subMonths,
   subDays,
 } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
 import type { GitHubUser, CommitAuthor } from "@/lib/github-api";
 import type { StandupSummary } from "@/lib/openai";
 
@@ -25,14 +18,10 @@ interface StandupDashboardProps {
 
 export function StandupDashboard({
   members,
-  commitDates = [],
   selectedDate,
   orgName,
   dailyCommitAuthors = {},
 }: StandupDashboardProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [standupSummaries, setStandupSummaries] = useState<StandupSummary[]>(
     []
   );
@@ -43,6 +32,8 @@ export function StandupDashboard({
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+  
+  const isGeneratingStandupsRef = useRef(false);
 
   // Client-side date selection for instant response
   const [clientSelectedDate, setClientSelectedDate] = useState<string>(
@@ -51,23 +42,10 @@ export function StandupDashboard({
 
   const selectedDateObj = new Date(clientSelectedDate);
 
-  // Sync with URL when component mounts
-  useEffect(() => {
-    if (selectedDate) {
-      setClientSelectedDate(selectedDate);
-    }
-  }, [selectedDate]);
+  const generateStandupSummaries = useCallback(async () => {
+    if (!clientSelectedDate || isGeneratingStandupsRef.current) return;
 
-  // Generate summaries when client date or members change
-  useEffect(() => {
-    if (clientSelectedDate && members.length > 0) {
-      generateStandupSummaries();
-    }
-  }, [clientSelectedDate, members]);
-
-  const generateStandupSummaries = async () => {
-    if (!clientSelectedDate || isGeneratingStandups) return;
-
+    isGeneratingStandupsRef.current = true;
     setIsGeneratingStandups(true);
     setStandupError(null);
 
@@ -94,9 +72,24 @@ export function StandupDashboard({
       console.error("Error generating standup summaries:", error);
       setStandupError("Failed to generate AI summaries");
     } finally {
+      isGeneratingStandupsRef.current = false;
       setIsGeneratingStandups(false);
     }
-  };
+  }, [clientSelectedDate, orgName, members]);
+
+  // Sync with URL when component mounts
+  useEffect(() => {
+    if (selectedDate) {
+      setClientSelectedDate(selectedDate);
+    }
+  }, [selectedDate]);
+
+  // Generate summaries when client date or members change
+  useEffect(() => {
+    if (clientSelectedDate && members.length > 0) {
+      generateStandupSummaries();
+    }
+  }, [clientSelectedDate, members, generateStandupSummaries]);
 
   const generateCommitReport = async (email?: string) => {
     if (isGeneratingCommitReport) return;
@@ -156,26 +149,12 @@ export function StandupDashboard({
     setEmail('');
   }
 
-  const handleDateSelect = (date: string) => {
-    // Instantly update client state for immediate UI response
-    setClientSelectedDate(date);
-    setStandupSummaries([]);
-    setStandupError(null);
-
-    // Update URL in background (non-blocking)
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("dateFrom", date);
-    params.set("dateTo", date);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  };
 
 
   const todaysAuthors = dailyCommitAuthors[clientSelectedDate] || [];
   const uniqueAuthors = Array.from(
     new Map(todaysAuthors.map((author) => [author.login, author])).values()
   );
-  const completedCount = uniqueAuthors.length;
-  const totalCount = members.length;
 
   const SkeletonCard = () => (
     <div className="bg-white rounded-lg p-4 border border-gray-200 animate-pulse">
@@ -527,7 +506,7 @@ export function StandupDashboard({
               No AI summaries generated yet
             </p>
             <p className="text-sm">
-              Click "Refresh AI Summaries" to generate standup summaries
+              Click &quot;Refresh AI Summaries&quot; to generate standup summaries
               for team members who committed today.
             </p>
           </div>

@@ -40,9 +40,6 @@ export function StandupDashboard({
   const [standupError, setStandupError] = useState<string | null>(null);
   const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
   const [commitReportError, setCommitReportError] = useState<string | null>(null);
-  const [commitsSelectedDate, setCommitsSelectedDate] = useState<string>(
-    selectedDate || format(subDays(new Date(), 1), "yyyy-MM-dd")
-  );
 
   // Client-side date selection for instant response
   const [clientSelectedDate, setClientSelectedDate] = useState<string>(
@@ -99,12 +96,15 @@ export function StandupDashboard({
   };
 
   const generateCommitReport = async () => {
-    if (!commitsSelectedDate || isGeneratingCommitReport) return;
+    if (isGeneratingCommitReport) return;
 
     setIsGeneratingCommitReport(true);
     setCommitReportError(null);
 
     try {
+      const today = new Date();
+      const formattedDate = format(today, 'yyyy-MM-dd');
+      
       const response = await fetch("/api/commit-report", {
         method: "POST",
         headers: {
@@ -112,13 +112,13 @@ export function StandupDashboard({
         },
         body: JSON.stringify({
           orgName,
-          date: commitsSelectedDate,
+          date: formattedDate,
           users: members,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate standup summaries");
+        throw new Error("Failed to generate commit report");
       }
 
     } catch (error) {
@@ -275,6 +275,12 @@ export function StandupDashboard({
       {standupError && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-800">{standupError}</p>
+        </div>
+      )}
+
+      {commitReportError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800">{commitReportError}</p>
         </div>
       )}
 

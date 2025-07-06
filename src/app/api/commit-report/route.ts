@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getAllOrgCommits, getCommitsForUserAndDate, GitHubCommit } from '@/lib/github-api';
 import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
+import { subDays, parseISO } from 'date-fns';
 
 interface n8nCommitStruct {
   numberOfCommits: number;
@@ -15,6 +16,19 @@ export function getCommitsForUser(
   return commits.filter(commit => {
     const commitUser = commit.author?.login || commit.commit.author.email.split("@")[0];
     return commitUser === userLogin;
+  });
+}
+
+export function getCommitsFromLast30Days(
+  commits: GitHubCommit[],
+  endDate: string,
+): GitHubCommit[] {
+  const endDateObj = parseISO(endDate);
+  const startDateObj = subDays(endDateObj, 30);
+  
+  return commits.filter(commit => {
+    const commitDate = parseISO(commit.commit.author.date);
+    return commitDate >= startDateObj && commitDate <= endDateObj;
   });
 }
 
@@ -36,16 +50,20 @@ export async function POST(request: NextRequest) {
     // Get all commits for the organization
     const commits = await getAllOrgCommits(session.accessToken, orgName);
 
+    // Filter commits to only include those from the last 30 days
+    const filteredCommits = getCommitsFromLast30Days(commits, date);
+    console.log(`Filtered commits from last 30 days: ${filteredCommits.length} out of ${commits.length} total commits`);
+
     // Generate commits for each user
     const commitsByUser: { [key: string]: n8nCommitStruct } = {};
     
     for (const user of users) {
-      const userAllCommits = getCommitsForUser(commits, user.login);
+      const userAllCommits = getCommitsForUser(filteredCommits, user.login);
       commitsByUser[user.login] = {numberOfCommits: userAllCommits.length, commits: userAllCommits};
       console.log("Number of commits for user", user.login, userAllCommits.length);
     }
 
-    console.log("Total number of commits", commits.length);
+    console.log("Total number of commits", filteredCommits.length);
     sendStandupsByUserToN8n(commitsByUser);
 
     return NextResponse.json({ message: "Commit report sent" });

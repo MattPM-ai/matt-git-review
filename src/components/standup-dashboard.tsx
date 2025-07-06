@@ -38,6 +38,11 @@ export function StandupDashboard({
   );
   const [isGeneratingStandups, setIsGeneratingStandups] = useState(false);
   const [standupError, setStandupError] = useState<string | null>(null);
+  const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
+  const [commitReportError, setCommitReportError] = useState<string | null>(null);
+  const [commitsSelectedDate, setCommitsSelectedDate] = useState<string>(
+    selectedDate || format(subDays(new Date(), 1), "yyyy-MM-dd")
+  );
 
   // Client-side date selection for instant response
   const [clientSelectedDate, setClientSelectedDate] = useState<string>(
@@ -92,6 +97,37 @@ export function StandupDashboard({
       setIsGeneratingStandups(false);
     }
   };
+
+  const generateCommitReport = async () => {
+    if (!commitsSelectedDate || isGeneratingCommitReport) return;
+
+    setIsGeneratingCommitReport(true);
+    setCommitReportError(null);
+
+    try {
+      const response = await fetch("/api/commit-report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orgName,
+          date: commitsSelectedDate,
+          users: members,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate standup summaries");
+      }
+
+    } catch (error) {
+      console.error("Error generating commit report:", error);
+      setCommitReportError("Failed to generate commit report");
+    } finally {
+      setIsGeneratingCommitReport(false);
+    }
+  }
 
   const handleDateSelect = (date: string) => {
     // Instantly update client state for immediate UI response
@@ -184,6 +220,53 @@ export function StandupDashboard({
                 />
               </svg>
               Refresh AI Summaries
+            </>
+          )}
+        </button>
+        <button
+          onClick={generateCommitReport}
+          disabled={isGeneratingCommitReport}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+        >
+          {isGeneratingCommitReport ? (
+            <>
+              <svg
+                className="animate-spin h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Generating report...
+            </>
+          ) : (
+            <>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              Send Commit Report
             </>
           )}
         </button>

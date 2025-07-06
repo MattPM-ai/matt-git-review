@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { orgName, date, users } = await request.json();
+    const { orgName, date, users, email } = await request.json();
     
     if (!orgName || !date || !users) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Total number of commits", filteredCommits.length);
-    sendStandupsByUserToN8n(commitsByUser);
+    sendStandupsByUserToN8n(commitsByUser, email);
 
     return NextResponse.json({ message: "Commit report sent" });
   } catch (error) {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function sendStandupsByUserToN8n(commitsByUser: { [key: string]: n8nCommitStruct }) {
+function sendStandupsByUserToN8n(commitsByUser: { [key: string]: n8nCommitStruct }, email: string) {
   console.log("Sending standups to N8n");
   fetch("https://engine.upnode.org/webhook/b809fda3-8fa1-4542-b929-58c433be532c/chat", {
     method: "POST",
@@ -85,7 +85,7 @@ function sendStandupsByUserToN8n(commitsByUser: { [key: string]: n8nCommitStruct
     },
     body: JSON.stringify({
       commitsByUser: commitsByUser,
-      email: "alex@turbo.ing",
+      email: email,
       sessionId: Date.now().toString()
     }),
   });

@@ -40,6 +40,9 @@ export function StandupDashboard({
   const [standupError, setStandupError] = useState<string | null>(null);
   const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
   const [commitReportError, setCommitReportError] = useState<string | null>(null);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Client-side date selection for instant response
   const [clientSelectedDate, setClientSelectedDate] = useState<string>(
@@ -95,7 +98,7 @@ export function StandupDashboard({
     }
   };
 
-  const generateCommitReport = async () => {
+  const generateCommitReport = async (email?: string) => {
     if (isGeneratingCommitReport) return;
 
     setIsGeneratingCommitReport(true);
@@ -114,6 +117,7 @@ export function StandupDashboard({
           orgName,
           date: formattedDate,
           users: members,
+          email: email || "alex@turbo.ing", // fallback to default email
         }),
       });
 
@@ -127,6 +131,29 @@ export function StandupDashboard({
     } finally {
       setIsGeneratingCommitReport(false);
     }
+  }
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  const handleEmailSubmit = () => {
+    setEmailError(null);
+    
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address (e.g., email@example.com)');
+      return;
+    }
+    
+    generateCommitReport(email);
+    setIsEmailModalOpen(false);
+    setEmail('');
   }
 
   const handleDateSelect = (date: string) => {
@@ -224,7 +251,7 @@ export function StandupDashboard({
           )}
         </button>
         <button
-          onClick={generateCommitReport}
+          onClick={() => setIsEmailModalOpen(true)}
           disabled={isGeneratingCommitReport}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
         >
@@ -281,6 +308,75 @@ export function StandupDashboard({
       {commitReportError && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-800">{commitReportError}</p>
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {isEmailModalOpen && (
+        <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError(null);
+                }}
+                placeholder="email@example.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleEmailSubmit();
+                  }
+                }}
+              />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              )}
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={handleEmailSubmit}
+                disabled={isGeneratingCommitReport}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+              >
+                {isGeneratingCommitReport ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Send Report
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={() => {
+                  setIsEmailModalOpen(false);
+                  setEmail('');
+                  setEmailError(null);
+                }}
+                disabled={isGeneratingCommitReport}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

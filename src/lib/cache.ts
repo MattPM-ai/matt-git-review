@@ -3,6 +3,7 @@ import { GitHubCommit, GitHubIssue, GitHubPullRequest } from "./github-api";
 const DB_NAME = "github-activity-cache";
 const DB_VERSION = 1;
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+const MAX_CACHE_SIZE = 1000; // Maximum items to cache per store
 
 interface CachedData<T> {
   data: T;

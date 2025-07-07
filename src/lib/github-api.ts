@@ -9,6 +9,12 @@ import {
   getActivityCacheKey,
   isBrowser,
 } from "./cache";
+import { 
+  deduplicateCommits, 
+  mergeCommits, 
+  mergeIssues, 
+  mergePulls 
+} from "./deduplication";
 
 // GitHub API Types
 export interface GitHubUser {
@@ -262,13 +268,18 @@ async function getAllOrgActivityUncached(
           getRepoActivity(accessToken, repo.full_name, "pulls", selectedUser),
         ]);
 
-        allActivity.commits.push(...commits);
+        // Merge commits without duplicates
+        allActivity.commits = mergeCommits(allActivity.commits, commits);
+        
         // Filter out pull requests from issues (GitHub API includes PRs in issues endpoint)
         const realIssues = issues.filter(
           (issue: GitHubIssue) => !issue.pull_request
         );
-        allActivity.issues.push(...realIssues);
-        allActivity.pulls.push(...pulls);
+        // Merge issues without duplicates
+        allActivity.issues = mergeIssues(allActivity.issues, realIssues);
+        
+        // Merge pulls without duplicates
+        allActivity.pulls = mergePulls(allActivity.pulls, pulls);
       } catch (error) {
         console.error(`Error fetching activity for ${repo.full_name}:`, error);
       }
@@ -392,8 +403,11 @@ async function getAllOrgCommitsUncached(
 
     const commitArrays = await Promise.all(commitPromises);
     const allCommits = commitArrays.flat();
+    
+    // Deduplicate commits by SHA
+    const uniqueCommits = deduplicateCommits(allCommits);
 
-    return allCommits.sort((a, b) => {
+    return uniqueCommits.sort((a, b) => {
       return (
         new Date(b.commit.author.date).getTime() -
         new Date(a.commit.author.date).getTime()

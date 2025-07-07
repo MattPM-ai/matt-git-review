@@ -29,7 +29,7 @@ async function getGitHubOrgs(accessToken: string) {
 export default async function DashboardPage() {
   const session = await auth()
 
-  if (!session) {
+  if (!session || !session.accessToken) {
     redirect("/")
   }
 
@@ -37,9 +37,10 @@ export default async function DashboardPage() {
   let error = null
 
   try {
-    organizations = await getGitHubOrgs(session.accessToken!)
-  } catch {
-    error = "Failed to fetch organizations"
+    organizations = await getGitHubOrgs(session.accessToken)
+  } catch (e) {
+    console.error("Failed to fetch orgs:", e)
+    error = "Failed to fetch organizations. Please sign in again."
   }
 
   const githubAppSlug = process.env.GITHUB_APP_SLUG || "your-github-app-slug"

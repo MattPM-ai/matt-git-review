@@ -78,6 +78,30 @@ export interface ActivitiesResponseDto {
   activities: SimplifiedActivityDto[];
 }
 
+export interface StandupRequest {
+  organizationLogin: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+export interface StandupResponse {
+  username: string;
+  name: string;
+  avatar_url: string;
+  standup: {
+    summary: string;
+    workDone: string[];
+    workingOn: string[];
+    ongoingIssues: string[];
+    totalCommits: number;
+    totalPRs: number;
+    totalIssues: number;
+    totalManHoursMin: number;
+    totalManHoursMax: number;
+    manHoursRationale: string;
+  };
+}
+
 class MattAPIClient {
   private getBaseUrl(): string {
     const url = process.env.NEXT_PUBLIC_GIT_API_HOST;
@@ -142,6 +166,26 @@ class MattAPIClient {
     }
 
     return data;
+  }
+
+  async generateStandup(
+    accessToken: string,
+    request: StandupRequest
+  ): Promise<StandupResponse[]> {
+    const response = await fetch(`${this.getBaseUrl()}/standup/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to generate standup: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }
 

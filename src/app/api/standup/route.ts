@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { mattAPI, type ActivityFilterDto, type SimplifiedCommitDto } from '@/lib/matt-api';
-import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
+import { mattAPI, type StandupRequest } from '@/lib/matt-api';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,40 +10,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { orgName, date, users } = await request.json();
+    const { orgName, date } = await request.json();
     
-    if (!orgName || !date || !users) {
+    if (!orgName || !date) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Build filter to fetch commits for the date
-    const filter: ActivityFilterDto = {
+    // Build request for Matt API standup endpoint
+    const standupRequest: StandupRequest = {
       organizationLogin: orgName,
-      activityTypes: ['commit'],
       dateFrom: date,
-      dateTo: date,
-      limit: 1000,
+      dateTo: date, // For daily standup, dateFrom and dateTo are the same
     };
 
-    // Fetch activities from Matt API
-    const response = await mattAPI.fetchActivities(session.accessToken, filter);
-    
-    // Generate summaries for each user
-    const summaries: StandupSummary[] = [];
-    
-    for (const user of users) {
-      // Filter commits for this user and date
-      const userCommits = response.activities.filter(activity => 
-        activity.type === 'commit' && 
-        activity.user_login === user.login &&
-        activity.created_at.toISOString().split('T')[0] === date
-      ) as SimplifiedCommitDto[];
-      
-      const summary = await generateStandupSummary(user.login, user.login, userCommits);
-      summaries.push(summary);
-    }
+    // Generate standup using Matt API
+    const standupSummaries = await mattAPI.generateStandup(session.accessToken, standupRequest);
 
-    return NextResponse.json({ summaries });
+    return NextResponse.json({ summaries: standupSummaries });
   } catch (error) {
     console.error('Error generating standup summaries:', error);
     return NextResponse.json(

@@ -84,22 +84,26 @@ export interface StandupRequest {
   dateTo: string;
 }
 
+export interface StandupSummary {
+  date?: Date;
+  summary: string;
+  workDone: string[];
+  workingOn: string[];
+  ongoingIssues: string[];
+  totalCommits: number;
+  totalPRs: number;
+  totalIssues: number;
+  totalManHoursMin: number;
+  totalManHoursMax: number;
+  manHoursRationale: string;
+  dailyStandups?: StandupSummary[];
+}
+
 export interface StandupResponse {
   username: string;
   name: string;
   avatar_url: string;
-  standup: {
-    summary: string;
-    workDone: string[];
-    workingOn: string[];
-    ongoingIssues: string[];
-    totalCommits: number;
-    totalPRs: number;
-    totalIssues: number;
-    totalManHoursMin: number;
-    totalManHoursMax: number;
-    manHoursRationale: string;
-  };
+  standup: StandupSummary;
 }
 
 class MattAPIClient {
@@ -173,10 +177,10 @@ class MattAPIClient {
     request: StandupRequest
   ): Promise<StandupResponse[]> {
     const response = await fetch(`${this.getBaseUrl()}/standup/generate`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(request),
     });

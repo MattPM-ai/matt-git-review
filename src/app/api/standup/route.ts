@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { orgName, date } = await request.json();
+    const { orgName, date, dateRange } = await request.json();
     
     if (!orgName || !date) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
     // Build request for Matt API standup endpoint
     const standupRequest: StandupRequest = {
       organizationLogin: orgName,
-      dateFrom: date,
-      dateTo: date, // For daily standup, dateFrom and dateTo are the same
+      dateFrom: dateRange?.dateFrom || date,
+      dateTo: dateRange?.dateTo || date, // For daily standup, dateFrom and dateTo are the same
     };
 
     // Generate standup using Matt API

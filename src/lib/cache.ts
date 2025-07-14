@@ -1,9 +1,9 @@
-import { GitHubCommit, GitHubIssue, GitHubPullRequest } from "./github-api";
+import { SimplifiedCommitDto, SimplifiedIssueDto, SimplifiedPullRequestDto } from "./matt-api";
 
 const DB_NAME = "github-activity-cache";
 const DB_VERSION = 1;
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
-const MAX_CACHE_SIZE = 1000; // Maximum items to cache per store
+// const MAX_CACHE_SIZE = 1000; // Maximum items to cache per store (unused for now)
 
 interface CachedData<T> {
   data: T;
@@ -159,9 +159,9 @@ export function getActivityCacheKey(org: string, user?: string): string {
 // Cached API functions
 export async function getCachedCommits(
   key: string,
-  fetcher: () => Promise<GitHubCommit[]>
-): Promise<GitHubCommit[]> {
-  const cached = await cacheStore.get<GitHubCommit[]>("commits", key);
+  fetcher: () => Promise<SimplifiedCommitDto[]>
+): Promise<SimplifiedCommitDto[]> {
+  const cached = await cacheStore.get<SimplifiedCommitDto[]>("commits", key);
 
   if (cached) {
     return cached;
@@ -174,9 +174,9 @@ export async function getCachedCommits(
 
 export async function getCachedIssues(
   key: string,
-  fetcher: () => Promise<GitHubIssue[]>
-): Promise<GitHubIssue[]> {
-  const cached = await cacheStore.get<GitHubIssue[]>("issues", key);
+  fetcher: () => Promise<SimplifiedIssueDto[]>
+): Promise<SimplifiedIssueDto[]> {
+  const cached = await cacheStore.get<SimplifiedIssueDto[]>("issues", key);
 
   if (cached) {
     return cached;
@@ -189,9 +189,9 @@ export async function getCachedIssues(
 
 export async function getCachedPulls(
   key: string,
-  fetcher: () => Promise<GitHubPullRequest[]>
-): Promise<GitHubPullRequest[]> {
-  const cached = await cacheStore.get<GitHubPullRequest[]>("pulls", key);
+  fetcher: () => Promise<SimplifiedPullRequestDto[]>
+): Promise<SimplifiedPullRequestDto[]> {
+  const cached = await cacheStore.get<SimplifiedPullRequestDto[]>("pulls", key);
 
   if (cached) {
     return cached;

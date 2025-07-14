@@ -5,7 +5,14 @@ import {
   format,
   subDays,
 } from "date-fns";
-import type { GitHubUser, CommitAuthor } from "@/lib/github-api";
+import type { ActivitiesResponseDto } from "@/lib/matt-api";
+
+// Define local types to replace the old GitHub API types
+type GitHubUser = ActivitiesResponseDto['users'][string];
+type CommitAuthor = {
+  login: string;
+  name?: string;
+};
 import type { StandupSummary } from "@/lib/openai";
 
 interface StandupDashboardProps {

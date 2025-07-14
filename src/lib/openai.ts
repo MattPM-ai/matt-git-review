@@ -1,5 +1,5 @@
-import OpenAI from 'openai';
-import { GitHubCommit } from './github-api';
+import OpenAI from "openai";
+import { SimplifiedActivityDto } from "./matt-api";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -16,10 +16,10 @@ export interface StandupSummary {
 export async function generateStandupSummary(
   userLogin: string,
   userName: string,
-  commits: GitHubCommit[]
+  commits: SimplifiedActivityDto[]
 ): Promise<StandupSummary> {
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured');
+    throw new Error("OpenAI API key not configured");
   }
 
   if (commits.length === 0) {
@@ -28,24 +28,24 @@ export async function generateStandupSummary(
       summary: `${userName} had no commits for this day.`,
       workDone: [],
       nextSteps: [],
-      blockers: []
+      blockers: [],
     };
   }
 
-  const commitMessages = commits.map(commit => ({
-    message: commit.commit.message,
-    repository: commit.repository.name,
-    timestamp: commit.commit.author.date
+  const commitMessages = commits.map((commit) => ({
+    message: commit.title,
+    repository: commit.repository_full_name,
+    timestamp: commit.created_at,
   }));
 
   const prompt = `
 You are helping generate a daily standup summary for a software developer. 
 
 Developer: ${userName} (@${userLogin})
-Date: ${commits[0]?.commit.author.date.split('T')[0]}
+Date: ${commits[0]?.created_at.toISOString().split("T")[0]}
 
 Here are their commits from today:
-${commitMessages.map(c => `- [${c.repository}] ${c.message}`).join('\n')}
+${commitMessages.map((c) => `- [${c.repository}] ${c.message}`).join("\n")}
 
 Please generate a brief, professional standup summary in the following format:
 - A 2-3 sentence overview of what they accomplished
@@ -65,58 +65,66 @@ Return the response as a JSON object with the following structure:
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: [
         {
-          role: 'system',
-          content: 'You are a helpful assistant that generates professional standup summaries for software developers based on their git commits. Always respond with valid JSON.'
+          role: "system",
+          content:
+            "You are a helpful assistant that generates professional standup summaries for software developers based on their git commits. Always respond with valid JSON.",
         },
         {
-          role: 'user',
-          content: prompt
-        }
+          role: "user",
+          content: prompt,
+        },
       ],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 500,
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      throw new Error("No response from OpenAI");
     }
 
     const parsed = JSON.parse(content);
-    
+
     return {
       userLogin,
-      summary: parsed.summary || `${userName} worked on ${commits.length} commits today.`,
+      summary:
+        parsed.summary ||
+        `${userName} worked on ${commits.length} commits today.`,
       workDone: parsed.workDone || [],
       nextSteps: parsed.nextSteps || [],
-      blockers: parsed.blockers || []
+      blockers: parsed.blockers || [],
     };
   } catch (error) {
-    console.error('Error generating standup summary:', error);
-    
+    console.error("Error generating standup summary:", error);
+
     // Fallback summary
-    const repoNames = [...new Set(commits.map(c => c.repository.name))];
+    const repoNames = [...new Set(commits.map((c) => c.repository_full_name))];
     return {
       userLogin,
-      summary: `${userName} made ${commits.length} commits across ${repoNames.length} repository(ies): ${repoNames.join(', ')}.`,
-      workDone: commits.slice(0, 5).map(c => c.commit.message.split('\n')[0]),
+      summary: `${userName} made ${commits.length} commits across ${
+        repoNames.length
+      } repository(ies): ${repoNames.join(", ")}.`,
+      workDone: commits.slice(0, 5).map((c) => c.title.split("\n")[0]),
       nextSteps: [],
-      blockers: []
+      blockers: [],
     };
   }
 }
 
 export async function generateMultipleStandupSummaries(
-  userCommits: { user: { login: string; name: string }, commits: GitHubCommit[] }[]
+  userCommits: {
+    user: { login: string; name: string };
+    commits: SimplifiedActivityDto[];
+  }[]
 ): Promise<StandupSummary[]> {
   const summaries = await Promise.all(
-    userCommits.map(({ user, commits }) => 
+    userCommits.map(({ user, commits }) =>
       generateStandupSummary(user.login, user.name, commits)
     )
   );
-  
+
   return summaries;
 }

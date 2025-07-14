@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getAllOrgCommits, getCommitsForUserAndDate } from '@/lib/github-api';
+import { mattAPI, type ActivityFilterDto, type SimplifiedCommitDto } from '@/lib/matt-api';
 import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
 
 export async function POST(request: NextRequest) {
@@ -17,14 +17,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get all commits for the organization
-    const commits = await getAllOrgCommits(session.accessToken, orgName);
+    // Build filter to fetch commits for the date
+    const filter: ActivityFilterDto = {
+      organizationLogin: orgName,
+      activityTypes: ['commit'],
+      dateFrom: date,
+      dateTo: date,
+      limit: 1000,
+    };
+
+    // Fetch activities from Matt API
+    const response = await mattAPI.fetchActivities(session.accessToken, filter);
     
     // Generate summaries for each user
     const summaries: StandupSummary[] = [];
     
     for (const user of users) {
-      const userCommits = getCommitsForUserAndDate(commits, user.login, date);
+      // Filter commits for this user and date
+      const userCommits = response.activities.filter(activity => 
+        activity.type === 'commit' && 
+        activity.user_login === user.login &&
+        activity.created_at.toISOString().split('T')[0] === date
+      ) as SimplifiedCommitDto[];
+      
       const summary = await generateStandupSummary(user.login, user.login, userCommits);
       summaries.push(summary);
     }

@@ -24,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, account, profile, trigger, user }) {
+    async jwt({ token, account, profile, user }) {
       // Initial sign in
       if (account && profile) {
         console.log("New sign in - Access Token:", account.access_token);

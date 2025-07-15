@@ -4,8 +4,8 @@ import { UserProfile } from "@/components/auth/user-profile";
 interface DashboardLayoutProps {
   orgName: string;
   title: string;
-  currentView: "standup" | "activity";
-  sidebar: React.ReactNode;
+  currentView?: "standup" | "activity" | "performance";
+  sidebar?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -16,8 +16,11 @@ export function DashboardLayout({
   sidebar,
   children,
 }: DashboardLayoutProps) {
-  const otherView = currentView === "standup" ? "activity" : "standup";
-  const otherViewLabel = currentView === "standup" ? "Activity" : "Standup";
+  const navItems = [
+    { key: "activity", label: "Activity", href: `/org/${orgName}/activity` },
+    { key: "standup", label: "Standup", href: `/org/${orgName}/standup` },
+    { key: "performance", label: "Performance", href: `/org/${orgName}/performance` },
+  ];
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -47,26 +50,37 @@ export function DashboardLayout({
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href={`/org/${orgName}/${otherView}`}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Switch to {otherViewLabel} View →
-              </Link>
+              <nav className="flex space-x-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      currentView === item.key
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
               <UserProfile />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main content with sidebar */}
+      {/* Main content with optional sidebar */}
       <div className="flex flex-1 min-h-0">
-        {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
-          <div className="p-6">
-            {sidebar}
+        {/* Sidebar - only show if provided */}
+        {sidebar && (
+          <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
+            <div className="p-6">
+              {sidebar}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-white">

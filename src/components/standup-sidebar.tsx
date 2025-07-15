@@ -12,7 +12,14 @@ import {
   subDays,
 } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { GitHubUser, CommitAuthor } from "@/lib/github-api";
+import type { ActivitiesResponseDto } from "@/lib/matt-api";
+
+// Define local types to replace the old GitHub API types
+type GitHubUser = ActivitiesResponseDto['users'][string];
+type CommitAuthor = {
+  login: string;
+  name?: string;
+};
 
 interface StandupSidebarProps {
   members: GitHubUser[];

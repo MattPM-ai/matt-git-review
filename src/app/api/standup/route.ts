@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getAllOrgCommits, getCommitsForUserAndDate } from '@/lib/github-api';
-import { generateStandupSummary, type StandupSummary } from '@/lib/openai';
+import { mattAPI, type StandupRequest } from '@/lib/matt-api';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,25 +10,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { orgName, date, users } = await request.json();
+    const { orgName, date, dateRange } = await request.json();
     
-    if (!orgName || !date || !users) {
+    if (!orgName || !date) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get all commits for the organization
-    const commits = await getAllOrgCommits(session.accessToken, orgName);
-    
-    // Generate summaries for each user
-    const summaries: StandupSummary[] = [];
-    
-    for (const user of users) {
-      const userCommits = getCommitsForUserAndDate(commits, user.login, date);
-      const summary = await generateStandupSummary(user.login, user.login, userCommits);
-      summaries.push(summary);
-    }
+    // Build request for Matt API standup endpoint
+    const standupRequest: StandupRequest = {
+      organizationLogin: orgName,
+      dateFrom: dateRange?.dateFrom || date,
+      dateTo: dateRange?.dateTo || date, // For daily standup, dateFrom and dateTo are the same
+    };
 
-    return NextResponse.json({ summaries });
+    // Generate standup using Matt API
+    const standupSummaries = await mattAPI.generateStandup(session.accessToken, standupRequest);
+
+    return NextResponse.json({ summaries: standupSummaries });
   } catch (error) {
     console.error('Error generating standup summaries:', error);
     return NextResponse.json(

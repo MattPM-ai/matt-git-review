@@ -3,14 +3,7 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { StandupDashboard } from "@/components/standup-dashboard";
 import { StandupSidebar } from "@/components/standup-sidebar";
-import { 
-  getOrgMembers, 
-  getAllOrgCommits, 
-  extractCommitDates, 
-  groupCommitAuthorsByDate,
-  type GitHubUser,
-  type GitHubCommit 
-} from "@/lib/github-api";
+import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/matt-api";
 
 interface StandupPageProps {
   params: Promise<{
@@ -21,7 +14,6 @@ interface StandupPageProps {
     dateTo?: string;
   }>;
 }
-
 
 export default async function StandupPage({
   params,
@@ -36,24 +28,67 @@ export default async function StandupPage({
   const { orgName } = await params;
   const { dateFrom } = await searchParams;
 
-  let members: GitHubUser[] = [];
-  let commits: GitHubCommit[] = [];
+  let activityData: ActivitiesResponseDto | null = null;
   let error = null;
 
   try {
-    const [membersData, commitsData] = await Promise.all([
-      getOrgMembers(session.accessToken!, orgName),
-      getAllOrgCommits(session.accessToken!, orgName),
-    ]);
-    members = membersData;
-    commits = commitsData;
-  } catch {
+    // Build filter to fetch only commits for calendar/sidebar data
+    const filter: ActivityFilterDto = {
+      organizationLogin: orgName,
+      activityTypes: ["commit"],
+      limit: 1000, // Get a reasonable amount of commits
+    };
+
+    // Add date filter if provided
+    if (dateFrom) {
+      filter.dateFrom = dateFrom;
+    }
+
+    // Fetch activities from Matt API for sidebar data
+    activityData = await mattAPI.fetchActivities(session.accessToken!, filter);
+  } catch (err) {
+    console.error("Failed to fetch activities:", err);
     error = "Failed to fetch organization data";
   }
 
-  // Extract unique commit dates and daily authors
-  const commitDates = extractCommitDates(commits);
-  const dailyCommitAuthors = groupCommitAuthorsByDate(commits);
+  const members = activityData ? Object.values(activityData.users) : [];
+  const commits = activityData
+    ? activityData.activities.filter((a) => a.type === "commit")
+    : [];
+
+  // Extract unique commit dates
+  const commitDates = activityData
+    ? Array.from(
+        new Set(
+          activityData.activities
+            .filter((a) => a.type === "commit")
+            .map((a) => a.created_at.toISOString().split("T")[0])
+        )
+      )
+        .sort()
+        .reverse()
+    : [];
+
+  // Group commit authors by date
+  const dailyCommitAuthors = activityData
+    ? commits.reduce((acc, commit) => {
+        const dateStr = commit.created_at.toISOString().split("T")[0];
+        if (!acc[dateStr]) {
+          acc[dateStr] = [];
+        }
+        if (commit.user_login) {
+          const user = activityData.users[commit.user_login];
+          const existingAuthor = acc[dateStr].find(author => author.login === commit.user_login);
+          if (!existingAuthor) {
+            acc[dateStr].push({
+              login: commit.user_login,
+              name: user?.name
+            });
+          }
+        }
+        return acc;
+      }, {} as Record<string, { login: string; name?: string }[]>)
+    : {};
 
   return (
     <DashboardLayout

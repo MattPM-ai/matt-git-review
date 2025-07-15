@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import { mattAPI } from "./matt-api";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: process.env.NODE_ENV === "development",
@@ -23,9 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, account, profile, trigger, user }) {
-      console.log("JWT callback triggered:", trigger);
-
+    async jwt({ token, account, profile, user }) {
       // Initial sign in
       if (account && profile) {
         console.log("New sign in - Access Token:", account.access_token);
@@ -38,6 +37,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.picture = (profile.avatar_url as string) || user?.image;
         // GitHub tokens don't expire for OAuth apps, only for GitHub Apps
         // So we don't need to track expiration
+
+        // Send access token to Matt API
+        try {
+          await mattAPI.authenticateUser(account.access_token!);
+          console.log("Successfully authenticated with Matt API");
+        } catch (error) {
+          console.error("Failed to authenticate with Matt API:", error);
+          // Don't fail the sign-in process if Matt API is down
+        }
       }
 
       // For subsequent requests, ensure we have the token

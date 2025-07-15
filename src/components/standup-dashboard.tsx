@@ -5,8 +5,14 @@ import {
   format,
   subDays,
 } from "date-fns";
-import type { GitHubUser, CommitAuthor } from "@/lib/github-api";
-import type { StandupSummary } from "@/lib/openai";
+import type { ActivitiesResponseDto, StandupResponse } from "@/lib/matt-api";
+
+// Define local types to replace the old GitHub API types
+type GitHubUser = ActivitiesResponseDto['users'][string];
+type CommitAuthor = {
+  login: string;
+  name?: string;
+};
 
 interface StandupDashboardProps {
   members: GitHubUser[];
@@ -22,7 +28,7 @@ export function StandupDashboard({
   orgName,
   dailyCommitAuthors = {},
 }: StandupDashboardProps) {
-  const [standupSummaries, setStandupSummaries] = useState<StandupSummary[]>(
+  const [standupSummaries, setStandupSummaries] = useState<StandupResponse[]>(
     []
   );
   const [isGeneratingStandups, setIsGeneratingStandups] = useState(false);
@@ -58,7 +64,6 @@ export function StandupDashboard({
         body: JSON.stringify({
           orgName,
           date: clientSelectedDate,
-          users: members,
         }),
       });
 
@@ -75,7 +80,7 @@ export function StandupDashboard({
       isGeneratingStandupsRef.current = false;
       setIsGeneratingStandups(false);
     }
-  }, [clientSelectedDate, orgName, members]);
+  }, [clientSelectedDate, orgName]);
 
   // Sync with URL when component mounts
   useEffect(() => {
@@ -369,28 +374,23 @@ export function StandupDashboard({
           </>
         ) : standupSummaries.length > 0 ? (
           standupSummaries.map((summary) => {
-            const member = members.find(
-              (m) => m.login === summary.userLogin
-            );
             return (
               <div
-                key={summary.userLogin}
+                key={summary.username}
                 className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start gap-3">
                   <img
-                    src={
-                      member?.avatar_url ||
-                      `https://github.com/${summary.userLogin}.png`
-                    }
-                    alt={summary.userLogin}
+                    src={summary.avatar_url}
+                    alt={summary.username}
                     className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="font-semibold text-gray-900">
-                        {summary.userLogin}
+                        {summary.name || summary.username}
                       </h4>
+                      <span className="text-sm text-gray-500">@{summary.username}</span>
                       <svg
                         className="w-4 h-4 text-indigo-500"
                         fill="currentColor"
@@ -407,17 +407,37 @@ export function StandupDashboard({
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm text-gray-700">
-                          {summary.summary}
+                          {summary.standup.summary}
                         </p>
                       </div>
 
-                      {summary.workDone.length > 0 && (
+                      {/* Activity metrics */}
+                      <div className="flex flex-wrap gap-4 p-3 bg-white rounded-md border border-gray-100">
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-green-600">{summary.standup.totalCommits}</div>
+                          <div className="text-xs text-gray-500">Commits</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-blue-600">{summary.standup.totalPRs}</div>
+                          <div className="text-xs text-gray-500">PRs</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-purple-600">{summary.standup.totalIssues}</div>
+                          <div className="text-xs text-gray-500">Issues</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-orange-600">{summary.standup.totalManHoursMin}-{summary.standup.totalManHoursMax}h</div>
+                          <div className="text-xs text-gray-500">Est. Hours</div>
+                        </div>
+                      </div>
+
+                      {summary.standup.workDone.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-gray-600 mb-2">
                             Work Completed:
                           </p>
                           <ul className="text-sm text-gray-700 space-y-1.5">
-                            {summary.workDone.map((item, index) => (
+                            {summary.standup.workDone.map((item, index) => (
                               <li
                                 key={index}
                                 className="flex items-start gap-2"
@@ -434,13 +454,13 @@ export function StandupDashboard({
                         </div>
                       )}
 
-                      {summary.nextSteps.length > 0 && (
+                      {summary.standup.workingOn.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-gray-600 mb-2">
-                            Next Steps:
+                            Currently Working On:
                           </p>
                           <ul className="text-sm text-gray-700 space-y-1.5">
-                            {summary.nextSteps.map((item, index) => (
+                            {summary.standup.workingOn.map((item, index) => (
                               <li
                                 key={index}
                                 className="flex items-start gap-2"
@@ -457,13 +477,13 @@ export function StandupDashboard({
                         </div>
                       )}
 
-                      {summary.blockers.length > 0 && (
+                      {summary.standup.ongoingIssues.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-gray-600 mb-2">
-                            Blockers:
+                            Ongoing Issues:
                           </p>
                           <ul className="text-sm text-gray-700 space-y-1.5">
-                            {summary.blockers.map((item, index) => (
+                            {summary.standup.ongoingIssues.map((item, index) => (
                               <li
                                 key={index}
                                 className="flex items-start gap-2"
@@ -477,6 +497,12 @@ export function StandupDashboard({
                               </li>
                             ))}
                           </ul>
+                        </div>
+                      )}
+
+                      {summary.standup.manHoursRationale && (
+                        <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          <strong>Time Estimate Rationale:</strong> {summary.standup.manHoursRationale}
                         </div>
                       )}
                     </div>

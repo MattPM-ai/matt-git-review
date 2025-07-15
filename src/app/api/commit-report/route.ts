@@ -1,36 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getAllOrgCommits, GitHubCommit } from '@/lib/github-api';
+import { mattAPI, type ActivityFilterDto, type SimplifiedCommitDto } from '@/lib/matt-api';
 import { subDays, parseISO } from 'date-fns';
 
 interface n8nCommitStruct {
   numberOfCommits: number;
-  commits: GitHubCommit[];
+  commits: SimplifiedCommitDto[];
 }
 
 function getCommitsForUser(
-  commits: GitHubCommit[],
+  commits: SimplifiedCommitDto[],
   userLogin: string,
-): GitHubCommit[] {
-  return commits.filter(commit => {
-    const commitUser = commit.author?.login || commit.commit.author.email.split("@")[0];
-    return commitUser === userLogin;
-  });
+): SimplifiedCommitDto[] {
+  return commits.filter(commit => commit.user_login === userLogin);
 }
-
-function getCommitsFromLast30Days(
-  commits: GitHubCommit[],
-  endDate: string,
-): GitHubCommit[] {
-  const endDateObj = parseISO(endDate);
-  const startDateObj = subDays(endDateObj, 30);
-  
-  return commits.filter(commit => {
-    const commitDate = parseISO(commit.commit.author.date);
-    return commitDate >= startDateObj && commitDate <= endDateObj;
-  });
-}
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,12 +29,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get all commits for the organization
-    const commits = await getAllOrgCommits(session.accessToken, orgName);
+    // Calculate date range for last 30 days
+    const endDateObj = parseISO(date);
+    const startDateObj = subDays(endDateObj, 30);
 
-    // Filter commits to only include those from the last 30 days
-    const filteredCommits = getCommitsFromLast30Days(commits, date);
-    console.log(`Filtered commits from last 30 days: ${filteredCommits.length} out of ${commits.length} total commits`);
+    // Build filter to fetch commits from the last 30 days
+    const filter: ActivityFilterDto = {
+      organizationLogin: orgName,
+      activityTypes: ['commit'],
+      dateFrom: startDateObj.toISOString(),
+      dateTo: endDateObj.toISOString(),
+      limit: 1000,
+    };
+
+    // Fetch activities from Matt API
+    const response = await mattAPI.fetchActivities(session.accessToken, filter);
+    
+    // Filter only commits
+    const filteredCommits = response.activities.filter(activity => 
+      activity.type === 'commit'
+    ) as SimplifiedCommitDto[];
+    
+    console.log(`Filtered commits from last 30 days: ${filteredCommits.length} total commits`);
 
     // Generate commits for each user
     const commitsByUser: { [key: string]: n8nCommitStruct } = {};

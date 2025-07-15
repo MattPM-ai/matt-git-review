@@ -3,16 +3,7 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ActivityFilters } from "@/components/activity-filters";
 import { ActivityContent } from "@/components/activity-content";
-import {
-  getOrgMembers,
-  getAllOrgActivity,
-  extractCommitDates,
-  type GitHubUser,
-  type GitHubCommit,
-  type GitHubIssue,
-  type GitHubPullRequest,
-  type ActivityWithType,
-} from "@/lib/github-api";
+import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/matt-api";
 
 interface OrgActivityPageProps {
   params: Promise<{
@@ -25,7 +16,6 @@ interface OrgActivityPageProps {
     dateTo?: string;
   }>;
 }
-
 
 export default async function OrgActivityPage({
   params,
@@ -47,52 +37,58 @@ export default async function OrgActivityPage({
     dateTo: selectedDateTo,
   } = searchParamsData;
 
-  let members: GitHubUser[] = [];
-  let activity: {
-    commits: GitHubCommit[];
-    issues: GitHubIssue[];
-    pulls: GitHubPullRequest[];
-  } = {
-    commits: [],
-    issues: [],
-    pulls: [],
-  };
+  let activityData: ActivitiesResponseDto | null = null;
   let error = null;
 
   try {
-    const results = await Promise.all([
-      getOrgMembers(session.accessToken!, orgName),
-      getAllOrgActivity(session.accessToken!, orgName, selectedUser),
-    ]);
-    members = results[0];
-    activity = results[1];
+    // Build filter for API request
+    const filter: ActivityFilterDto = {
+      organizationLogin: orgName,
+      limit: 1000, // Get a reasonable amount of activities
+    };
 
-    console.log("activity", activity);
-  } catch {
+    // Add optional filters
+    if (selectedUser) {
+      filter.usernames = [selectedUser];
+    }
+    if (selectedDateFrom) {
+      filter.dateFrom = selectedDateFrom;
+    }
+    if (selectedDateTo) {
+      filter.dateTo = selectedDateTo;
+    }
+    if (selectedType) {
+      const typeMap: Record<string, ('commit' | 'issue' | 'pull')[]> = {
+        commits: ['commit'],
+        issues: ['issue'],
+        pulls: ['pull'],
+      };
+      filter.activityTypes = typeMap[selectedType] || ['commit', 'issue', 'pull'];
+    }
+
+    // Fetch activities from Matt API
+    activityData = await mattAPI.fetchActivities(session.accessToken!, filter);
+
+    // Sort activities by date
+    activityData.activities.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    console.log("activity", activityData);
+  } catch (err) {
+    console.error("Failed to fetch activities:", err);
     error = "Failed to fetch organization data";
   }
 
-  // Extract unique commit dates
-  const commitDates = extractCommitDates(activity.commits);
-
-  // Combine all activities for display
-  const allActivities: ActivityWithType[] = [
-    ...activity.commits.map((c) => ({ ...c, type: "commits" as const })),
-    ...activity.issues.map((i) => ({ ...i, type: "issues" as const })),
-    ...activity.pulls.map((p) => ({ ...p, type: "pulls" as const })),
-  ].sort((a, b) => {
-    const dateA =
-      a.type === "commits"
-        ? new Date(a.commit.author.date)
-        : new Date(a.created_at);
-    const dateB =
-      b.type === "commits"
-        ? new Date(b.commit.author.date)
-        : new Date(b.created_at);
-    return dateB.getTime() - dateA.getTime();
-  });
-
-
+  const members = activityData ? Object.values(activityData.users) : [];
+  const allActivities = activityData ? activityData.activities : [];
+  const commitDates = activityData ? 
+    Array.from(new Set(activityData.activities
+      .filter(a => a.type === 'commit')
+      .map(a => a.created_at.toISOString().split('T')[0])
+    )).sort().reverse() : [];
 
   return (
     <DashboardLayout
@@ -119,6 +115,8 @@ export default async function OrgActivityPage({
 
       <ActivityContent
         allActivities={allActivities}
+        users={activityData?.users || {}}
+        repositories={activityData?.repositories || {}}
         selectedUser={selectedUser}
         selectedType={selectedType}
         selectedDateFrom={selectedDateFrom}

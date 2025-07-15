@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subWeeks } from "date-fns";
 import type { StandupResponse } from "@/lib/matt-api";
 
 interface PerformanceReviewDashboardProps {
@@ -33,7 +33,7 @@ export function PerformanceReviewDashboard({
 }: PerformanceReviewDashboardProps) {
   const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">(initialPeriod);
   const [selectedDate, setSelectedDate] = useState<string>(
-    initialDateFrom || format(new Date(), "yyyy-MM-dd")
+    initialDateFrom || format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), "yyyy-MM-dd")
   );
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,13 +98,8 @@ export function PerformanceReviewDashboard({
       const performanceMetrics: PerformanceData[] = standupData.map(user => {
         const avgManHours = (user.standup.totalManHoursMin + user.standup.totalManHoursMax) / 2;
         
-        // Calculate active days based on period
-        let activeDays = 1;
-        if (period === "weekly") {
-          activeDays = Math.min(user.standup.totalCommits > 0 ? 5 : 0, 7); // Assume workdays
-        } else if (period === "monthly") {
-          activeDays = Math.min(user.standup.totalCommits > 0 ? 20 : 0, 30); // Assume workdays
-        }
+        // Calculate active days based on the length of dailyStandups array
+        const activeDays = user.standup.dailyStandups ? user.standup.dailyStandups.length : 1;
 
         return {
           username: user.username,
@@ -190,13 +185,22 @@ export function PerformanceReviewDashboard({
             ))}
           </div>
 
-          {/* Date picker */}
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
+          {/* Date range picker */}
+          <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="text-sm focus:outline-none"
+            />
+            <span className="text-gray-500">to</span>
+            <input
+              type="date"
+              value={dateTo}
+              readOnly
+              className="text-sm focus:outline-none text-gray-600 cursor-not-allowed"
+            />
+          </div>
 
           {/* Refresh button */}
           <button

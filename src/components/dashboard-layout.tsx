@@ -27,35 +27,43 @@ export function DashboardLayout({
       {/* Navbar */}
       <header className="bg-white shadow-sm flex-shrink-0 border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href={`/org/${orgName}`}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {/* Top row: Back button + Title + User Profile */}
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                <Link
+                  href={`/org/${orgName}`}
+                  className="text-gray-500 hover:text-gray-700 flex-shrink-0"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Link>
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {orgName} {title}
-              </h1>
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </Link>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate min-w-0">
+                  {orgName} {title}
+                </h1>
+              </div>
+              <div className="flex-shrink-0">
+                <UserProfile />
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <nav className="flex space-x-4">
+            
+            {/* Bottom row: Navigation */}
+            <div className="flex justify-center sm:justify-start">
+              <nav className="flex space-x-1 sm:space-x-2 lg:space-x-4">
                 {navItems.map((item) => (
                   <Link
                     key={item.key}
                     href={item.href}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                       currentView === item.key
                         ? "bg-indigo-100 text-indigo-700"
                         : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
@@ -65,18 +73,17 @@ export function DashboardLayout({
                   </Link>
                 ))}
               </nav>
-              <UserProfile />
             </div>
           </div>
         </div>
       </header>
 
       {/* Main content with optional sidebar */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
         {/* Sidebar - only show if provided */}
         {sidebar && (
-          <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
-            <div className="p-6">
+          <div className="w-full lg:w-80 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0 overflow-y-auto">
+            <div className="p-4 lg:p-6">
               {sidebar}
             </div>
           </div>
@@ -84,7 +91,7 @@ export function DashboardLayout({
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

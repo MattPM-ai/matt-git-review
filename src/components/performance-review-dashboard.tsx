@@ -167,47 +167,51 @@ export function PerformanceReviewDashboard({
           </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Period selector */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            {(["daily", "weekly", "monthly"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => handlePeriodChange(p)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  period === p
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-              </button>
-            ))}
+        <div className="flex flex-col gap-3">
+          {/* First row: Period selector and date range picker */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Period selector */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              {(["daily", "weekly", "monthly"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePeriodChange(p)}
+                  className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors ${
+                    period === p
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Date range picker */}
+            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => handleDateChange(e.target.value)}
+                className="text-xs sm:text-sm focus:outline-none min-w-0"
+              />
+              <span className="text-gray-500 text-xs sm:text-sm">to</span>
+              <input
+                type="date"
+                value={dateTo}
+                readOnly
+                className="text-xs sm:text-sm focus:outline-none text-gray-600 cursor-not-allowed min-w-0"
+              />
+            </div>
           </div>
 
-          {/* Date range picker */}
-          <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="text-sm focus:outline-none"
-            />
-            <span className="text-gray-500">to</span>
-            <input
-              type="date"
-              value={dateTo}
-              readOnly
-              className="text-sm focus:outline-none text-gray-600 cursor-not-allowed"
-            />
-          </div>
-
-          {/* Refresh button */}
-          <button
-            onClick={fetchPerformanceData}
-            disabled={isLoading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
-          >
+          {/* Second row: Refresh button */}
+          <div className="flex justify-end">
+            <button
+              onClick={fetchPerformanceData}
+              disabled={isLoading}
+              className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-xs sm:text-sm font-medium"
+            >
             {isLoading ? (
               <>
                 <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -224,7 +228,8 @@ export function PerformanceReviewDashboard({
                 Refresh
               </>
             )}
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 

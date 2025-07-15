@@ -18,6 +18,7 @@ interface PerformanceData {
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;
+  totalActivities: number;
   totalManHoursMin: number;
   totalManHoursMax: number;
   avgManHours: number;
@@ -101,6 +102,8 @@ export function PerformanceReviewDashboard({
         // Calculate active days based on the length of dailyStandups array
         const activeDays = user.standup.dailyStandups ? user.standup.dailyStandups.length : 1;
 
+        const totalActivities = user.standup.totalCommits + user.standup.totalPRs + user.standup.totalIssues;
+        
         return {
           username: user.username,
           name: user.name,
@@ -108,6 +111,7 @@ export function PerformanceReviewDashboard({
           totalCommits: user.standup.totalCommits,
           totalPRs: user.standup.totalPRs,
           totalIssues: user.standup.totalIssues,
+          totalActivities,
           totalManHoursMin: user.standup.totalManHoursMin,
           totalManHoursMax: user.standup.totalManHoursMax,
           avgManHours,
@@ -284,11 +288,26 @@ export function PerformanceReviewDashboard({
                       </p>
                       <span className="text-xs text-gray-500">@{user.username}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span>{user.totalManHoursMin}-{user.totalManHoursMax}h</span>
+                    <div className="flex items-center gap-3 text-xs text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {user.totalManHoursMin}-{user.totalManHoursMax}h
+                      </span>
                       <span>Avg: {user.avgManHours.toFixed(1)}h</span>
-                      <span>{user.totalCommits} commits</span>
-                      <span>{user.activeDays} active days</span>
+                      <span className="flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        {user.totalActivities}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {user.activeDays}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -338,9 +357,9 @@ export function PerformanceReviewDashboard({
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="text-lg font-semibold text-purple-600">
-                    {selectedUser.totalCommits}
+                    {selectedUser.totalActivities}
                   </div>
-                  <div className="text-xs text-gray-500">Total Commits</div>
+                  <div className="text-xs text-gray-500">Total Activities</div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="text-lg font-semibold text-orange-600">
@@ -348,6 +367,28 @@ export function PerformanceReviewDashboard({
                   </div>
                   <div className="text-xs text-gray-500">Active Days</div>
                 </div>
+              </div>
+
+              {/* Activity breakdown */}
+              <div className="flex items-center justify-center gap-4 text-xs text-gray-600 bg-gray-50 p-2 rounded-lg">
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                  </svg>
+                  {selectedUser.totalCommits} Commits
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                  {selectedUser.totalPRs} PRs
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  {selectedUser.totalIssues} Issues
+                </span>
               </div>
 
               {/* Man hours rationale */}

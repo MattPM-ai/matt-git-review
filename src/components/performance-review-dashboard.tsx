@@ -55,6 +55,15 @@ export function PerformanceReviewDashboard({
   const [selectedUser, setSelectedUser] = useState<PerformanceData | null>(
     null
   );
+  const [isModalClosing, setIsModalClosing] = useState(false);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalClosing(true);
+    setTimeout(() => {
+      setSelectedUser(null);
+      setIsModalClosing(false);
+    }, 300); // Match animation duration
+  }, []);
 
   const calculateDateRange = useCallback(
     (date: string, periodType: "daily" | "weekly" | "monthly") => {
@@ -251,7 +260,7 @@ export function PerformanceReviewDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ranking Section */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden lg:col-span-1">
           <div className="p-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">
               Performance Ranking
@@ -376,8 +385,8 @@ export function PerformanceReviewDashboard({
           )}
         </div>
 
-        {/* Detailed View Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        {/* Detailed View Section - Hidden on mobile */}
+        <div className="hidden lg:block bg-white rounded-lg border border-gray-200 p-6">
           {selectedUser ? (
             <div className="space-y-4">
               {/* User header */}
@@ -516,6 +525,173 @@ export function PerformanceReviewDashboard({
           )}
         </div>
       </div>
+
+      {/* Mobile Modal for Detailed View */}
+      {selectedUser && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 flex items-end justify-center"
+          onClick={handleCloseModal}
+        >
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div
+            className={`relative bg-white rounded-t-2xl w-full max-h-[90vh] flex flex-col ${
+              isModalClosing ? "animate-slide-down" : "animate-slide-up"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex-shrink-0 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <img
+                  src={selectedUser.avatar_url}
+                  alt={selectedUser.username}
+                  className="w-10 h-10 rounded-full flex-shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-gray-900 truncate">
+                    {selectedUser.name || selectedUser.username}
+                  </h3>
+                  {selectedUser.name && (
+                    <p className="text-sm text-gray-500 truncate">
+                      @{selectedUser.username}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleCloseModal}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+              >
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+              {/* Metrics */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 p-3 rounded-lg text-center">
+                  <div className="text-lg font-semibold text-green-600">
+                    {selectedUser.totalManHoursMin}-
+                    {selectedUser.totalManHoursMax}h
+                  </div>
+                  <div className="text-sm text-gray-500">Man-Hours</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg text-center">
+                  <div className="text-lg font-semibold text-blue-600">
+                    {selectedUser.avgManHours.toFixed(1)}h
+                  </div>
+                  <div className="text-sm text-gray-500">Average</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg text-center">
+                  <div className="text-lg font-semibold text-purple-600">
+                    {selectedUser.totalActivities}
+                  </div>
+                  <div className="text-sm text-gray-500">Activities</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg text-center">
+                  <div className="text-lg font-semibold text-orange-600">
+                    {selectedUser.activeDays}
+                  </div>
+                  <div className="text-sm text-gray-500">Days</div>
+                </div>
+              </div>
+
+              {/* Activity breakdown */}
+              <div className="flex items-center justify-center gap-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="w-4 h-4 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {selectedUser.totalCommits} Commits
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {selectedUser.totalPRs} PRs
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="w-4 h-4 text-purple-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {selectedUser.totalIssues} Issues
+                </span>
+              </div>
+
+              {/* Man hours rationale */}
+              {selectedUser.manHoursRationale && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                    Time Estimate Rationale
+                  </h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                    {selectedUser.manHoursRationale}
+                  </p>
+                </div>
+              )}
+
+              {/* Work done */}
+              {selectedUser.workDone.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                    Work Completed
+                  </h4>
+                  <ul className="space-y-2">
+                    {selectedUser.workDone.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-sm text-gray-700"
+                      >
+                        <span className="text-emerald-500 mt-0.5 font-medium">
+                          ✓
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

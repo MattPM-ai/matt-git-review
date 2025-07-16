@@ -705,9 +705,9 @@ export function PerformanceReviewDashboard({
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center p-8 text-center text-gray-500">
-              <p>
+              <p className="max-w-sm">
                 Select a team member from the ranking to view detailed
-                performance metrics.
+                performance metrics and standups.
               </p>
             </div>
           )}

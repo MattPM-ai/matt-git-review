@@ -31,7 +31,22 @@ interface PerformanceData {
   avgManHours: number;
   activeDays: number;
   workDone: string[];
+  workingOn: string[];
+  ongoingIssues: string[];
   manHoursRationale: string;
+  dailyStandups?: Array<{
+    date?: Date;
+    summary: string;
+    workDone: string[];
+    workingOn: string[];
+    ongoingIssues: string[];
+    totalCommits: number;
+    totalPRs: number;
+    totalIssues: number;
+    totalManHoursMin: number;
+    totalManHoursMax: number;
+    manHoursRationale: string;
+  }>;
 }
 
 export function PerformanceReviewDashboard({
@@ -156,7 +171,10 @@ export function PerformanceReviewDashboard({
           avgManHours,
           activeDays,
           workDone: user.standup.workDone,
+          workingOn: user.standup.workingOn,
+          ongoingIssues: user.standup.ongoingIssues,
           manHoursRationale: user.standup.manHoursRationale,
+          dailyStandups: user.standup.dailyStandups,
         };
       });
 
@@ -524,6 +542,164 @@ export function PerformanceReviewDashboard({
                       </ul>
                     </div>
                   )}
+
+                  {/* Working on */}
+                  {selectedUser.workingOn.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        Currently Working On
+                      </h4>
+                      <ul className="space-y-1">
+                        {selectedUser.workingOn.map((item, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2 text-sm text-gray-700"
+                          >
+                            <span className="text-blue-500 mt-0.5 font-medium">
+                              ⚡
+                            </span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Ongoing issues */}
+                  {selectedUser.ongoingIssues.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        Ongoing Issues
+                      </h4>
+                      <ul className="space-y-1">
+                        {selectedUser.ongoingIssues.map((item, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2 text-sm text-gray-700"
+                          >
+                            <span className="text-red-500 mt-0.5 font-medium">
+                              ⚠
+                            </span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Daily Timeline */}
+                  {selectedUser.dailyStandups &&
+                    selectedUser.dailyStandups.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                          Daily Timeline
+                        </h4>
+                        <div className="space-y-3">
+                          {selectedUser.dailyStandups.map((daily, index) => (
+                            <div
+                              key={index}
+                              className="border-l-2 border-gray-200 pl-4 pb-3 last:pb-0"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-2 h-2 bg-indigo-500 rounded-full -ml-5 border-2 border-white"></div>
+                                <h5 className="text-xs font-medium text-gray-900">
+                                  {daily.date
+                                    ? format(
+                                        new Date(daily.date),
+                                        "MMM d, yyyy"
+                                      )
+                                    : `Day ${index + 1}`}
+                                </h5>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <span>{daily.totalCommits}c</span>
+                                  <span>{daily.totalPRs}pr</span>
+                                  <span>{daily.totalIssues}i</span>
+                                  <span className="text-green-600">
+                                    {daily.totalManHoursMin}-
+                                    {daily.totalManHoursMax}h
+                                  </span>
+                                </div>
+                              </div>
+
+                              {daily.summary && (
+                                <p className="text-xs text-gray-600 mb-2 bg-gray-50 p-2 rounded">
+                                  {daily.summary}
+                                </p>
+                              )}
+
+                              <div className="space-y-2">
+                                {daily.workDone.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-700 mb-1">
+                                      Completed:
+                                    </p>
+                                    <ul className="space-y-1 ml-2">
+                                      {daily.workDone.map((item, itemIndex) => (
+                                        <li
+                                          key={itemIndex}
+                                          className="flex items-start gap-1 text-xs text-gray-600"
+                                        >
+                                          <span className="text-emerald-500 mt-0.5">
+                                            ✓
+                                          </span>
+                                          <span>{item}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {daily.workingOn.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-700 mb-1">
+                                      Working on:
+                                    </p>
+                                    <ul className="space-y-1 ml-2">
+                                      {daily.workingOn.map(
+                                        (item, itemIndex) => (
+                                          <li
+                                            key={itemIndex}
+                                            className="flex items-start gap-1 text-xs text-gray-600"
+                                          >
+                                            <span className="text-blue-500 mt-0.5">
+                                              ⚡
+                                            </span>
+                                            <span>{item}</span>
+                                          </li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {daily.ongoingIssues.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-700 mb-1">
+                                      Issues:
+                                    </p>
+                                    <ul className="space-y-1 ml-2">
+                                      {daily.ongoingIssues.map(
+                                        (item, itemIndex) => (
+                                          <li
+                                            key={itemIndex}
+                                            className="flex items-start gap-1 text-xs text-gray-600"
+                                          >
+                                            <span className="text-red-500 mt-0.5">
+                                              ⚠
+                                            </span>
+                                            <span>{item}</span>
+                                          </li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>
             </>
@@ -700,6 +876,159 @@ export function PerformanceReviewDashboard({
                   </ul>
                 </div>
               )}
+
+              {/* Working on */}
+              {selectedUser.workingOn.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                    Currently Working On
+                  </h4>
+                  <ul className="space-y-2">
+                    {selectedUser.workingOn.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-sm text-gray-700"
+                      >
+                        <span className="text-blue-500 mt-0.5 font-medium">
+                          ⚡
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Ongoing issues */}
+              {selectedUser.ongoingIssues.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                    Ongoing Issues
+                  </h4>
+                  <ul className="space-y-2">
+                    {selectedUser.ongoingIssues.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-sm text-gray-700"
+                      >
+                        <span className="text-red-500 mt-0.5 font-medium">
+                          ⚠
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Daily Timeline */}
+              {selectedUser.dailyStandups &&
+                selectedUser.dailyStandups.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      Daily Timeline
+                    </h4>
+                    <div className="">
+                      {selectedUser.dailyStandups.map((daily, index) => (
+                        <div
+                          key={index}
+                          className="border-l-2 border-gray-200 pl-4 pb-6 last:pb-0"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full -ml-5 border-2 border-white"></div>
+                            <h5 className="text-sm font-medium text-gray-900">
+                              {daily.date
+                                ? format(new Date(daily.date), "MMM d, yyyy")
+                                : `Day ${index + 1}`}
+                            </h5>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
+                            <span>{daily.totalCommits} commits</span>
+                            <span>{daily.totalPRs} PRs</span>
+                            <span>{daily.totalIssues} issues</span>
+                            <span className="text-green-600">
+                              {daily.totalManHoursMin}-{daily.totalManHoursMax}h
+                            </span>
+                          </div>
+
+                          {daily.summary && (
+                            <p className="text-sm text-gray-600 mb-3 bg-gray-50 p-3 rounded">
+                              {daily.summary}
+                            </p>
+                          )}
+
+                          <div className="space-y-3">
+                            {daily.workDone.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Completed:
+                                </p>
+                                <ul className="space-y-1 ml-3">
+                                  {daily.workDone.map((item, itemIndex) => (
+                                    <li
+                                      key={itemIndex}
+                                      className="flex items-start gap-2 text-sm text-gray-600"
+                                    >
+                                      <span className="text-emerald-500 mt-0.5">
+                                        ✓
+                                      </span>
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {daily.workingOn.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Working on:
+                                </p>
+                                <ul className="space-y-1 ml-3">
+                                  {daily.workingOn.map((item, itemIndex) => (
+                                    <li
+                                      key={itemIndex}
+                                      className="flex items-start gap-2 text-sm text-gray-600"
+                                    >
+                                      <span className="text-blue-500 mt-0.5">
+                                        ⚡
+                                      </span>
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {daily.ongoingIssues.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium text-gray-700 mb-2">
+                                  Issues:
+                                </p>
+                                <ul className="space-y-1 ml-3">
+                                  {daily.ongoingIssues.map(
+                                    (item, itemIndex) => (
+                                      <li
+                                        key={itemIndex}
+                                        className="flex items-start gap-2 text-sm text-gray-600"
+                                      >
+                                        <span className="text-red-500 mt-0.5">
+                                          ⚠
+                                        </span>
+                                        <span>{item}</span>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

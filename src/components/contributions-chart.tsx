@@ -5,17 +5,16 @@ import {
   format,
   startOfWeek,
   endOfWeek,
-  startOfMonth,
-  endOfMonth,
   subWeeks,
   eachDayOfInterval,
 } from "date-fns";
 import type { StandupResponse } from "@/lib/matt-api";
 import { loadMockStandup } from "@/lib/mock/mockStandup";
+import { DateRangePicker, type PeriodType } from "./date-range-picker";
 
 interface ContributionsChartProps {
   orgName: string;
-  initialPeriod?: "weekly" | "monthly";
+  initialPeriod?: PeriodType;
   initialDateFrom?: string;
   initialDateTo?: string;
 }
@@ -40,56 +39,51 @@ export function ContributionsChart({
   orgName,
   initialPeriod = "weekly",
   initialDateFrom,
+  initialDateTo,
 }: ContributionsChartProps) {
-  const [period, setPeriod] = useState<"weekly" | "monthly">(initialPeriod);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    initialDateFrom ||
-      format(
-        startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-        "yyyy-MM-dd"
-      )
-  );
+  const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+  
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const defaultStart = startOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+    const defaultEnd = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+    
+    return {
+      dateFrom: initialDateFrom || format(defaultStart, "yyyy-MM-dd"),
+      dateTo: initialDateTo || format(defaultEnd, "yyyy-MM-dd"),
+    };
+  };
+  
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [contributors, setContributors] = useState<ContributorData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const calculateDateRange = useCallback(
-    (date: string, periodType: "weekly" | "monthly") => {
-      const baseDate = new Date(date);
+  const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
+    setPeriod(newPeriod);
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("period", newPeriod);
+    url.searchParams.set("dateFrom", dateRange.dateFrom);
+    url.searchParams.set("dateTo", dateRange.dateTo);
+    window.history.pushState({}, "", url.toString());
+  }, [dateRange]);
 
-      switch (periodType) {
-        case "weekly":
-          return {
-            dateFrom: format(
-              startOfWeek(baseDate, { weekStartsOn: 1 }),
-              "yyyy-MM-dd"
-            ),
-            dateTo: format(
-              endOfWeek(baseDate, { weekStartsOn: 1 }),
-              "yyyy-MM-dd"
-            ),
-          };
-        case "monthly":
-          return {
-            dateFrom: format(startOfMonth(baseDate), "yyyy-MM-dd"),
-            dateTo: format(endOfMonth(baseDate), "yyyy-MM-dd"),
-          };
-        default:
-          return {
-            dateFrom: format(baseDate, "yyyy-MM-dd"),
-            dateTo: format(baseDate, "yyyy-MM-dd"),
-          };
-      }
-    },
-    []
-  );
+  const handleDateRangeChange = useCallback((newDateRange: { dateFrom: string; dateTo: string }) => {
+    setDateRange(newDateRange);
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("period", period);
+    url.searchParams.set("dateFrom", newDateRange.dateFrom);
+    url.searchParams.set("dateTo", newDateRange.dateTo);
+    window.history.pushState({}, "", url.toString());
+  }, [period]);
 
   const fetchContributionsData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const { dateFrom, dateTo } = calculateDateRange(selectedDate, period);
 
       // Fetch data using the same endpoint as performance dashboard
       // const response = await fetch("/api/standup", {
@@ -99,8 +93,8 @@ export function ContributionsChart({
       //   },
       //   body: JSON.stringify({
       //     orgName,
-      //     date: dateFrom,
-      //     dateRange: { dateFrom, dateTo },
+      //     date: dateRange.dateFrom,
+      //     dateRange: { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo },
       //   }),
       // });
 
@@ -132,8 +126,8 @@ export function ContributionsChart({
         });
 
         // Get all days in the period
-        const startDate = new Date(dateFrom);
-        const endDate = new Date(dateTo);
+        const startDate = new Date(dateRange.dateFrom);
+        const endDate = new Date(dateRange.dateTo);
         const allDays = eachDayOfInterval({ start: startDate, end: endDate });
 
         // Create daily hours and activities map
@@ -212,34 +206,12 @@ export function ContributionsChart({
     } finally {
       setIsLoading(false);
     }
-  }, [orgName, selectedDate, period, calculateDateRange]);
+  }, [orgName, dateRange, period]);
 
   useEffect(() => {
     fetchContributionsData();
   }, [fetchContributionsData]);
 
-  const handlePeriodChange = (newPeriod: "weekly" | "monthly") => {
-    setPeriod(newPeriod);
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.set("period", newPeriod);
-    const { dateFrom, dateTo } = calculateDateRange(selectedDate, newPeriod);
-    url.searchParams.set("dateFrom", dateFrom);
-    url.searchParams.set("dateTo", dateTo);
-    window.history.pushState({}, "", url.toString());
-  };
-
-  const handleDateChange = (newDate: string) => {
-    setSelectedDate(newDate);
-    // Update URL
-    const url = new URL(window.location.href);
-    const { dateFrom, dateTo } = calculateDateRange(newDate, period);
-    url.searchParams.set("dateFrom", dateFrom);
-    url.searchParams.set("dateTo", dateTo);
-    window.history.pushState({}, "", url.toString());
-  };
-
-  const { dateFrom, dateTo } = calculateDateRange(selectedDate, period);
 
   // Calculate max daily hours for scaling
   const maxDailyHours = Math.max(
@@ -249,8 +221,8 @@ export function ContributionsChart({
 
   // Calculate overall daily totals
   const allDays = eachDayOfInterval({
-    start: new Date(dateFrom),
-    end: new Date(dateTo),
+    start: new Date(dateRange.dateFrom),
+    end: new Date(dateRange.dateTo),
   });
 
   const dailyTotals = allDays.map((day) => {
@@ -279,48 +251,19 @@ export function ContributionsChart({
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Contributions</h1>
             <p className="text-sm text-gray-600">
-              {format(new Date(dateFrom), "MMM d")} -{" "}
-              {format(new Date(dateTo), "MMM d, yyyy")}
+              {format(new Date(dateRange.dateFrom), "MMM d")} -{" "}
+              {format(new Date(dateRange.dateTo), "MMM d, yyyy")}
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Period selector */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              {(["weekly", "monthly"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePeriodChange(p)}
-                  disabled={isLoading}
-                  className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    period === p
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Date range picker */}
-            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => handleDateChange(e.target.value)}
-                disabled={isLoading}
-                className="text-xs sm:text-sm focus:outline-none min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <span className="text-gray-500 text-xs sm:text-sm">to</span>
-              <input
-                type="date"
-                value={dateTo}
-                readOnly
-                className="text-xs sm:text-sm focus:outline-none text-gray-600 cursor-not-allowed min-w-0"
-              />
-            </div>
-          </div>
+          <DateRangePicker
+            period={period}
+            dateFrom={dateRange.dateFrom}
+            dateTo={dateRange.dateTo}
+            onPeriodChange={handlePeriodChange}
+            onDateRangeChange={handleDateRangeChange}
+            className="flex-shrink-0"
+          />
         </div>
 
         {error && (
@@ -368,7 +311,7 @@ export function ContributionsChart({
                 <div>Max Daily Hours: {maxDailyHours.toFixed(1)}</div>
                 <div>Max Total Hours: {maxTotalHours.toFixed(1)}</div>
                 <div>
-                  Date Range: {dateFrom} to {dateTo}
+                  Date Range: {dateRange.dateFrom} to {dateRange.dateTo}
                 </div>
                 <div>
                   Daily Totals:{" "}
@@ -393,8 +336,8 @@ export function ContributionsChart({
                 Man-hours over time
               </h2>
               <p className="text-sm text-gray-600 mb-6">
-                Daily breakdown for {format(new Date(dateFrom), "MMM d")} -{" "}
-                {format(new Date(dateTo), "MMM d, yyyy")}
+                Daily breakdown for {format(new Date(dateRange.dateFrom), "MMM d")} -{" "}
+                {format(new Date(dateRange.dateTo), "MMM d, yyyy")}
               </p>
 
               {/* Aggregate daily chart */}
@@ -463,7 +406,7 @@ export function ContributionsChart({
                   ))}
                 </div>
                 <div className="text-center text-xs text-gray-400 mt-1 pl-2">
-                  {format(new Date(dateFrom), "MMMM yyyy")}
+                  {format(new Date(dateRange.dateFrom), "MMMM yyyy")}
                 </div>
               </div>
             </div>

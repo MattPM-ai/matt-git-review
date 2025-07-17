@@ -5,17 +5,16 @@ import {
   format,
   startOfWeek,
   endOfWeek,
-  startOfMonth,
-  endOfMonth,
   subWeeks,
 } from "date-fns";
 import type { StandupResponse } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
+import { DateRangePicker, type PeriodType } from "./date-range-picker";
 
 interface PerformanceReviewDashboardProps {
   orgName: string;
-  initialPeriod?: "daily" | "weekly" | "monthly";
+  initialPeriod?: PeriodType;
   initialDateFrom?: string;
   initialDateTo?: string;
 }
@@ -55,17 +54,22 @@ export function PerformanceReviewDashboard({
   orgName,
   initialPeriod = "weekly",
   initialDateFrom,
+  initialDateTo,
 }: PerformanceReviewDashboardProps) {
-  const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">(
-    initialPeriod
-  );
-  const [selectedDate, setSelectedDate] = useState<string>(
-    initialDateFrom ||
-      format(
-        startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-        "yyyy-MM-dd"
-      )
-  );
+  const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+  
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const defaultStart = startOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+    const defaultEnd = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+    
+    return {
+      dateFrom: initialDateFrom || format(defaultStart, "yyyy-MM-dd"),
+      dateTo: initialDateTo || format(defaultEnd, "yyyy-MM-dd"),
+    };
+  };
+  
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,49 +86,31 @@ export function PerformanceReviewDashboard({
     }, 300); // Match animation duration
   }, []);
 
-  const calculateDateRange = useCallback(
-    (date: string, periodType: "daily" | "weekly" | "monthly") => {
-      const baseDate = new Date(date);
+  const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
+    setPeriod(newPeriod);
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("period", newPeriod);
+    url.searchParams.set("dateFrom", dateRange.dateFrom);
+    url.searchParams.set("dateTo", dateRange.dateTo);
+    window.history.pushState({}, "", url.toString());
+  }, [dateRange]);
 
-      switch (periodType) {
-        case "daily":
-          return {
-            dateFrom: format(baseDate, "yyyy-MM-dd"),
-            dateTo: format(baseDate, "yyyy-MM-dd"),
-          };
-        case "weekly":
-          return {
-            dateFrom: format(
-              startOfWeek(baseDate, { weekStartsOn: 1 }),
-              "yyyy-MM-dd"
-            ),
-            dateTo: format(
-              endOfWeek(baseDate, { weekStartsOn: 1 }),
-              "yyyy-MM-dd"
-            ),
-          };
-        case "monthly":
-          return {
-            dateFrom: format(startOfMonth(baseDate), "yyyy-MM-dd"),
-            dateTo: format(endOfMonth(baseDate), "yyyy-MM-dd"),
-          };
-        default:
-          return {
-            dateFrom: format(baseDate, "yyyy-MM-dd"),
-            dateTo: format(baseDate, "yyyy-MM-dd"),
-          };
-      }
-    },
-    []
-  );
+  const handleDateRangeChange = useCallback((newDateRange: { dateFrom: string; dateTo: string }) => {
+    setDateRange(newDateRange);
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("period", period);
+    url.searchParams.set("dateFrom", newDateRange.dateFrom);
+    url.searchParams.set("dateTo", newDateRange.dateTo);
+    window.history.pushState({}, "", url.toString());
+  }, [period]);
 
   const fetchPerformanceData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const { dateFrom, dateTo } = calculateDateRange(selectedDate, period);
-
       // Call the Next.js API endpoint
       const response = await fetch("/api/standup", {
         method: "POST",
@@ -133,8 +119,8 @@ export function PerformanceReviewDashboard({
         },
         body: JSON.stringify({
           orgName,
-          date: dateFrom, // For now, use dateFrom as the primary date
-          dateRange: period !== "daily" ? { dateFrom, dateTo } : undefined,
+          date: dateRange.dateFrom, // Use dateFrom as the primary date
+          dateRange: period !== "daily" ? { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo } : undefined,
         }),
       });
 
@@ -190,34 +176,12 @@ export function PerformanceReviewDashboard({
     } finally {
       setIsLoading(false);
     }
-  }, [orgName, selectedDate, period, calculateDateRange]);
+  }, [orgName, dateRange, period]);
 
   useEffect(() => {
     fetchPerformanceData();
   }, [fetchPerformanceData]);
 
-  const handlePeriodChange = (newPeriod: "daily" | "weekly" | "monthly") => {
-    setPeriod(newPeriod);
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.set("period", newPeriod);
-    const { dateFrom, dateTo } = calculateDateRange(selectedDate, newPeriod);
-    url.searchParams.set("dateFrom", dateFrom);
-    url.searchParams.set("dateTo", dateTo);
-    window.history.pushState({}, "", url.toString());
-  };
-
-  const handleDateChange = (newDate: string) => {
-    setSelectedDate(newDate);
-    // Update URL
-    const url = new URL(window.location.href);
-    const { dateFrom, dateTo } = calculateDateRange(newDate, period);
-    url.searchParams.set("dateFrom", dateFrom);
-    url.searchParams.set("dateTo", dateTo);
-    window.history.pushState({}, "", url.toString());
-  };
-
-  const { dateFrom, dateTo } = calculateDateRange(selectedDate, period);
 
   return (
     <div className="flex flex-col h-full pb-6">
@@ -229,48 +193,19 @@ export function PerformanceReviewDashboard({
               Performance & Standup
             </h1>
             <p className="text-sm text-gray-600">
-              {format(new Date(dateFrom), "MMM d")} -{" "}
-              {format(new Date(dateTo), "MMM d, yyyy")}
+              {format(new Date(dateRange.dateFrom), "MMM d")} -{" "}
+              {format(new Date(dateRange.dateTo), "MMM d, yyyy")}
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Period selector */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              {(["daily", "weekly", "monthly"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePeriodChange(p)}
-                  disabled={isLoading}
-                  className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    period === p
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Date range picker */}
-            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => handleDateChange(e.target.value)}
-                disabled={isLoading}
-                className="text-xs sm:text-sm focus:outline-none min-w-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <span className="text-gray-500 text-xs sm:text-sm">to</span>
-              <input
-                type="date"
-                value={dateTo}
-                readOnly
-                className="text-xs sm:text-sm focus:outline-none text-gray-600 cursor-not-allowed min-w-0"
-              />
-            </div>
-          </div>
+          <DateRangePicker
+            period={period}
+            dateFrom={dateRange.dateFrom}
+            dateTo={dateRange.dateTo}
+            onPeriodChange={handlePeriodChange}
+            onDateRangeChange={handleDateRangeChange}
+            className="flex-shrink-0"
+          />
         </div>
 
         {error && (

@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  format,
-  startOfWeek,
-  endOfWeek,
-  subWeeks,
-} from "date-fns";
+import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import type { StandupResponse } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
@@ -58,18 +53,18 @@ export function PerformanceReviewDashboard({
   initialDateTo,
 }: PerformanceReviewDashboardProps) {
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
-  
+
   const getDefaultDateRange = () => {
     const today = new Date();
     const defaultStart = startOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
     const defaultEnd = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
-    
+
     return {
       dateFrom: initialDateFrom || format(defaultStart, "yyyy-MM-dd"),
       dateTo: initialDateTo || format(defaultEnd, "yyyy-MM-dd"),
     };
   };
-  
+
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,25 +82,31 @@ export function PerformanceReviewDashboard({
     }, 300); // Match animation duration
   }, []);
 
-  const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
-    setPeriod(newPeriod);
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.set("period", newPeriod);
-    url.searchParams.set("dateFrom", dateRange.dateFrom);
-    url.searchParams.set("dateTo", dateRange.dateTo);
-    window.history.pushState({}, "", url.toString());
-  }, [dateRange]);
+  const handlePeriodChange = useCallback(
+    (newPeriod: PeriodType) => {
+      setPeriod(newPeriod);
+      // Update URL
+      const url = new URL(window.location.href);
+      url.searchParams.set("period", newPeriod);
+      url.searchParams.set("dateFrom", dateRange.dateFrom);
+      url.searchParams.set("dateTo", dateRange.dateTo);
+      window.history.pushState({}, "", url.toString());
+    },
+    [dateRange]
+  );
 
-  const handleDateRangeChange = useCallback((newDateRange: { dateFrom: string; dateTo: string }) => {
-    setDateRange(newDateRange);
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.set("period", period);
-    url.searchParams.set("dateFrom", newDateRange.dateFrom);
-    url.searchParams.set("dateTo", newDateRange.dateTo);
-    window.history.pushState({}, "", url.toString());
-  }, [period]);
+  const handleDateRangeChange = useCallback(
+    (newDateRange: { dateFrom: string; dateTo: string }) => {
+      setDateRange(newDateRange);
+      // Update URL
+      const url = new URL(window.location.href);
+      url.searchParams.set("period", period);
+      url.searchParams.set("dateFrom", newDateRange.dateFrom);
+      url.searchParams.set("dateTo", newDateRange.dateTo);
+      window.history.pushState({}, "", url.toString());
+    },
+    [period]
+  );
 
   const fetchPerformanceData = useCallback(async () => {
     setIsLoading(true);
@@ -121,7 +122,10 @@ export function PerformanceReviewDashboard({
         body: JSON.stringify({
           orgName,
           date: dateRange.dateFrom, // Use dateFrom as the primary date
-          dateRange: period !== "daily" ? { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo } : undefined,
+          dateRange:
+            period !== "daily"
+              ? { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo }
+              : undefined,
         }),
       });
 
@@ -183,7 +187,6 @@ export function PerformanceReviewDashboard({
     fetchPerformanceData();
   }, [fetchPerformanceData]);
 
-
   return (
     <div className="flex flex-col h-full pb-6">
       {/* Header with controls */}
@@ -225,6 +228,9 @@ export function PerformanceReviewDashboard({
             <h2 className="text-lg font-semibold text-gray-900">
               Performance Ranking
             </h2>
+            <p className="text-sm text-gray-500">
+              Select any member to view detailed metrics
+            </p>
           </div>
 
           {isLoading ? (
@@ -264,15 +270,12 @@ export function PerformanceReviewDashboard({
                           </span>
                         </div>
 
-                        {/* Progress bar for manhours */}
-                        <div className="mb-1">
-                          <div className="flex items-center justify-between text-xs text-gray-600">
-                            <span className="font-medium">
-                              {user.totalManHoursMin}-{user.totalManHoursMax}h
-                            </span>
-                            <span>Avg: {user.avgManHours.toFixed(1)}h</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                        {/* Average hours with inline progress bar */}
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-gray-600 font-medium whitespace-nowrap w-24">
+                            {user.avgManHours.toFixed(1)} man-hours
+                          </span>
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full transition-all duration-300"
                               style={{

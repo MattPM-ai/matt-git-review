@@ -11,6 +11,7 @@ import type { StandupResponse } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
+import { ReportLoadingState } from "./report-loading-state";
 
 interface PerformanceReviewDashboardProps {
   orgName: string;
@@ -204,6 +205,7 @@ export function PerformanceReviewDashboard({
             dateTo={dateRange.dateTo}
             onPeriodChange={handlePeriodChange}
             onDateRangeChange={handleDateRangeChange}
+            disabled={isLoading}
             className="flex-shrink-0"
           />
         </div>
@@ -226,22 +228,7 @@ export function PerformanceReviewDashboard({
           </div>
 
           {isLoading ? (
-            <div className="flex-1 px-4 py-2">
-              <div className="space-y-1">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-2 animate-pulse"
-                  >
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-24"></div>
-                      <div className="h-3 bg-gray-200 rounded w-32"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ReportLoadingState />
           ) : performanceData.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
               <div className="divide-y divide-gray-100">

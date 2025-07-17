@@ -262,6 +262,7 @@ export function ContributionsChart({
             dateTo={dateRange.dateTo}
             onPeriodChange={handlePeriodChange}
             onDateRangeChange={handleDateRangeChange}
+            disabled={isLoading}
             className="flex-shrink-0"
           />
         </div>

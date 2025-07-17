@@ -33,6 +33,7 @@ interface DateRangePickerProps {
   onPeriodChange: (period: PeriodType) => void;
   onDateRangeChange: (dateRange: DateRange) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 interface PeriodOption {
@@ -56,6 +57,7 @@ export function DateRangePicker({
   onPeriodChange,
   onDateRangeChange,
   className = "",
+  disabled = false,
 }: DateRangePickerProps) {
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
@@ -188,9 +190,117 @@ export function DateRangePicker({
     onPeriodChange(newPeriod);
     setIsPeriodDropdownOpen(false);
     
-    // Auto-select the first (most recent) date range for the new period
+    // Smart date range selection: find range that contains the previous end date
     if (newPeriod !== "custom") {
-      const options = generateDateRangeOptions();
+      // Generate options for the new period type
+      const currentDate = new Date();
+      const previousEndDate = new Date(dateTo);
+      const options: Array<{ label: string; dateFrom: string; dateTo: string }> = [];
+
+      switch (newPeriod) {
+        case "daily":
+          // For daily, just use the previous end date
+          const dateStr = format(previousEndDate, "yyyy-MM-dd");
+          options.push({
+            label: format(previousEndDate, "d MMM yyyy"),
+            dateFrom: dateStr,
+            dateTo: dateStr,
+          });
+          break;
+
+        case "weekly":
+          // Find the week that contains the previous end date
+          for (let i = 0; i < 20; i++) { // Look at more weeks to find the one containing previous end date
+            const weekStart = startOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
+            let weekEnd = endOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
+            
+            if (isAfter(weekEnd, today)) {
+              weekEnd = today;
+            }
+
+            options.push({
+              label: `${format(weekStart, "d MMM")} - ${format(weekEnd, "d MMM")} | ${format(weekStart, "yyyy")}`,
+              dateFrom: format(weekStart, "yyyy-MM-dd"),
+              dateTo: format(weekEnd, "yyyy-MM-dd"),
+            });
+
+            // Check if this week contains the previous end date
+            if (previousEndDate >= weekStart && previousEndDate <= weekEnd) {
+              break; // Found the right week, stop here and use this as first option
+            }
+          }
+          break;
+
+        case "monthly":
+          // Find the month that contains the previous end date
+          for (let i = 0; i < 24; i++) { // Look at more months
+            const monthStart = startOfMonth(subMonths(currentDate, i));
+            let monthEnd = endOfMonth(subMonths(currentDate, i));
+            
+            if (isAfter(monthEnd, today)) {
+              monthEnd = today;
+            }
+
+            options.push({
+              label: `${format(monthStart, "d MMM")} - ${format(monthEnd, "d MMM")} | ${format(monthStart, "yyyy")}`,
+              dateFrom: format(monthStart, "yyyy-MM-dd"),
+              dateTo: format(monthEnd, "yyyy-MM-dd"),
+            });
+
+            // Check if this month contains the previous end date
+            if (previousEndDate >= monthStart && previousEndDate <= monthEnd) {
+              break; // Found the right month
+            }
+          }
+          break;
+
+        case "quarterly":
+          // Find the quarter that contains the previous end date
+          for (let i = 0; i < 16; i++) { // Look at more quarters
+            const quarterStart = startOfQuarter(subQuarters(currentDate, i));
+            let quarterEnd = endOfQuarter(subQuarters(currentDate, i));
+            
+            if (isAfter(quarterEnd, today)) {
+              quarterEnd = today;
+            }
+
+            options.push({
+              label: `${format(quarterStart, "d MMM")} - ${format(quarterEnd, "d MMM")} | ${format(quarterStart, "yyyy")}`,
+              dateFrom: format(quarterStart, "yyyy-MM-dd"),
+              dateTo: format(quarterEnd, "yyyy-MM-dd"),
+            });
+
+            // Check if this quarter contains the previous end date
+            if (previousEndDate >= quarterStart && previousEndDate <= quarterEnd) {
+              break; // Found the right quarter
+            }
+          }
+          break;
+
+        case "yearly":
+          // Find the year that contains the previous end date
+          for (let i = 0; i < 10; i++) { // Look at more years
+            const yearStart = startOfYear(subYears(currentDate, i));
+            let yearEnd = endOfYear(subYears(currentDate, i));
+            
+            if (isAfter(yearEnd, today)) {
+              yearEnd = today;
+            }
+
+            options.push({
+              label: `${format(yearStart, "d MMM")} - ${format(yearEnd, "d MMM")} | ${format(yearStart, "yyyy")}`,
+              dateFrom: format(yearStart, "yyyy-MM-dd"),
+              dateTo: format(yearEnd, "yyyy-MM-dd"),
+            });
+
+            // Check if this year contains the previous end date
+            if (previousEndDate >= yearStart && previousEndDate <= yearEnd) {
+              break; // Found the right year
+            }
+          }
+          break;
+      }
+
       if (options.length > 0) {
         onDateRangeChange({
           dateFrom: options[0].dateFrom,
@@ -244,8 +354,13 @@ export function DateRangePicker({
       {/* Period Selector Dropdown */}
       <div className="relative" ref={periodDropdownRef}>
         <button
-          onClick={() => setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
-          className="flex items-center justify-between w-full sm:w-auto px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors min-w-32"
+          onClick={() => !disabled && setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
+          disabled={disabled}
+          className={`flex items-center justify-between w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg transition-colors min-w-32 ${
+            disabled 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-white hover:bg-gray-50'
+          }`}
         >
           <span>{currentPeriodLabel}</span>
           <svg
@@ -258,7 +373,7 @@ export function DateRangePicker({
           </svg>
         </button>
         
-        {isPeriodDropdownOpen && (
+        {isPeriodDropdownOpen && !disabled && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-48">
             {PERIOD_OPTIONS.map((option) => (
               <button
@@ -285,7 +400,12 @@ export function DateRangePicker({
             onChange={(e) => setCustomStartDate(e.target.value)}
             onBlur={handleCustomDateChange}
             max={format(today, "yyyy-MM-dd")}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={disabled}
+            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg ${
+              disabled 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
           <span className="text-gray-500 text-sm">to</span>
           <input
@@ -295,7 +415,12 @@ export function DateRangePicker({
             onBlur={handleCustomDateChange}
             min={customStartDate}
             max={format(today, "yyyy-MM-dd")}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={disabled}
+            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg ${
+              disabled 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
         </div>
       ) : period === "daily" ? (
@@ -305,14 +430,24 @@ export function DateRangePicker({
           value={dateFrom}
           onChange={(e) => onDateRangeChange({ dateFrom: e.target.value, dateTo: e.target.value })}
           max={format(today, "yyyy-MM-dd")}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          disabled={disabled}
+          className={`px-3 py-2 text-sm border border-gray-300 rounded-lg ${
+            disabled 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+          }`}
         />
       ) : (
         // Dropdown for Other Periods
         <div className="relative flex-1" ref={dateDropdownRef}>
           <button
-            onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            onClick={() => !disabled && setIsDateDropdownOpen(!isDateDropdownOpen)}
+            disabled={disabled}
+            className={`flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-lg transition-colors ${
+              disabled 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white hover:bg-gray-50'
+            }`}
           >
             <span className="truncate">{formatCurrentRange()}</span>
             <svg
@@ -325,7 +460,7 @@ export function DateRangePicker({
             </svg>
           </button>
           
-          {isDateDropdownOpen && (
+          {isDateDropdownOpen && !disabled && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
               {dateRangeOptions.map((option, index) => (
                 <button

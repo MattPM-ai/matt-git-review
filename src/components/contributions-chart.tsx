@@ -9,7 +9,6 @@ import {
   endOfMonth,
   subWeeks,
   eachDayOfInterval,
-  isWithinInterval,
 } from "date-fns";
 import type { StandupResponse } from "@/lib/matt-api";
 import { loadMockStandup } from "@/lib/mock/mockStandup";

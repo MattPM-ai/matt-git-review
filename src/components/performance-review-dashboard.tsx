@@ -224,7 +224,7 @@ export function PerformanceReviewDashboard({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Performance Review
+              Performance & Standup
             </h1>
             <p className="text-sm text-gray-600">
               {format(new Date(dateFrom), "MMM d")} -{" "}
@@ -339,56 +339,32 @@ export function PerformanceReviewDashboard({
                             @{user.username}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <span className="flex items-center gap-1">
-                            <svg
-                              className="w-3.5 h-3.5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            {user.totalManHoursMin}-{user.totalManHoursMax}h
-                          </span>
-                          <span>Avg: {user.avgManHours.toFixed(1)}h</span>
-                          <span className="flex items-center gap-1">
-                            <svg
-                              className="w-3.5 h-3.5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                              />
-                            </svg>
-                            {user.totalActivities}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <svg
-                              className="w-3.5 h-3.5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                            {user.activeDays}
-                          </span>
+
+                        {/* Progress bar for manhours */}
+                        <div className="mb-1">
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            <span className="font-medium">
+                              {user.totalManHoursMin}-{user.totalManHoursMax}h
+                            </span>
+                            <span>Avg: {user.avgManHours.toFixed(1)}h</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full transition-all duration-300"
+                              style={{
+                                width: `${Math.min(
+                                  (user.avgManHours /
+                                    Math.max(
+                                      ...performanceData.map(
+                                        (u) => u.avgManHours
+                                      )
+                                    )) *
+                                    100,
+                                  100
+                                )}%`,
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -592,7 +568,7 @@ export function PerformanceReviewDashboard({
                     selectedUser.dailyStandups.length > 0 && (
                       <div>
                         <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                          Daily Timeline
+                          Daily Standup
                         </h4>
                         <div className="space-y-3">
                           {selectedUser.dailyStandups.map((daily, index) => (
@@ -793,7 +769,7 @@ export function PerformanceReviewDashboard({
                   <div className="text-lg font-semibold text-orange-600">
                     {selectedUser.activeDays}
                   </div>
-                  <div className="text-sm text-gray-500">Days</div>
+                  <div className="text-sm text-gray-500">Active Days</div>
                 </div>
               </div>
 
@@ -926,7 +902,7 @@ export function PerformanceReviewDashboard({
                 selectedUser.dailyStandups.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                      Daily Timeline
+                      Daily Standup
                     </h4>
                     <div className="">
                       {selectedUser.dailyStandups.map((daily, index) => (

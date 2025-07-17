@@ -570,11 +570,11 @@ export function PerformanceReviewDashboard({
                         <h4 className="text-sm font-semibold text-gray-700 mb-3">
                           Daily Standup
                         </h4>
-                        <div className="space-y-3">
+                        <div className="">
                           {selectedUser.dailyStandups.map((daily, index) => (
                             <div
                               key={index}
-                              className="border-l-2 border-gray-200 pl-4 pb-3 last:pb-0"
+                              className="border-l-2 border-gray-200 pl-4 pb-6 last:pb-0"
                             >
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-2 h-2 bg-indigo-500 rounded-full -ml-5 border-2 border-white"></div>

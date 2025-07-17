@@ -151,7 +151,8 @@ export function ContributionsChart({
               const dateStr = format(new Date(daily.date), "yyyy-MM-dd");
               const dailyAvg =
                 (daily.totalManHoursMin + daily.totalManHoursMax) / 2;
-              const dailyActivities = daily.totalCommits + daily.totalPRs + daily.totalIssues;
+              const dailyActivities =
+                daily.totalCommits + daily.totalPRs + daily.totalIssues;
               dailyHoursMap.set(dateStr, dailyAvg);
               dailyActivitiesMap.set(dateStr, dailyActivities);
             }
@@ -160,7 +161,10 @@ export function ContributionsChart({
           // If no daily standups, distribute the average hours evenly across the period
           // For weekly period, distribute across 7 days; for monthly across all days
           const hoursPerDay = avgManHours / allDays.length;
-          const totalActivities = user.standup.totalCommits + user.standup.totalPRs + user.standup.totalIssues;
+          const totalActivities =
+            user.standup.totalCommits +
+            user.standup.totalPRs +
+            user.standup.totalIssues;
           const activitiesPerDay = totalActivities / allDays.length;
           allDays.forEach((day) => {
             dailyHoursMap.set(format(day, "yyyy-MM-dd"), hoursPerDay);
@@ -190,7 +194,10 @@ export function ContributionsChart({
           totalManHours:
             user.standup.totalManHoursMin + user.standup.totalManHoursMax,
           avgManHours,
-          totalActivities: user.standup.totalCommits + user.standup.totalPRs + user.standup.totalIssues,
+          totalActivities:
+            user.standup.totalCommits +
+            user.standup.totalPRs +
+            user.standup.totalIssues,
           dailyHours,
         });
       });
@@ -248,15 +255,18 @@ export function ContributionsChart({
   });
 
   const dailyTotals = allDays.map((day) => {
-    const totals = contributors.reduce((acc, contributor) => {
-      const dayData = contributor.dailyHours.find(
-        (d) => format(d.date, "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-      );
-      return {
-        hours: acc.hours + (dayData?.hours || 0),
-        activities: acc.activities + (dayData?.activities || 0),
-      };
-    }, { hours: 0, activities: 0 });
+    const totals = contributors.reduce(
+      (acc, contributor) => {
+        const dayData = contributor.dailyHours.find(
+          (d) => format(d.date, "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
+        );
+        return {
+          hours: acc.hours + (dayData?.hours || 0),
+          activities: acc.activities + (dayData?.activities || 0),
+        };
+      },
+      { hours: 0, activities: 0 }
+    );
     return { date: day, hours: totals.hours, activities: totals.activities };
   });
 
@@ -407,8 +417,9 @@ export function ContributionsChart({
                           style={{ height: `${height}px` }}
                         >
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                            {format(dayTotal.date, "MMM d")}:<br/>
-                            {dayTotal.hours.toFixed(1)}h • {Math.round(dayTotal.activities)} activities
+                            {format(dayTotal.date, "MMM d")}:<br />
+                            {dayTotal.hours.toFixed(1)}h •{" "}
+                            {Math.round(dayTotal.activities)} activities
                           </div>
                         </div>
                       </div>
@@ -417,19 +428,27 @@ export function ContributionsChart({
                 </div>
 
                 {/* Y-axis labels and ticks */}
-                <div className="absolute -left-6 top-0 bottom-2 flex items-center">
+                <div className="absolute -left-5 top-0 bottom-10 flex items-center">
                   <span className="text-xs text-gray-500 -rotate-90">
                     Hours
                   </span>
                 </div>
                 {/* Y-axis hour markers */}
-                {[0, Math.round(maxTotalHours * 0.25), Math.round(maxTotalHours * 0.5), Math.round(maxTotalHours * 0.75), Math.round(maxTotalHours)].map((hour, i) => (
+                {[
+                  0,
+                  Math.round(maxTotalHours * 0.25),
+                  Math.round(maxTotalHours * 0.5),
+                  Math.round(maxTotalHours * 0.75),
+                  Math.round(maxTotalHours),
+                ].map((hour, i) => (
                   <div
                     key={i}
-                    className="absolute -left-2 text-xs text-gray-400"
+                    className="absolute text-xs text-gray-400 text-right"
                     style={{
-                      bottom: `${2 + (hour / maxTotalHours) * 180}px`,
-                      transform: 'translateY(50%)'
+                      left: "0px",
+                      bottom: `${50 + (hour / maxTotalHours) * 180}px`,
+                      transform: "translateY(50%)",
+                      width: "20px",
                     }}
                   >
                     {hour}
@@ -500,8 +519,9 @@ export function ContributionsChart({
                             >
                               {day.hours > 0 && (
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                  {format(day.date, "MMM d")}:<br/>
-                                  {day.hours.toFixed(1)}h • {Math.round(day.activities)} activities
+                                  {format(day.date, "MMM d")}:<br />
+                                  {day.hours.toFixed(1)}h •{" "}
+                                  {Math.round(day.activities)} activities
                                 </div>
                               )}
                             </div>
@@ -511,19 +531,25 @@ export function ContributionsChart({
                     </div>
 
                     {/* Y-axis labels and ticks */}
-                    <div className="absolute -left-4 top-0 bottom-2 flex items-center">
+                    <div className="absolute -left-5 top-0 bottom-2 flex items-center">
                       <span className="text-xs text-gray-500 -rotate-90">
                         Hours
                       </span>
                     </div>
                     {/* Y-axis hour markers */}
-                    {[0, Math.round(maxDailyHours * 0.5), Math.round(maxDailyHours)].map((hour, i) => (
+                    {[
+                      0,
+                      Math.round(maxDailyHours * 0.5),
+                      Math.round(maxDailyHours),
+                    ].map((hour, i) => (
                       <div
                         key={i}
-                        className="absolute -left-2 text-xs text-gray-400"
+                        className="absolute text-xs text-gray-400 text-right"
                         style={{
-                          bottom: `${2 + (hour / maxDailyHours) * 100}px`,
-                          transform: 'translateY(50%)'
+                          left: "0px",
+                          bottom: `${30 + (hour / maxDailyHours) * 100}px`,
+                          transform: "translateY(50%)",
+                          width: "16px",
                         }}
                       >
                         {hour}

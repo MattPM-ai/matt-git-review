@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   format,
   subDays,
 } from "date-fns";
-import { useSession } from "next-auth/react";
-import type { ActivitiesResponseDto, StandupResponse, StandupTask } from "@/lib/matt-api";
-import { mattAPI } from "@/lib/matt-api";
+import type { ActivitiesResponseDto } from "@/lib/matt-api";
 import { TaskLoadingState } from "./task-loading-state";
+import { useStandupData } from "@/hooks/useStandupData";
 
 // Define local types to replace the old GitHub API types
 type GitHubUser = ActivitiesResponseDto['users'][string];
@@ -31,20 +30,11 @@ export function StandupDashboard({
   orgName,
   dailyCommitAuthors = {},
 }: StandupDashboardProps) {
-  const { data: session } = useSession();
-  const [standupSummaries, setStandupSummaries] = useState<StandupResponse[]>(
-    []
-  );
-  const [isGeneratingStandups, setIsGeneratingStandups] = useState(false);
-  const [standupError, setStandupError] = useState<string | null>(null);
-  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
   const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
   const [commitReportError, setCommitReportError] = useState<string | null>(null);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
-  
-  const isGeneratingStandupsRef = useRef(false);
 
   // Client-side date selection for instant response
   const [clientSelectedDate, setClientSelectedDate] = useState<string>(
@@ -52,48 +42,26 @@ export function StandupDashboard({
   );
 
   const selectedDateObj = new Date(clientSelectedDate);
+  
+  const {
+    standupData: standupSummaries,
+    isLoading: isGeneratingStandups,
+    error: standupError,
+    currentTask,
+    fetchStandupData,
+  } = useStandupData({
+    organizationLogin: orgName,
+    dateFrom: clientSelectedDate,
+    dateTo: clientSelectedDate,
+  });
 
-  const generateStandupSummaries = useCallback(async () => {
-    if (!clientSelectedDate || isGeneratingStandupsRef.current) return;
-
-    // Check if we have a valid session with JWT token
-    if (!session?.mattJwtToken) {
-      setStandupError("Not authenticated. Please sign in.");
-      return;
-    }
-
-    isGeneratingStandupsRef.current = true;
-    setIsGeneratingStandups(true);
-    setStandupError(null);
-    setCurrentTask(null);
-
-    try {
-      // Start the standup generation task
-      const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
-        organizationLogin: orgName,
-        dateFrom: clientSelectedDate,
-        dateTo: clientSelectedDate,
-      });
-
-      // Poll the task until completion
-      const summaries = await mattAPI.pollStandupTask(
-        session.mattJwtToken,
-        taskResponse.taskId,
-        (task: StandupTask) => {
-          setCurrentTask(task);
-          console.log(`Standup task ${task.id} status: ${task.status}`);
-        }
-      );
-
-      setStandupSummaries(summaries);
-    } catch (error) {
-      console.error("Error generating standup summaries:", error);
-      setStandupError("Failed to generate AI summaries");
-    } finally {
-      isGeneratingStandupsRef.current = false;
-      setIsGeneratingStandups(false);
-    }
-  }, [clientSelectedDate, orgName, session]);
+  const generateStandupSummaries = useCallback(() => {
+    if (!clientSelectedDate) return;
+    fetchStandupData({
+      dateFrom: clientSelectedDate,
+      dateTo: clientSelectedDate,
+    });
+  }, [clientSelectedDate, fetchStandupData]);
 
   // Sync with URL when component mounts
   useEffect(() => {
@@ -107,7 +75,7 @@ export function StandupDashboard({
     if (clientSelectedDate && members.length > 0) {
       generateStandupSummaries();
     }
-  }, [clientSelectedDate, members, generateStandupSummaries]);
+  }, [clientSelectedDate, members.length, generateStandupSummaries]);
 
   const generateCommitReport = async (email?: string) => {
     if (isGeneratingCommitReport) return;

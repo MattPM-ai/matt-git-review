@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   format,
   startOfWeek,
@@ -8,12 +8,9 @@ import {
   subWeeks,
   eachDayOfInterval,
 } from "date-fns";
-import { useSession } from "next-auth/react";
-import type { StandupResponse, StandupTask } from "@/lib/matt-api";
-import { mattAPI } from "@/lib/matt-api";
-import { loadMockStandup } from "@/lib/mock/mockStandup";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
 import { TaskLoadingState } from "./task-loading-state";
+import { useStandupData } from "@/hooks/useStandupData";
 
 interface ContributionsChartProps {
   orgName: string;
@@ -44,7 +41,6 @@ export function ContributionsChart({
   initialDateFrom,
   initialDateTo,
 }: ContributionsChartProps) {
-  const { data: session } = useSession();
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
   
   const getDefaultDateRange = () => {
@@ -60,9 +56,20 @@ export function ContributionsChart({
   
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [contributors, setContributors] = useState<ContributorData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
+  const dataFetchedRef = useRef(false);
+  
+  const {
+    standupData,
+    isLoading,
+    error,
+    currentTask,
+    fetchStandupData,
+  } = useStandupData({
+    organizationLogin: orgName,
+    dateFrom: dateRange.dateFrom,
+    dateTo: dateRange.dateTo,
+    useMockWhenUnauthenticated: true,
+  });
 
   const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
     setPeriod(newPeriod);
@@ -82,40 +89,17 @@ export function ContributionsChart({
     url.searchParams.set("dateFrom", newDateRange.dateFrom);
     url.searchParams.set("dateTo", newDateRange.dateTo);
     window.history.pushState({}, "", url.toString());
-  }, [period]);
+    
+    // Trigger fetch with new date range
+    fetchStandupData({
+      dateFrom: newDateRange.dateFrom,
+      dateTo: newDateRange.dateTo,
+    });
+  }, [period, fetchStandupData]);
 
-  const fetchContributionsData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setCurrentTask(null);
-
-    try {
-      let standupData: StandupResponse[];
-
-      // Check if we have a valid session with JWT token
-      if (!session?.mattJwtToken) {
-        // Use mock data if not authenticated for demo purposes
-        console.log("No JWT token found, using mock data");
-        standupData = loadMockStandup();
-      } else {
-        // Start the standup generation task
-        const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
-          organizationLogin: orgName,
-          dateFrom: dateRange.dateFrom,
-          dateTo: dateRange.dateTo,
-        });
-
-        // Poll the task until completion
-        standupData = await mattAPI.pollStandupTask(
-          session.mattJwtToken,
-          taskResponse.taskId,
-          (task: StandupTask) => {
-            setCurrentTask(task);
-            console.log(`Contributions task ${task.id} status: ${task.status}`);
-          }
-        );
-      }
-
+  // Transform standup data into contributor data whenever standupData changes
+  useEffect(() => {
+    if (standupData.length > 0) {
       console.log("Fetched standup data:", standupData);
 
       // Transform standup data into contributor data
@@ -209,17 +193,18 @@ export function ContributionsChart({
       contributorsArray.sort((a, b) => b.avgManHours - a.avgManHours);
 
       setContributors(contributorsArray);
-    } catch (err) {
-      console.error("Error fetching contribution data:", err);
-      setError("Failed to fetch contribution data");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setContributors([]);
     }
-  }, [orgName, dateRange, period, session]);
+  }, [standupData, dateRange.dateFrom, dateRange.dateTo]);
 
+  // Only fetch data on initial load when orgName is available
   useEffect(() => {
-    fetchContributionsData();
-  }, [fetchContributionsData]);
+    if (orgName && !dataFetchedRef.current) {
+      dataFetchedRef.current = true;
+      fetchStandupData();
+    }
+  }, [orgName, fetchStandupData]);
 
 
   // Calculate max daily hours for scaling

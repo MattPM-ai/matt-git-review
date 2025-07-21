@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
-import { useSession } from "next-auth/react";
-import type { StandupTask } from "@/lib/matt-api";
-import { mattAPI } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
 import { TaskLoadingState } from "./task-loading-state";
+import { useStandupData } from "@/hooks/useStandupData";
 
 interface PerformanceReviewDashboardProps {
   orgName: string;
@@ -54,7 +52,6 @@ export function PerformanceReviewDashboard({
   initialDateFrom,
   initialDateTo,
 }: PerformanceReviewDashboardProps) {
-  const { data: session } = useSession();
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
 
   const getDefaultDateRange = () => {
@@ -70,9 +67,19 @@ export function PerformanceReviewDashboard({
 
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
+  const dataFetchedRef = useRef(false);
+  
+  const {
+    standupData,
+    isLoading,
+    error,
+    currentTask,
+    fetchStandupData,
+  } = useStandupData({
+    organizationLogin: orgName,
+    dateFrom: dateRange.dateFrom,
+    dateTo: dateRange.dateTo,
+  });
   const [selectedUser, setSelectedUser] = useState<PerformanceData | null>(
     null
   );
@@ -108,41 +115,19 @@ export function PerformanceReviewDashboard({
       url.searchParams.set("dateFrom", newDateRange.dateFrom);
       url.searchParams.set("dateTo", newDateRange.dateTo);
       window.history.pushState({}, "", url.toString());
+      
+      // Fetch data after date range change with the new range
+      fetchStandupData({
+        dateFrom: newDateRange.dateFrom,
+        dateTo: newDateRange.dateTo,
+      });
     },
-    [period]
+    [period, fetchStandupData]
   );
 
-  const fetchPerformanceData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setCurrentTask(null);
-
-    // Check if we have a valid session with JWT token
-    if (!session?.mattJwtToken) {
-      setError("Not authenticated. Please sign in.");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Start the standup generation task
-      const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
-        organizationLogin: orgName,
-        dateFrom: dateRange.dateFrom,
-        dateTo: dateRange.dateTo,
-      });
-
-      // Poll the task until completion
-      const standupData = await mattAPI.pollStandupTask(
-        session.mattJwtToken,
-        taskResponse.taskId,
-        (task: StandupTask) => {
-          setCurrentTask(task);
-          console.log(`Task ${task.id} status: ${task.status}`);
-        }
-      );
-
-      // Transform standup data into performance data
+  // Transform standup data into performance data whenever standupData changes
+  useEffect(() => {
+    if (standupData.length > 0) {
       const performanceMetrics: PerformanceData[] = standupData.map((user) => {
         const avgManHours =
           (user.standup.totalManHoursMin + user.standup.totalManHoursMax) / 2;
@@ -181,17 +166,18 @@ export function PerformanceReviewDashboard({
       performanceMetrics.sort((a, b) => b.avgManHours - a.avgManHours);
 
       setPerformanceData(performanceMetrics);
-    } catch (err) {
-      console.error("Error fetching performance data:", err);
-      setError("Failed to fetch performance data");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setPerformanceData([]);
     }
-  }, [orgName, dateRange, period, session]);
+  }, [standupData]);
 
+  // Only fetch data on initial load when orgName is available
   useEffect(() => {
-    fetchPerformanceData();
-  }, [fetchPerformanceData]);
+    if (orgName && !dataFetchedRef.current) {
+      dataFetchedRef.current = true;
+      fetchStandupData();
+    }
+  }, [orgName, fetchStandupData]);
 
   return (
     <div className="flex flex-col h-full pb-6">

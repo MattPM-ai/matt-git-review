@@ -1,0 +1,406 @@
+[
+  {
+    "username": "chomtana",
+    "name": "Chomtana",
+    "avatar_url": "https://avatars.githubusercontent.com/u/4103490?v=4",
+    "standup": {
+      "date": "2025-07-13",
+      "summary": "Chomtana focused on enhancing backend synchronization, stability, and AI integration in the MattPM-ai/matt-git-backend repository throughout the week. Key efforts included implementing git sync mechanisms, improving session handling, optimizing performance, and integrating multiple AI models for standup generation. The work also involved refining prompts and environment configurations to support multi-user and multi-day standup generation workflows.",
+      "workDone": [
+        "Implemented git sync mechanism and attempted session expiration fixes",
+        "Fixed synchronization and token handling issues",
+        "Enhanced backend stability with healthcheck endpoint and performance optimizations",
+        "Developed and refined standup endpoint and synchronization features",
+        "Supported multiple AI models and improved standup accuracy",
+        "Added man-hours estimation and improved prompt handling",
+        "Integrated backend with Caddy and fixed multi-user standup generation bugs"
+      ],
+      "workingOn": [
+        "Verifying session expiration fix effectiveness",
+        "Improving sync reliability and retry mechanisms",
+        "Testing AI model integration and optimizing parallel processes",
+        "Refining prompt accuracy and validating man-hours estimation",
+        "Improving multi-user standup generation"
+      ],
+      "ongoingIssues": ["Uncertainty if session expire fix works properly"],
+      "totalCommits": 44,
+      "totalPRs": 0,
+      "totalIssues": 0,
+      "totalManHoursMin": 43,
+      "totalManHoursMax": 57,
+      "manHoursRationale": "The hours range reflects daily efforts varying from 5 to 10 hours, with consistent focus on backend development, bug fixing, and feature enhancements across seven days.",
+      "dailyStandups": [
+        {
+          "date": "2025-07-07",
+          "summary": "Worked on implementing git sync mechanism and attempted to fix session expiration issues across two repositories.",
+          "workDone": [
+            "Implemented git sync mechanism in MattPM-ai/matt-git-backend",
+            "Tried fixing session expire issue in MattPM-ai/matt-git-review"
+          ],
+          "workingOn": [
+            "Verifying session expiration fix effectiveness",
+            "Improving git sync reliability"
+          ],
+          "ongoingIssues": ["Uncertainty if session expire fix works properly"],
+          "totalCommits": 2,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 5,
+          "totalManHoursMax": 7,
+          "manHoursRationale": "Multiple commits across two repositories with debugging and implementation tasks."
+        },
+        {
+          "date": "2025-07-08",
+          "summary": "Focused on fixing and improving synchronization and token handling in MattPM-ai/matt-git-backend repository.",
+          "workDone": [
+            "Fixed get org access token",
+            "Removed debugging logs",
+            "Updated filter activities API and fixed org syncing",
+            "Fixed sync since issues",
+            "Updated entities nullable field and implemented retry mechanism on GitHub sync",
+            "Added organization id to activities"
+          ],
+          "workingOn": [
+            "Enhancing sync reliability",
+            "Testing retry mechanism on GitHub sync"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 6,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 6,
+          "totalManHoursMax": 8,
+          "manHoursRationale": "Multiple fixes and improvements related to synchronization and API updates."
+        },
+        {
+          "date": "2025-07-09",
+          "summary": "Enhanced backend stability and performance by fixing paths, adding healthcheck endpoint, and optimizing activity fetching in MattPM-ai/matt-git-backend.",
+          "workDone": [
+            "Fixed dist path for launching backend",
+            "Implemented healthcheck endpoint",
+            "Added docker compose",
+            "Simplified DTO",
+            "Fixed performance issues on activity fetching",
+            "Implemented activity polymorphic table for activity fetching"
+          ],
+          "workingOn": [
+            "Testing healthcheck endpoint",
+            "Further performance optimizations"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 6,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 6,
+          "totalManHoursMax": 8,
+          "manHoursRationale": "Multiple backend improvements and performance fixes requiring testing and validation."
+        },
+        {
+          "date": "2025-07-10",
+          "summary": "Developed and refined standup endpoint and synchronization features in MattPM-ai/matt-git-backend repository.",
+          "workDone": [
+            "First working version of standup endpoint",
+            "Synced all members' names properly",
+            "Moved standup module to modules folder",
+            "Added name to GitHub user DTO",
+            "Adjusted standup response format",
+            "Fixed GitHub sync to sync all branches",
+            "Drafted standup module"
+          ],
+          "workingOn": [
+            "Improving standup endpoint accuracy",
+            "Refining synchronization processes"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 7,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 7,
+          "totalManHoursMax": 9,
+          "manHoursRationale": "Complex feature development and synchronization fixes with multiple commits."
+        },
+        {
+          "date": "2025-07-11",
+          "summary": "Implemented support for multiple AI models and improved standup accuracy in MattPM-ai/matt-git-backend.",
+          "workDone": [
+            "Supported multiple AI models from various providers",
+            "Added model selection query for lab experiment",
+            "Added OPENAI_API_KEY to docker compose",
+            "Improved standup accuracy",
+            "Drafted fixed GitHub sync date",
+            "Generated standup in parallel",
+            "Synced branches and GitHub activities in parallel",
+            "Used gpt-4.1-nano model",
+            "Updated summary description"
+          ],
+          "workingOn": [
+            "Testing AI model integration",
+            "Optimizing parallel sync and standup generation"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 10,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 8,
+          "totalManHoursMax": 10,
+          "manHoursRationale": "Advanced AI integration and parallel processing improvements requiring extensive testing."
+        },
+        {
+          "date": "2025-07-12",
+          "summary": "Focused on adding man-hours estimation and improving prompt handling for multi-day standup generation in MattPM-ai/matt-git-backend.",
+          "workDone": [
+            "Estimated man hours in range",
+            "Batched prompt for multi-day standup into one",
+            "Updated prompt for man-hours rationale",
+            "Changed to working on and ongoing issues format",
+            "Added man hours estimation",
+            "Added JSON focused prompt"
+          ],
+          "workingOn": [
+            "Refining prompt accuracy",
+            "Validating man-hours estimation"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 6,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 5,
+          "totalManHoursMax": 7,
+          "manHoursRationale": "Prompt and estimation improvements with moderate complexity."
+        },
+        {
+          "date": "2025-07-13",
+          "summary": "Integrated backend with Caddy, fixed bugs in multi-user standup generation, and enhanced environment configuration in MattPM-ai/matt-git-backend.",
+          "workDone": [
+            "Integrated with Caddy",
+            "Fixed username bug in multi-user standup generation",
+            "Drafted unified prompt",
+            "Added env for docker compose",
+            "Moved org user sync block after creating org",
+            "Generated standup of all users at once",
+            "Kept two-step standup generation for caching"
+          ],
+          "workingOn": [
+            "Testing unified prompt",
+            "Improving multi-user standup generation"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 7,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 6,
+          "totalManHoursMax": 8,
+          "manHoursRationale": "Integration and bug fixes with environment setup and prompt drafting."
+        }
+      ]
+    }
+  },
+  {
+    "username": "adam-cain",
+    "name": "Adam Cain",
+    "avatar_url": "https://avatars.githubusercontent.com/u/98537187?v=4",
+    "standup": {
+      "date": "2025-07-13",
+      "summary": "Adam-cain worked on enhancing the MattPM-ai/matt-landing repository with a focus on UI/UX improvements, responsive design, and animation integration. The week involved refactoring components, improving mobile responsiveness, and managing animation wrappers to create a polished user experience.",
+      "workDone": [
+        "Enhanced Navbar with mobile menu and scroll lock",
+        "Refactored and cleaned up codebase including globals and components",
+        "Updated chat page and landing theme for visual consistency",
+        "Refined ScrollingCardGalleryDeprecated and improved layout and animation management"
+      ],
+      "workingOn": [
+        "Testing mobile menu functionality and animation components",
+        "Improving layout responsiveness and landing page structure",
+        "Refining visual consistency and user interaction"
+      ],
+      "ongoingIssues": [],
+      "totalCommits": 36,
+      "totalPRs": 0,
+      "totalIssues": 0,
+      "totalManHoursMin": 29,
+      "totalManHoursMax": 37,
+      "manHoursRationale": "The hours reflect steady daily contributions ranging from 7 to 10 hours focused on UI/UX enhancements and codebase refactoring over four days.",
+      "dailyStandups": [
+        {
+          "date": "2025-07-07",
+          "summary": "Enhanced the Navbar component with mobile menu functionality and improved layout and accessibility in MattPM-ai/matt-landing.",
+          "workDone": [
+            "Enhanced Navbar with mobile menu and scroll lock",
+            "Removed unused ReactNode import in ScrollingCardGallery",
+            "Added className prop to MessageBody and updated ScrollingCardGallery",
+            "Refactored Features component with message selection and user interaction hooks",
+            "Cleaned up unused iteration reference and updated text formatting in ScrollingCardGallery",
+            "Implemented ScrollingCardGallery for mobile view and enhanced conversation card layout",
+            "Enhanced global styles and updated Button color schemes"
+          ],
+          "workingOn": [
+            "Testing mobile menu functionality",
+            "Improving layout responsiveness"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 7,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 7,
+          "totalManHoursMax": 9,
+          "manHoursRationale": "Multiple UI enhancements and refactoring tasks with styling and accessibility improvements."
+        },
+        {
+          "date": "2025-07-08",
+          "summary": "Refactored and cleaned up the MattPM-ai/matt-landing repository by commenting out unused code, removing assets, and adding animation components for better user experience.",
+          "workDone": [
+            "Commented out unused imports in page.tsx",
+            "Cleaned up globals.css",
+            "Integrated Navbar into layout and adjusted page structure",
+            "Removed ChatMessage component",
+            "Added animation components including Copy, GSAPWrapper, ScrollingCardGallery, and SmoothScroll",
+            "Removed unused image and font files",
+            "Commented out unused state and functions in Navbar",
+            "Cleaned up ScrollingCardGallery component",
+            "Updated Button component in Navbar",
+            "Commented out unused navigation links",
+            "Overhauled page versions structure",
+            "Implemented responsive design in V5 component",
+            "Removed unnecessary margin from ScrollingCardGallery",
+            "Updated ScrollingCardGallery for active conversation state and card navigation"
+          ],
+          "workingOn": [
+            "Testing animation components",
+            "Improving responsive design"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 14,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 8,
+          "totalManHoursMax": 10,
+          "manHoursRationale": "Extensive refactoring and feature additions with focus on animations and responsiveness."
+        },
+        {
+          "date": "2025-07-09",
+          "summary": "Refactored chat page and landing theme for visual consistency and improved responsiveness in MattPM-ai/matt-landing.",
+          "workDone": [
+            "Updated chat page to match landing theme",
+            "Added will-change-transform class to gallery cards",
+            "Fixed x scroll overflow on mobile",
+            "Adjusted layout class for full-width display",
+            "Commented out markers in scroll gallery components and gasp scroll trigger implementations",
+            "Updated page structure with new dashboard and scrolling card gallery components"
+          ],
+          "workingOn": [
+            "Testing layout and responsiveness",
+            "Refining visual consistency"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 7,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 7,
+          "totalManHoursMax": 9,
+          "manHoursRationale": "Multiple UI fixes and refactoring for better performance and consistency."
+        },
+        {
+          "date": "2025-07-10",
+          "summary": "Refined ScrollingCardGalleryDeprecated component and enhanced layout and animation management in MattPM-ai/matt-landing.",
+          "workDone": [
+            "Removed unused ConversationCardProps interface",
+            "Updated ScrollingCardGalleryDeprecated for improved layout and message rendering",
+            "Refactored Button and Navbar components for color consistency",
+            "Adjusted ScrollTrigger end value for dynamic card length",
+            "Enhanced layout with animation wrappers and refactored landing page structure",
+            "Added GSAPProvider component for animation management",
+            "Commented out unused POST function in subscribe route",
+            "Commented out unused section in ScrollingCardGalleryDeprecated"
+          ],
+          "workingOn": [
+            "Testing animation wrappers",
+            "Improving landing page structure"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 8,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 7,
+          "totalManHoursMax": 9,
+          "manHoursRationale": "Multiple UI refinements and animation integration tasks requiring careful testing."
+        }
+      ]
+    }
+  },
+  {
+    "username": "upnodedev",
+    "name": "Upnode",
+    "avatar_url": "https://avatars.githubusercontent.com/u/117493285?v=4",
+    "standup": {
+      "date": "2025-07-13",
+      "summary": "Upnodedev concentrated on backing up multiple workflows and modules in the MattPM-ai/n8n repository to ensure data safety and version control. The work was focused on comprehensive backup and verification processes to maintain workflow integrity.",
+      "workDone": [
+        "Backed up numerous workflows including Auto Backup, Telegram Gen Z Bot, Chat interface v4, Gen Z Test Core, SMTP Test, Vacation scheduler, Discord bot, Standup logger, Report generator webhook, Commit retriever, and Core module"
+      ],
+      "workingOn": [
+        "Verifying backup integrity",
+        "Planning next steps for workflow improvements"
+      ],
+      "ongoingIssues": [],
+      "totalCommits": 35,
+      "totalPRs": 0,
+      "totalIssues": 0,
+      "totalManHoursMin": 6,
+      "totalManHoursMax": 8,
+      "manHoursRationale": "The hours reflect a single day of focused backup work with verification and planning activities.",
+      "dailyStandups": [
+        {
+          "date": "2025-07-13",
+          "summary": "Performed extensive backup of multiple workflows and modules in the MattPM-ai/n8n repository to ensure data safety and version control.",
+          "workDone": [
+            "Backed up numerous workflows including Auto Backup, Telegram Gen Z Bot, Chat interface v4, Gen Z Test Core, SMTP Test, Vacation scheduler, Discord bot, Standup logger, Report generator webhook, Commit retriever, and Core module among others"
+          ],
+          "workingOn": [
+            "Verifying backup integrity",
+            "Planning next steps for workflow improvements"
+          ],
+          "ongoingIssues": [],
+          "totalCommits": 35,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 6,
+          "totalManHoursMax": 8,
+          "manHoursRationale": "Large volume of backup commits indicating significant time spent on data preservation and organization."
+        }
+      ]
+    }
+  },
+  {
+    "username": "mattpmai",
+    "name": "mattpmai",
+    "avatar_url": "https://avatars.githubusercontent.com/u/220402075?v=4",
+    "standup": {
+      "date": "2025-07-13",
+      "summary": "Mattpmai updated documentation in the MattPM-ai/matt-landing repository to improve clarity and usability. The work was limited to README.md enhancements with plans for further documentation improvements.",
+      "workDone": ["Updated README.md in MattPM-ai/matt-landing"],
+      "workingOn": ["Reviewing further documentation improvements"],
+      "ongoingIssues": [],
+      "totalCommits": 1,
+      "totalPRs": 0,
+      "totalIssues": 0,
+      "totalManHoursMin": 1,
+      "totalManHoursMax": 2,
+      "manHoursRationale": "The hours represent a short, focused documentation update task completed in one day.",
+      "dailyStandups": [
+        {
+          "date": "2025-07-11",
+          "summary": "Updated the README.md file in the MattPM-ai/matt-landing repository to improve documentation clarity.",
+          "workDone": ["Updated README.md in MattPM-ai/matt-landing"],
+          "workingOn": ["Reviewing further documentation improvements"],
+          "ongoingIssues": [],
+          "totalCommits": 1,
+          "totalPRs": 0,
+          "totalIssues": 0,
+          "totalManHoursMin": 1,
+          "totalManHoursMax": 2,
+          "manHoursRationale": "Single documentation update task requiring minimal time."
+        }
+      ]
+    }
+  }
+]

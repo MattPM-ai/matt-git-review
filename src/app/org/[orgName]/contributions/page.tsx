@@ -1,23 +1,23 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { PerformanceReviewDashboard } from "@/components/performance-review-dashboard";
+import { ContributionsChart } from "@/components/contributions-chart";
 
-interface PerformancePageProps {
+interface ContributionsPageProps {
   params: Promise<{
     orgName: string;
   }>;
   searchParams: Promise<{
-    period?: "daily" | "weekly" | "monthly";
+    period?: "weekly" | "monthly";
     dateFrom?: string;
     dateTo?: string;
   }>;
 }
 
-export default async function PerformancePage({
+export default async function ContributionsPage({
   params,
   searchParams,
-}: PerformancePageProps) {
+}: ContributionsPageProps) {
   const session = await auth();
 
   if (!session) {
@@ -30,11 +30,11 @@ export default async function PerformancePage({
   return (
     <DashboardLayout
       orgName={orgName}
-      title="Performance & Standup"
-      currentView="performance"
+      title="Contributions"
+      currentView="contributions"
     >
-      <PerformanceReviewDashboard
-        orgName={orgName}
+      <ContributionsChart 
+        orgName={orgName} 
         initialPeriod={period}
         initialDateFrom={dateFrom}
         initialDateTo={dateTo}

@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
-import type { StandupResponse } from "@/lib/matt-api";
+import { useSession } from "next-auth/react";
+import type { StandupTask } from "@/lib/matt-api";
+import { mattAPI } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
-import { ReportLoadingState } from "./report-loading-state";
+import { TaskLoadingState } from "./task-loading-state";
 
 interface PerformanceReviewDashboardProps {
   orgName: string;
@@ -52,6 +54,7 @@ export function PerformanceReviewDashboard({
   initialDateFrom,
   initialDateTo,
 }: PerformanceReviewDashboardProps) {
+  const { data: session } = useSession();
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
 
   const getDefaultDateRange = () => {
@@ -69,6 +72,7 @@ export function PerformanceReviewDashboard({
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
   const [selectedUser, setSelectedUser] = useState<PerformanceData | null>(
     null
   );
@@ -111,30 +115,32 @@ export function PerformanceReviewDashboard({
   const fetchPerformanceData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setCurrentTask(null);
+
+    // Check if we have a valid session with JWT token
+    if (!session?.mattJwtToken) {
+      setError("Not authenticated. Please sign in.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // Call the Next.js API endpoint
-      const response = await fetch("/api/standup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orgName,
-          date: dateRange.dateFrom, // Use dateFrom as the primary date
-          dateRange:
-            period !== "daily"
-              ? { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo }
-              : undefined,
-        }),
+      // Start the standup generation task
+      const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
+        organizationLogin: orgName,
+        dateFrom: dateRange.dateFrom,
+        dateTo: dateRange.dateTo,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch standup data");
-      }
-
-      const data = await response.json();
-      const standupData: StandupResponse[] = data.summaries;
+      // Poll the task until completion
+      const standupData = await mattAPI.pollStandupTask(
+        session.mattJwtToken,
+        taskResponse.taskId,
+        (task: StandupTask) => {
+          setCurrentTask(task);
+          console.log(`Task ${task.id} status: ${task.status}`);
+        }
+      );
 
       // Transform standup data into performance data
       const performanceMetrics: PerformanceData[] = standupData.map((user) => {
@@ -181,7 +187,7 @@ export function PerformanceReviewDashboard({
     } finally {
       setIsLoading(false);
     }
-  }, [orgName, dateRange, period]);
+  }, [orgName, dateRange, period, session]);
 
   useEffect(() => {
     fetchPerformanceData();
@@ -234,7 +240,7 @@ export function PerformanceReviewDashboard({
           </div>
 
           {isLoading ? (
-            <ReportLoadingState />
+            <TaskLoadingState task={currentTask} />
           ) : performanceData.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
               <div className="divide-y divide-gray-100">

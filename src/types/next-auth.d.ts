@@ -6,6 +6,14 @@ declare module "next-auth" {
       id: string
     } & DefaultSession["user"]
     accessToken?: string
+    mattJwtToken?: string
+    mattUser?: {
+      id: number
+      login: string
+      name: string
+      avatar_url: string
+      html_url: string
+    }
     error?: string
   }
   
@@ -14,6 +22,14 @@ declare module "next-auth" {
     refreshToken?: string
     id?: string
     accessTokenExpires?: number
+    mattJwtToken?: string
+    mattUser?: {
+      id: number
+      login: string
+      name: string
+      avatar_url: string
+      html_url: string
+    }
     error?: string
   }
 }

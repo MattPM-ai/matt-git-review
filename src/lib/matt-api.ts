@@ -106,6 +106,35 @@ export interface StandupResponse {
   standup: StandupSummary;
 }
 
+export enum TaskStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+export interface StandupTaskResponse {
+  taskId: string;
+}
+
+export interface StandupTask {
+  id: string;
+  status: TaskStatus;
+  created_at: string;
+  started_at?: string;
+  completed_at?: string;
+  duration_ms?: number;
+  organization_login: string;
+  request_params: {
+    model: string;
+    dateTo: string;
+    dateFrom: string;
+    organizationLogin: string;
+  };
+  result?: StandupResponse[];
+  error_message?: string;
+}
+
 class MattAPIClient {
   private getBaseUrl(): string {
     const url = process.env.NEXT_PUBLIC_GIT_API_HOST;
@@ -132,14 +161,16 @@ class MattAPIClient {
   }
 
   async fetchActivities(
-    accessToken: string,
+    jwtToken: string,
     filter: ActivityFilterDto
   ): Promise<ActivitiesResponseDto> {
+    console.log("jwtToken", jwtToken);
+
     const response = await fetch(`${this.getBaseUrl()}/activity/filter`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
       body: JSON.stringify(filter),
     });
@@ -173,14 +204,14 @@ class MattAPIClient {
   }
 
   async generateStandup(
-    accessToken: string,
+    jwtToken: string,
     request: StandupRequest
-  ): Promise<StandupResponse[]> {
+  ): Promise<StandupTaskResponse> {
     const response = await fetch(`${this.getBaseUrl()}/standup/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
       body: JSON.stringify(request),
     });
@@ -190,6 +221,61 @@ class MattAPIClient {
     }
 
     return response.json();
+  }
+
+  async getStandupTask(
+    jwtToken: string,
+    taskId: string
+  ): Promise<StandupTask> {
+    const response = await fetch(`${this.getBaseUrl()}/standup/task/${taskId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get standup task: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async pollStandupTask(
+    jwtToken: string,
+    taskId: string,
+    onProgress?: (task: StandupTask) => void,
+    pollInterval: number = 2000
+  ): Promise<StandupResponse[]> {
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const task = await this.getStandupTask(jwtToken, taskId);
+          
+          if (onProgress) {
+            onProgress(task);
+          }
+
+          if (task.status === TaskStatus.COMPLETED) {
+            if (task.result) {
+              resolve(task.result);
+            } else {
+              reject(new Error('Task completed but no result found'));
+            }
+          } else if (task.status === TaskStatus.FAILED) {
+            reject(new Error(task.error_message || 'Standup generation failed'));
+          } else {
+            // Continue polling if status is PENDING or PROCESSING
+            setTimeout(poll, pollInterval);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      poll();
+    });
   }
 }
 

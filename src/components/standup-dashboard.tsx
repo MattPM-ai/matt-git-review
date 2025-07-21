@@ -5,7 +5,10 @@ import {
   format,
   subDays,
 } from "date-fns";
-import type { ActivitiesResponseDto, StandupResponse } from "@/lib/matt-api";
+import { useSession } from "next-auth/react";
+import type { ActivitiesResponseDto, StandupResponse, StandupTask } from "@/lib/matt-api";
+import { mattAPI } from "@/lib/matt-api";
+import { TaskLoadingState } from "./task-loading-state";
 
 // Define local types to replace the old GitHub API types
 type GitHubUser = ActivitiesResponseDto['users'][string];
@@ -28,11 +31,13 @@ export function StandupDashboard({
   orgName,
   dailyCommitAuthors = {},
 }: StandupDashboardProps) {
+  const { data: session } = useSession();
   const [standupSummaries, setStandupSummaries] = useState<StandupResponse[]>(
     []
   );
   const [isGeneratingStandups, setIsGeneratingStandups] = useState(false);
   const [standupError, setStandupError] = useState<string | null>(null);
+  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
   const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
   const [commitReportError, setCommitReportError] = useState<string | null>(null);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -51,28 +56,36 @@ export function StandupDashboard({
   const generateStandupSummaries = useCallback(async () => {
     if (!clientSelectedDate || isGeneratingStandupsRef.current) return;
 
+    // Check if we have a valid session with JWT token
+    if (!session?.mattJwtToken) {
+      setStandupError("Not authenticated. Please sign in.");
+      return;
+    }
+
     isGeneratingStandupsRef.current = true;
     setIsGeneratingStandups(true);
     setStandupError(null);
+    setCurrentTask(null);
 
     try {
-      const response = await fetch("/api/standup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orgName,
-          date: clientSelectedDate,
-        }),
+      // Start the standup generation task
+      const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
+        organizationLogin: orgName,
+        dateFrom: clientSelectedDate,
+        dateTo: clientSelectedDate,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate standup summaries");
-      }
+      // Poll the task until completion
+      const summaries = await mattAPI.pollStandupTask(
+        session.mattJwtToken,
+        taskResponse.taskId,
+        (task: StandupTask) => {
+          setCurrentTask(task);
+          console.log(`Standup task ${task.id} status: ${task.status}`);
+        }
+      );
 
-      const data = await response.json();
-      setStandupSummaries(data.summaries);
+      setStandupSummaries(summaries);
     } catch (error) {
       console.error("Error generating standup summaries:", error);
       setStandupError("Failed to generate AI summaries");
@@ -80,7 +93,7 @@ export function StandupDashboard({
       isGeneratingStandupsRef.current = false;
       setIsGeneratingStandups(false);
     }
-  }, [clientSelectedDate, orgName]);
+  }, [clientSelectedDate, orgName, session]);
 
   // Sync with URL when component mounts
   useEffect(() => {
@@ -161,27 +174,6 @@ export function StandupDashboard({
     new Map(todaysAuthors.map((author) => [author.login, author])).values()
   );
 
-  const SkeletonCard = () => (
-    <div className="bg-white rounded-lg p-4 border border-gray-200 animate-pulse">
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-4 bg-gray-200 rounded w-24"></div>
-            <div className="w-4 h-4 bg-gray-200 rounded"></div>
-          </div>
-          <div className="space-y-3">
-            <div className="h-3 bg-gray-200 rounded w-full"></div>
-            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-            <div className="space-y-2">
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -366,10 +358,81 @@ export function StandupDashboard({
 
       <div className="space-y-4">
         {isGeneratingStandups ? (
-          // Show skeleton cards while loading
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Generating Standup Summaries
+              </h3>
+            </div>
+            <TaskLoadingState task={currentTask} />
+          </div>
+        ) : standupSummaries.length > 0 ? (
+          // Show actual standup summaries
           <>
-            {uniqueAuthors.slice(0, 3).map((_, index) => (
-              <SkeletonCard key={index} />
+            {standupSummaries.map((summary) => (
+              <div key={summary.username} className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src={summary.avatar_url}
+                    alt={summary.name}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{summary.name}</h3>
+                    <p className="text-gray-600">@{summary.username}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Summary</h4>
+                    <p className="text-gray-700">{summary.standup.summary}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Work Done</h4>
+                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                      {summary.standup.workDone.map((work, index) => (
+                        <li key={index}>{work}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Working On</h4>
+                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                      {summary.standup.workingOn.map((work, index) => (
+                        <li key={index}>{work}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  {summary.standup.ongoingIssues.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Ongoing Issues</h4>
+                      <ul className="list-disc list-inside text-gray-700 space-y-1">
+                        {summary.standup.ongoingIssues.map((issue, index) => (
+                          <li key={index}>{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Commits:</span> {summary.standup.totalCommits}
+                    </div>
+                    <div>
+                      <span className="font-medium">PRs:</span> {summary.standup.totalPRs}
+                    </div>
+                    <div>
+                      <span className="font-medium">Issues:</span> {summary.standup.totalIssues}
+                    </div>
+                    <div>
+                      <span className="font-medium">Hours:</span> {summary.standup.totalManHoursMin}-{summary.standup.totalManHoursMax}h
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Hours Rationale</h4>
+                    <p className="text-gray-700 text-sm">{summary.standup.manHoursRationale}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </>
         ) : standupSummaries.length > 0 ? (

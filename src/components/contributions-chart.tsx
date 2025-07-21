@@ -8,9 +8,12 @@ import {
   subWeeks,
   eachDayOfInterval,
 } from "date-fns";
-import type { StandupResponse } from "@/lib/matt-api";
+import { useSession } from "next-auth/react";
+import type { StandupResponse, StandupTask } from "@/lib/matt-api";
+import { mattAPI } from "@/lib/matt-api";
 import { loadMockStandup } from "@/lib/mock/mockStandup";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
+import { TaskLoadingState } from "./task-loading-state";
 
 interface ContributionsChartProps {
   orgName: string;
@@ -41,6 +44,7 @@ export function ContributionsChart({
   initialDateFrom,
   initialDateTo,
 }: ContributionsChartProps) {
+  const { data: session } = useSession();
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
   
   const getDefaultDateRange = () => {
@@ -58,6 +62,7 @@ export function ContributionsChart({
   const [contributors, setContributors] = useState<ContributorData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
 
   const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
     setPeriod(newPeriod);
@@ -82,30 +87,34 @@ export function ContributionsChart({
   const fetchContributionsData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setCurrentTask(null);
 
     try {
+      let standupData: StandupResponse[];
 
-      // Fetch data using the same endpoint as performance dashboard
-      // const response = await fetch("/api/standup", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     orgName,
-      //     date: dateRange.dateFrom,
-      //     dateRange: { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo },
-      //   }),
-      // });
+      // Check if we have a valid session with JWT token
+      if (!session?.mattJwtToken) {
+        // Use mock data if not authenticated for demo purposes
+        console.log("No JWT token found, using mock data");
+        standupData = loadMockStandup();
+      } else {
+        // Start the standup generation task
+        const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, {
+          organizationLogin: orgName,
+          dateFrom: dateRange.dateFrom,
+          dateTo: dateRange.dateTo,
+        });
 
-      // if (!response.ok) {
-      //   throw new Error("Failed to fetch contribution data");
-      // }
-
-      // const data = await response.json();
-      // const standupData: StandupResponse[] = data.summaries;
-
-      const standupData: StandupResponse[] = loadMockStandup();
+        // Poll the task until completion
+        standupData = await mattAPI.pollStandupTask(
+          session.mattJwtToken,
+          taskResponse.taskId,
+          (task: StandupTask) => {
+            setCurrentTask(task);
+            console.log(`Contributions task ${task.id} status: ${task.status}`);
+          }
+        );
+      }
 
       console.log("Fetched standup data:", standupData);
 
@@ -206,7 +215,7 @@ export function ContributionsChart({
     } finally {
       setIsLoading(false);
     }
-  }, [orgName, dateRange, period]);
+  }, [orgName, dateRange, period, session]);
 
   useEffect(() => {
     fetchContributionsData();
@@ -277,28 +286,13 @@ export function ContributionsChart({
       {/* Main content */}
       <div className="flex-1 min-h-0 space-y-6 overflow-y-auto">
         {isLoading ? (
-          <div className="space-y-6">
-            {/* Loading skeleton for overall chart */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="h-6 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
-              <div className="h-40 bg-gray-200 rounded animate-pulse"></div>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Contributions Loading
+              </h2>
             </div>
-            {/* Loading skeleton for contributor cards */}
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-lg border border-gray-200 p-6"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            ))}
+            <TaskLoadingState task={currentTask} />
           </div>
         ) : contributors.length > 0 ? (
           <>

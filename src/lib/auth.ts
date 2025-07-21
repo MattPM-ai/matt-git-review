@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
-import { mattAPI } from "./matt-api";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: process.env.NODE_ENV === "development",
@@ -38,10 +37,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // GitHub tokens don't expire for OAuth apps, only for GitHub Apps
         // So we don't need to track expiration
 
-        // Send access token to Matt API
+        // Exchange GitHub token for JWT token from Matt API
         try {
-          await mattAPI.authenticateUser(account.access_token!);
-          console.log("Successfully authenticated with Matt API");
+          const response = await fetch(`${process.env.NEXT_PUBLIC_GIT_API_HOST}/users/auth`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ access_token: account.access_token }),
+          });
+
+          if (response.ok) {
+            const authData = await response.json();
+            token.mattJwtToken = authData.access_token;
+            token.mattUser = authData.user;
+            console.log("Successfully exchanged GitHub token for JWT");
+          } else {
+            console.error("Failed to exchange token with Matt API:", response.statusText);
+            // Don't fail the sign-in process if Matt API is down
+          }
         } catch (error) {
           console.error("Failed to authenticate with Matt API:", error);
           // Don't fail the sign-in process if Matt API is down
@@ -60,14 +74,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        
+        // Pass GitHub access token
         if (token.accessToken) {
           session.accessToken = token.accessToken as string;
-          console.log("Session created with access token", token.accessToken);
+          console.log("Session created with GitHub access token");
+        }
+        
+        // Pass JWT token from Matt API
+        if (token.mattJwtToken) {
+          session.mattJwtToken = token.mattJwtToken as string;
+          session.mattUser = token.mattUser as typeof session.mattUser;
+          console.log("Session created with Matt JWT token");
         } else {
-          console.warn(
-            "Session without access token - user needs to re-authenticate"
-          );
-          // Don't set accessToken if it's missing
+          console.warn("Session without Matt JWT token - API calls may fail");
         }
 
         // Pass along any errors

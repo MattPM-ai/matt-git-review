@@ -47,6 +47,7 @@ export function StandupDashboard({
     standupData: standupSummaries,
     isLoading: isGeneratingStandups,
     error: standupError,
+    noActivity,
     currentTask,
     fetchStandupData,
   } = useStandupData({

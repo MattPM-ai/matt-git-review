@@ -47,7 +47,7 @@ export async function createDirectAuthSession(options: DirectAuthOptions): Promi
       .sign(secret);
 
     // Set the session cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieName = process.env.NODE_ENV === 'production' 
       ? '__Secure-next-auth.session-token' 
       : 'next-auth.session-token';
@@ -70,9 +70,9 @@ export async function createDirectAuthSession(options: DirectAuthOptions): Promi
 /**
  * Clear direct auth session
  */
-export function clearDirectAuthSession(): void {
+export async function clearDirectAuthSession(): Promise<void> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieName = process.env.NODE_ENV === 'production' 
       ? '__Secure-next-auth.session-token' 
       : 'next-auth.session-token';

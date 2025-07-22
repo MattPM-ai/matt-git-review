@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ActivityFilters } from "@/components/activity-filters";
 import { ActivityContent } from "@/components/activity-content";
+import { QueryAuthHandler } from "@/components/query-auth-handler";
 import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/matt-api";
 
 interface OrgActivityPageProps {
@@ -21,15 +21,35 @@ export default async function OrgActivityPage({
   params,
   searchParams,
 }: OrgActivityPageProps) {
+  const paramsData = await params;
   const session = await auth();
 
   if (!session) {
-    redirect("/");
+    return (
+      <QueryAuthHandler requiredOrg={paramsData.orgName}>
+        <OrgActivityContent params={paramsData} searchParams={searchParams} />
+      </QueryAuthHandler>
+    );
   }
 
-  const paramsData = await params;
+  return <OrgActivityContent params={paramsData} searchParams={searchParams} />;
+}
+
+async function OrgActivityContent({
+  params,
+  searchParams,
+}: {
+  params: { orgName: string };
+  searchParams: Promise<{
+    user?: string;
+    type?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }>;
+}) {
+  const session = await auth();
   const searchParamsData = await searchParams;
-  const { orgName } = paramsData;
+  const { orgName } = params;
   const {
     user: selectedUser,
     type: selectedType,
@@ -67,7 +87,11 @@ export default async function OrgActivityPage({
     }
 
     // Fetch activities from Matt API
-    activityData = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
+    if (session?.mattJwtToken) {
+      activityData = await mattAPI.fetchActivities(session.mattJwtToken, filter);
+    } else {
+      throw new Error("No authentication token available");
+    }
 
     // Sort activities by date
     activityData.activities.sort((a, b) => {

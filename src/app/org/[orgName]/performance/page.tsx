@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { PerformanceReviewDashboard } from "@/components/performance-review-dashboard";
+import { QueryAuthHandler } from "@/components/query-auth-handler";
 
 interface PerformancePageProps {
   params: Promise<{
@@ -18,13 +18,32 @@ export default async function PerformancePage({
   params,
   searchParams,
 }: PerformancePageProps) {
+  const { orgName } = await params;
   const session = await auth();
 
   if (!session) {
-    redirect("/");
+    return (
+      <QueryAuthHandler requiredOrg={orgName}>
+        <PerformancePageContent params={{orgName}} searchParams={searchParams} />
+      </QueryAuthHandler>
+    );
   }
 
-  const { orgName } = await params;
+  return <PerformancePageContent params={{orgName}} searchParams={searchParams} />;
+}
+
+async function PerformancePageContent({
+  params,
+  searchParams,
+}: {
+  params: { orgName: string };
+  searchParams: Promise<{
+    period?: "daily" | "weekly" | "monthly";
+    dateFrom?: string;
+    dateTo?: string;
+  }>;
+}) {
+  const { orgName } = params;
   const { period = "weekly", dateFrom, dateTo } = await searchParams;
 
   return (

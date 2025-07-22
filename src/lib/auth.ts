@@ -24,6 +24,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, account, profile, user }) {
+      // Handle direct JWT authentication (from query params)
+      if (token.directJWT && !token.processed) {
+        token.processed = true;
+        return token;
+      }
+
       // Initial sign in
       if (account && profile) {
         console.log("New sign in - Access Token:", account.access_token);
@@ -63,7 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // For subsequent requests, ensure we have the token
-      if (!token.accessToken && token.id) {
+      if (!token.accessToken && !token.directJWT && token.id) {
         console.error("Token lost access token, session might be corrupted");
         // Mark token as needing re-authentication but don't return null
         token.error = "NoAccessToken";

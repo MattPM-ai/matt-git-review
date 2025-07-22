@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import type { StandupResponse, StandupTask, StandupRequest } from '@/lib/matt-api';
-import { mattAPI } from '@/lib/matt-api';
+import { mattAPI, NoActivityError } from '@/lib/matt-api';
 import { loadMockStandup } from '@/lib/mock/mockStandup';
 
 interface UseStandupDataOptions {
@@ -15,6 +15,7 @@ interface UseStandupDataReturn {
   standupData: StandupResponse[];
   isLoading: boolean;
   error: string | null;
+  noActivity: boolean;
   currentTask: StandupTask | null;
   fetchStandupData: (options?: Partial<UseStandupDataOptions>) => Promise<void>;
   refetch: () => Promise<void>;
@@ -25,6 +26,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
   const [standupData, setStandupData] = useState<StandupResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noActivity, setNoActivity] = useState(false);
   const [currentTask, setCurrentTask] = useState<StandupTask | null>(null);
   const fetchInProgressRef = useRef(false);
   const [directJWTToken, setDirectJWTToken] = useState<string | null>(null);
@@ -49,6 +51,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
     fetchInProgressRef.current = true;
     setIsLoading(true);
     setError(null);
+    setNoActivity(false);
     setCurrentTask(null);
 
     try {
@@ -90,7 +93,12 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
       setStandupData(data);
     } catch (err) {
       console.error("Error fetching standup data:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch standup data");
+      if (err instanceof NoActivityError) {
+        setNoActivity(true);
+        setStandupData([]);
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to fetch standup data");
+      }
     } finally {
       setIsLoading(false);
       fetchInProgressRef.current = false;
@@ -103,6 +111,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
     standupData,
     isLoading,
     error,
+    noActivity,
     currentTask,
     fetchStandupData,
     refetch,

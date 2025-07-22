@@ -68,6 +68,7 @@ export function ContributionsChart({
     standupData,
     isLoading,
     error,
+    noActivity,
     currentTask,
     fetchStandupData,
   } = useStandupData({
@@ -285,6 +286,19 @@ export function ContributionsChart({
               </h2>
             </div>
             <TaskLoadingState task={currentTask} />
+          </div>
+        ) : noActivity ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <div className="mb-4">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-lg font-medium text-gray-900 mb-2">No Activity Found</p>
+            <p className="text-sm text-gray-500">
+              There was no development activity during this period.<br />
+              Try selecting a different date range.
+            </p>
           </div>
         ) : contributors.length > 0 ? (
           <>

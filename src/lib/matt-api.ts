@@ -113,6 +113,13 @@ export enum TaskStatus {
   FAILED = 'failed',
 }
 
+export class NoActivityError extends Error {
+  constructor(message: string = 'No activity found for this period') {
+    super(message);
+    this.name = 'NoActivityError';
+  }
+}
+
 export interface StandupTaskResponse {
   taskId: string;
 }
@@ -215,6 +222,11 @@ class MattAPIClient {
       },
       body: JSON.stringify(request),
     });
+
+    if (response.status === 204) {
+      // No content - no activity for this period
+      throw new NoActivityError();
+    }
 
     if (!response.ok) {
       throw new Error(`Failed to generate standup: ${response.statusText}`);

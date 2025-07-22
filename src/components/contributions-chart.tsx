@@ -42,6 +42,12 @@ export function ContributionsChart({
   initialDateTo,
 }: ContributionsChartProps) {
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+  const periodRef = useRef<PeriodType>(initialPeriod);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
   
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -62,6 +68,7 @@ export function ContributionsChart({
     standupData,
     isLoading,
     error,
+    noActivity,
     currentTask,
     fetchStandupData,
   } = useStandupData({
@@ -73,6 +80,7 @@ export function ContributionsChart({
 
   const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
     setPeriod(newPeriod);
+    periodRef.current = newPeriod; // Update ref immediately
     // Update URL
     const url = new URL(window.location.href);
     url.searchParams.set("period", newPeriod);
@@ -85,7 +93,7 @@ export function ContributionsChart({
     setDateRange(newDateRange);
     // Update URL
     const url = new URL(window.location.href);
-    url.searchParams.set("period", period);
+    url.searchParams.set("period", periodRef.current); // Use ref for latest value
     url.searchParams.set("dateFrom", newDateRange.dateFrom);
     url.searchParams.set("dateTo", newDateRange.dateTo);
     window.history.pushState({}, "", url.toString());
@@ -95,7 +103,7 @@ export function ContributionsChart({
       dateFrom: newDateRange.dateFrom,
       dateTo: newDateRange.dateTo,
     });
-  }, [period, fetchStandupData]);
+  }, [fetchStandupData]);
 
   // Transform standup data into contributor data whenever standupData changes
   useEffect(() => {
@@ -278,6 +286,19 @@ export function ContributionsChart({
               </h2>
             </div>
             <TaskLoadingState task={currentTask} />
+          </div>
+        ) : noActivity ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <div className="mb-4">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-lg font-medium text-gray-900 mb-2">No Activity Found</p>
+            <p className="text-sm text-gray-500">
+              There was no development activity during this period.<br />
+              Try selecting a different date range.
+            </p>
           </div>
         ) : contributors.length > 0 ? (
           <>

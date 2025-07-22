@@ -47,6 +47,7 @@ export function StandupDashboard({
     standupData: standupSummaries,
     isLoading: isGeneratingStandups,
     error: standupError,
+    noActivity,
     currentTask,
     fetchStandupData,
   } = useStandupData({
@@ -333,6 +334,31 @@ export function StandupDashboard({
               </h3>
             </div>
             <TaskLoadingState task={currentTask} />
+          </div>
+        ) : noActivity ? (
+          <div className="text-center py-12">
+            <div className="mb-4">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <p className="text-lg font-medium text-gray-900 mb-2">
+              No Activity for {format(selectedDateObj, "MMMM d, yyyy")}
+            </p>
+            <p className="text-sm text-gray-500">
+              There was no development activity on this date.<br />
+              Try selecting a different date from the calendar.
+            </p>
           </div>
         ) : standupSummaries.length > 0 ? (
           // Show actual standup summaries

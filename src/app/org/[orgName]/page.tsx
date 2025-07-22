@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { UserProfile } from "@/components/auth/user-profile";
+import { QueryAuthHandler } from "@/components/query-auth-handler";
 import Link from "next/link";
 
 interface OrgPageProps {
@@ -10,14 +10,23 @@ interface OrgPageProps {
 }
 
 export default async function OrgPage({ params }: OrgPageProps) {
+  const { orgName } = await params;
   const session = await auth();
 
+  // Only redirect if no session AND no query auth is being processed
   if (!session) {
-    redirect("/");
+    // Allow query auth to be processed client-side
+    return (
+      <QueryAuthHandler requiredOrg={orgName}>
+        <OrgPageContent orgName={orgName} />
+      </QueryAuthHandler>
+    );
   }
 
-  const { orgName } = await params;
+  return <OrgPageContent orgName={orgName} />;
+}
 
+function OrgPageContent({ orgName }: { orgName: string }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">

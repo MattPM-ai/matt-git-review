@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { StandupDashboard } from "@/components/standup-dashboard";
 import { StandupSidebar } from "@/components/standup-sidebar";
+import { QueryAuthHandler } from "@/components/query-auth-handler";
 import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/matt-api";
 
 interface StandupPageProps {
@@ -19,13 +19,32 @@ export default async function StandupPage({
   params,
   searchParams,
 }: StandupPageProps) {
+  const { orgName } = await params;
   const session = await auth();
 
   if (!session) {
-    redirect("/");
+    return (
+      <QueryAuthHandler requiredOrg={orgName}>
+        <StandupPageContent params={{orgName}} searchParams={searchParams} />
+      </QueryAuthHandler>
+    );
   }
 
-  const { orgName } = await params;
+  return <StandupPageContent params={{orgName}} searchParams={searchParams} />;
+}
+
+async function StandupPageContent({
+  params,
+  searchParams,
+}: {
+  params: { orgName: string };
+  searchParams: Promise<{
+    dateFrom?: string;
+    dateTo?: string;
+  }>;
+}) {
+  const session = await auth();
+  const { orgName } = params;
   const { dateFrom } = await searchParams;
 
   let activityData: ActivitiesResponseDto | null = null;
@@ -45,7 +64,11 @@ export default async function StandupPage({
     }
 
     // Fetch activities from Matt API for sidebar data
-    activityData = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
+    if (session?.mattJwtToken) {
+      activityData = await mattAPI.fetchActivities(session.mattJwtToken, filter);
+    } else {
+      throw new Error("No authentication token available");
+    }
   } catch (err) {
     console.error("Failed to fetch activities:", err);
     error = "Failed to fetch organization data";

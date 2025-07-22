@@ -53,6 +53,12 @@ export function PerformanceReviewDashboard({
   initialDateTo,
 }: PerformanceReviewDashboardProps) {
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+  const periodRef = useRef<PeriodType>(initialPeriod);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
 
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -93,28 +99,38 @@ export function PerformanceReviewDashboard({
     }, 300); // Match animation duration
   }, []);
 
+  // Unified URL update function
+  const updateURL = useCallback((updatedPeriod: PeriodType, updatedDateRange: { dateFrom: string; dateTo: string }) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("period", updatedPeriod);
+    url.searchParams.set("dateFrom", updatedDateRange.dateFrom);
+    url.searchParams.set("dateTo", updatedDateRange.dateTo);
+    window.history.pushState({}, "", url.toString());
+  }, []);
+
   const handlePeriodChange = useCallback(
     (newPeriod: PeriodType) => {
       setPeriod(newPeriod);
-      // Update URL
-      const url = new URL(window.location.href);
-      url.searchParams.set("period", newPeriod);
-      url.searchParams.set("dateFrom", dateRange.dateFrom);
-      url.searchParams.set("dateTo", dateRange.dateTo);
-      window.history.pushState({}, "", url.toString());
+      periodRef.current = newPeriod; // Update ref immediately
+      
+      // Hide detailed view when period changes
+      setSelectedUser(null);
+      
+      // Update URL with new period and current date range
+      updateURL(newPeriod, dateRange);
     },
-    [dateRange]
+    [dateRange, updateURL]
   );
 
   const handleDateRangeChange = useCallback(
     (newDateRange: { dateFrom: string; dateTo: string }) => {
       setDateRange(newDateRange);
-      // Update URL
-      const url = new URL(window.location.href);
-      url.searchParams.set("period", period);
-      url.searchParams.set("dateFrom", newDateRange.dateFrom);
-      url.searchParams.set("dateTo", newDateRange.dateTo);
-      window.history.pushState({}, "", url.toString());
+      
+      // Hide detailed view when date range changes
+      setSelectedUser(null);
+      
+      // Update URL with current period (from ref to get latest value) and new date range
+      updateURL(periodRef.current, newDateRange);
       
       // Fetch data after date range change with the new range
       fetchStandupData({
@@ -122,7 +138,7 @@ export function PerformanceReviewDashboard({
         dateTo: newDateRange.dateTo,
       });
     },
-    [period, fetchStandupData]
+    [updateURL, fetchStandupData]
   );
 
   // Transform standup data into performance data whenever standupData changes

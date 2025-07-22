@@ -42,6 +42,12 @@ export function ContributionsChart({
   initialDateTo,
 }: ContributionsChartProps) {
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+  const periodRef = useRef<PeriodType>(initialPeriod);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
   
   const getDefaultDateRange = () => {
     const today = new Date();
@@ -73,6 +79,7 @@ export function ContributionsChart({
 
   const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
     setPeriod(newPeriod);
+    periodRef.current = newPeriod; // Update ref immediately
     // Update URL
     const url = new URL(window.location.href);
     url.searchParams.set("period", newPeriod);
@@ -85,7 +92,7 @@ export function ContributionsChart({
     setDateRange(newDateRange);
     // Update URL
     const url = new URL(window.location.href);
-    url.searchParams.set("period", period);
+    url.searchParams.set("period", periodRef.current); // Use ref for latest value
     url.searchParams.set("dateFrom", newDateRange.dateFrom);
     url.searchParams.set("dateTo", newDateRange.dateTo);
     window.history.pushState({}, "", url.toString());
@@ -95,7 +102,7 @@ export function ContributionsChart({
       dateFrom: newDateRange.dateFrom,
       dateTo: newDateRange.dateTo,
     });
-  }, [period, fetchStandupData]);
+  }, [fetchStandupData]);
 
   // Transform standup data into contributor data whenever standupData changes
   useEffect(() => {

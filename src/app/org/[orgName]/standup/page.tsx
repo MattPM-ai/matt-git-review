@@ -45,7 +45,7 @@ export default async function StandupPage({
     }
 
     // Fetch activities from Matt API for sidebar data
-    activityData = await mattAPI.fetchActivities(session.accessToken!, filter);
+    activityData = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
   } catch (err) {
     console.error("Failed to fetch activities:", err);
     error = "Failed to fetch organization data";

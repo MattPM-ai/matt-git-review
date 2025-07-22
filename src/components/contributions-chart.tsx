@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   format,
   startOfWeek,
@@ -8,9 +8,9 @@ import {
   subWeeks,
   eachDayOfInterval,
 } from "date-fns";
-import type { StandupResponse } from "@/lib/matt-api";
-import { loadMockStandup } from "@/lib/mock/mockStandup";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
+import { TaskLoadingState } from "./task-loading-state";
+import { useStandupData } from "@/hooks/useStandupData";
 
 interface ContributionsChartProps {
   orgName: string;
@@ -56,8 +56,20 @@ export function ContributionsChart({
   
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [contributors, setContributors] = useState<ContributorData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dataFetchedRef = useRef(false);
+  
+  const {
+    standupData,
+    isLoading,
+    error,
+    currentTask,
+    fetchStandupData,
+  } = useStandupData({
+    organizationLogin: orgName,
+    dateFrom: dateRange.dateFrom,
+    dateTo: dateRange.dateTo,
+    useMockWhenUnauthenticated: true,
+  });
 
   const handlePeriodChange = useCallback((newPeriod: PeriodType) => {
     setPeriod(newPeriod);
@@ -77,36 +89,17 @@ export function ContributionsChart({
     url.searchParams.set("dateFrom", newDateRange.dateFrom);
     url.searchParams.set("dateTo", newDateRange.dateTo);
     window.history.pushState({}, "", url.toString());
-  }, [period]);
+    
+    // Trigger fetch with new date range
+    fetchStandupData({
+      dateFrom: newDateRange.dateFrom,
+      dateTo: newDateRange.dateTo,
+    });
+  }, [period, fetchStandupData]);
 
-  const fetchContributionsData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-
-      // Fetch data using the same endpoint as performance dashboard
-      // const response = await fetch("/api/standup", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     orgName,
-      //     date: dateRange.dateFrom,
-      //     dateRange: { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo },
-      //   }),
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to fetch contribution data");
-      // }
-
-      // const data = await response.json();
-      // const standupData: StandupResponse[] = data.summaries;
-
-      const standupData: StandupResponse[] = loadMockStandup();
-
+  // Transform standup data into contributor data whenever standupData changes
+  useEffect(() => {
+    if (standupData.length > 0) {
       console.log("Fetched standup data:", standupData);
 
       // Transform standup data into contributor data
@@ -200,17 +193,18 @@ export function ContributionsChart({
       contributorsArray.sort((a, b) => b.avgManHours - a.avgManHours);
 
       setContributors(contributorsArray);
-    } catch (err) {
-      console.error("Error fetching contribution data:", err);
-      setError("Failed to fetch contribution data");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setContributors([]);
     }
-  }, [orgName, dateRange, period]);
+  }, [standupData, dateRange.dateFrom, dateRange.dateTo]);
 
+  // Only fetch data on initial load when orgName is available
   useEffect(() => {
-    fetchContributionsData();
-  }, [fetchContributionsData]);
+    if (orgName && !dataFetchedRef.current) {
+      dataFetchedRef.current = true;
+      fetchStandupData();
+    }
+  }, [orgName, fetchStandupData]);
 
 
   // Calculate max daily hours for scaling
@@ -277,28 +271,13 @@ export function ContributionsChart({
       {/* Main content */}
       <div className="flex-1 min-h-0 space-y-6 overflow-y-auto">
         {isLoading ? (
-          <div className="space-y-6">
-            {/* Loading skeleton for overall chart */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="h-6 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
-              <div className="h-40 bg-gray-200 rounded animate-pulse"></div>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Contributions Loading
+              </h2>
             </div>
-            {/* Loading skeleton for contributor cards */}
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-lg border border-gray-200 p-6"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            ))}
+            <TaskLoadingState task={currentTask} />
           </div>
         ) : contributors.length > 0 ? (
           <>

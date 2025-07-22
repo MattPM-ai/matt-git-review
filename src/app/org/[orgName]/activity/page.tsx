@@ -67,7 +67,7 @@ export default async function OrgActivityPage({
     }
 
     // Fetch activities from Matt API
-    activityData = await mattAPI.fetchActivities(session.accessToken!, filter);
+    activityData = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
 
     // Sort activities by date
     activityData.activities.sort((a, b) => {

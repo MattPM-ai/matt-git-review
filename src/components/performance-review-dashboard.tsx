@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
-import type { StandupResponse } from "@/lib/matt-api";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
-import { ReportLoadingState } from "./report-loading-state";
+import { TaskLoadingState } from "./task-loading-state";
+import { useStandupData } from "@/hooks/useStandupData";
 
 interface PerformanceReviewDashboardProps {
   orgName: string;
@@ -67,8 +67,19 @@ export function PerformanceReviewDashboard({
 
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dataFetchedRef = useRef(false);
+  
+  const {
+    standupData,
+    isLoading,
+    error,
+    currentTask,
+    fetchStandupData,
+  } = useStandupData({
+    organizationLogin: orgName,
+    dateFrom: dateRange.dateFrom,
+    dateTo: dateRange.dateTo,
+  });
   const [selectedUser, setSelectedUser] = useState<PerformanceData | null>(
     null
   );
@@ -104,39 +115,19 @@ export function PerformanceReviewDashboard({
       url.searchParams.set("dateFrom", newDateRange.dateFrom);
       url.searchParams.set("dateTo", newDateRange.dateTo);
       window.history.pushState({}, "", url.toString());
+      
+      // Fetch data after date range change with the new range
+      fetchStandupData({
+        dateFrom: newDateRange.dateFrom,
+        dateTo: newDateRange.dateTo,
+      });
     },
-    [period]
+    [period, fetchStandupData]
   );
 
-  const fetchPerformanceData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Call the Next.js API endpoint
-      const response = await fetch("/api/standup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orgName,
-          date: dateRange.dateFrom, // Use dateFrom as the primary date
-          dateRange:
-            period !== "daily"
-              ? { dateFrom: dateRange.dateFrom, dateTo: dateRange.dateTo }
-              : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch standup data");
-      }
-
-      const data = await response.json();
-      const standupData: StandupResponse[] = data.summaries;
-
-      // Transform standup data into performance data
+  // Transform standup data into performance data whenever standupData changes
+  useEffect(() => {
+    if (standupData.length > 0) {
       const performanceMetrics: PerformanceData[] = standupData.map((user) => {
         const avgManHours =
           (user.standup.totalManHoursMin + user.standup.totalManHoursMax) / 2;
@@ -175,17 +166,18 @@ export function PerformanceReviewDashboard({
       performanceMetrics.sort((a, b) => b.avgManHours - a.avgManHours);
 
       setPerformanceData(performanceMetrics);
-    } catch (err) {
-      console.error("Error fetching performance data:", err);
-      setError("Failed to fetch performance data");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setPerformanceData([]);
     }
-  }, [orgName, dateRange, period]);
+  }, [standupData]);
 
+  // Only fetch data on initial load when orgName is available
   useEffect(() => {
-    fetchPerformanceData();
-  }, [fetchPerformanceData]);
+    if (orgName && !dataFetchedRef.current) {
+      dataFetchedRef.current = true;
+      fetchStandupData();
+    }
+  }, [orgName, fetchStandupData]);
 
   return (
     <div className="flex flex-col h-full pb-6">
@@ -234,7 +226,7 @@ export function PerformanceReviewDashboard({
           </div>
 
           {isLoading ? (
-            <ReportLoadingState />
+            <TaskLoadingState task={currentTask} />
           ) : performanceData.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
               <div className="divide-y divide-gray-100">

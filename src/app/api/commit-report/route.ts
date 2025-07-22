@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Fetch activities from Matt API
-    const response = await mattAPI.fetchActivities(session.accessToken, filter);
+    const response = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
     
     // Filter only commits
     const filteredCommits = response.activities.filter(activity => 

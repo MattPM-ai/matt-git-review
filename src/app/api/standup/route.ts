@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.accessToken) {
+    if (!session?.mattJwtToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
       dateTo: dateRange?.dateTo || date, // For daily standup, dateFrom and dateTo are the same
     };
 
-    // Generate standup using Matt API
-    const standupSummaries = await mattAPI.generateStandup(session.accessToken, standupRequest);
+    // Generate standup task using Matt API
+    const taskResponse = await mattAPI.generateStandup(session.mattJwtToken!, standupRequest);
 
-    return NextResponse.json({ summaries: standupSummaries });
+    return NextResponse.json(taskResponse);
   } catch (error) {
     console.error('Error generating standup summaries:', error);
     return NextResponse.json(

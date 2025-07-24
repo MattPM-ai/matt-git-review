@@ -174,6 +174,10 @@ class MattAPIClient {
     filter: ActivityFilterDto
   ): Promise<ActivitiesResponseDto> {
     console.log("jwtToken", jwtToken);
+    
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
 
     const response = await authenticatedFetch(`${this.getBaseUrl()}/activity/filter`, {
       method: "POST",
@@ -216,6 +220,9 @@ class MattAPIClient {
     jwtToken: string,
     request: StandupRequest
   ): Promise<StandupTaskResponse> {
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
     const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/generate`, {
       method: "POST",
       headers: {
@@ -241,6 +248,9 @@ class MattAPIClient {
     jwtToken: string,
     taskId: string
   ): Promise<StandupTask> {
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
     const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/task/${taskId}`, {
       method: "GET",
       headers: {

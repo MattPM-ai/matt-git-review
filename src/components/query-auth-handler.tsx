@@ -106,7 +106,7 @@ export function QueryAuthHandler({
     if (needsAuth) {
       router.push("/");
     }
-  }, [needsAuth]);
+  }, [needsAuth, router]);
 
   // Show authentication needed state
   if (needsAuth) {

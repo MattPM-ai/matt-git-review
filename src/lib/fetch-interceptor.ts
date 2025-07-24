@@ -17,8 +17,6 @@ export async function authenticatedFetch(
       ? (init.headers as Record<string, string>)["Authorization"]
       : null;
 
-  console.log("auth fetch", authHeader);
-
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
 
@@ -36,7 +34,6 @@ export async function authenticatedFetch(
     if (checkTokenExpiration(token)) {
       // Handle expired token before making the request
       if (typeof window !== "undefined") {
-        const currentPath = window.location.pathname;
         const isDirectAuth = document.cookie.includes("matt-direct-jwt");
 
         if (isDirectAuth) {

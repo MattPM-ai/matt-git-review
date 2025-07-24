@@ -247,21 +247,24 @@ export function PerformanceReviewDashboard({
       </div>
 
       {/* Main content - flex-1 to fill remaining height */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Ranking Section */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden lg:col-span-1 flex flex-col">
-          <div className="flex-shrink-0 p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Performance Ranking
-            </h2>
-            <p className="text-sm text-gray-500">
-              Select any member to view detailed metrics
-            </p>
-          </div>
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <TaskLoadingState task={currentTask} />
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Ranking Section */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden lg:col-span-1 flex flex-col">
+            <div className="flex-shrink-0 p-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Performance Ranking
+              </h2>
+              <p className="text-sm text-gray-500">
+                Select any member to view detailed metrics
+              </p>
+            </div>
 
-          {isLoading ? (
-            <TaskLoadingState task={currentTask} />
-          ) : noActivity ? (
+            {noActivity ? (
             <div className="flex-1 flex items-center justify-center px-4 py-8 text-center">
               <div>
                 <div className="mb-4">
@@ -352,11 +355,12 @@ export function PerformanceReviewDashboard({
           )}
         </div>
 
-        {/* Detailed View Section - Hidden on mobile */}
-        <div className="hidden lg:flex lg:flex-col bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <UserDetailedView selectedUser={selectedUser} />
+          {/* Detailed View Section - Hidden on mobile */}
+          <div className="hidden lg:flex lg:flex-col bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <UserDetailedView selectedUser={selectedUser} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile Modal for Detailed View */}
       <MobileModal

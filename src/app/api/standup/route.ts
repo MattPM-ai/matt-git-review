@@ -29,6 +29,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(taskResponse);
   } catch (error) {
     console.error('Error generating standup summaries:', error);
+    
+    if (error instanceof Error && error.message === 'JWT token has expired') {
+      return NextResponse.json({ error: 'Unauthorized - Token expired' }, { status: 401 });
+    }
+    
     return NextResponse.json(
       { error: 'Failed to generate standup summaries' }, 
       { status: 500 }

@@ -73,7 +73,7 @@ export function PerformanceReviewDashboard({
 
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const dataFetchedRef = useRef(false);
+  const [hasGeneratedReport, setHasGeneratedReport] = useState(false);
   
   const {
     standupData,
@@ -130,17 +130,26 @@ export function PerformanceReviewDashboard({
       // Hide detailed view when date range changes
       setSelectedUser(null);
       
+      // Reset report generation state when date changes
+      if (hasGeneratedReport) {
+        setHasGeneratedReport(false);
+      }
+      
       // Update URL with current period (from ref to get latest value) and new date range
       updateURL(periodRef.current, newDateRange);
       
-      // Fetch data after date range change with the new range
-      fetchStandupData({
-        dateFrom: newDateRange.dateFrom,
-        dateTo: newDateRange.dateTo,
-      });
+      // Don't auto-fetch data, wait for user to generate report
     },
-    [updateURL, fetchStandupData]
+    [updateURL, hasGeneratedReport]
   );
+
+  const handleGenerateReport = useCallback(() => {
+    setHasGeneratedReport(true);
+    fetchStandupData({
+      dateFrom: dateRange.dateFrom,
+      dateTo: dateRange.dateTo,
+    });
+  }, [fetchStandupData, dateRange]);
 
   // Transform standup data into performance data whenever standupData changes
   useEffect(() => {
@@ -188,66 +197,98 @@ export function PerformanceReviewDashboard({
     }
   }, [standupData]);
 
-  // Only fetch data on initial load when orgName is available
-  useEffect(() => {
-    if (orgName && !dataFetchedRef.current) {
-      dataFetchedRef.current = true;
-      fetchStandupData();
-    }
-  }, [orgName, fetchStandupData]);
+  // No initial data fetch - wait for user to generate report
 
   return (
     <div className="flex flex-col h-full pb-6">
-      {/* Header with controls */}
-      <div className="flex-shrink-0 space-y-4 pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Performance & Standup
-            </h1>
-            <p className="text-sm text-gray-600">
-              {format(new Date(dateRange.dateFrom), "MMM d")} -{" "}
-              {format(new Date(dateRange.dateTo), "MMM d, yyyy")}
-            </p>
+      {/* Header with controls - only show after report generation */}
+      {hasGeneratedReport && (
+        <div className="flex-shrink-0 space-y-4 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Performance & Standup
+              </h1>
+              <p className="text-sm text-gray-600">
+                {format(new Date(dateRange.dateFrom), "MMM d")} -{" "}
+                {format(new Date(dateRange.dateTo), "MMM d, yyyy")}
+              </p>
+            </div>
+
+            <DateRangePicker
+              period={period}
+              dateFrom={dateRange.dateFrom}
+              dateTo={dateRange.dateTo}
+              onPeriodChange={handlePeriodChange}
+              onDateRangeChange={handleDateRangeChange}
+              disabled={isLoading}
+              className="flex-shrink-0"
+            />
           </div>
 
-          <DateRangePicker
-            period={period}
-            dateFrom={dateRange.dateFrom}
-            dateTo={dateRange.dateTo}
-            onPeriodChange={handlePeriodChange}
-            onDateRangeChange={handleDateRangeChange}
-            disabled={isLoading}
-            className="flex-shrink-0"
-          />
-        </div>
-
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
-        
-        {noActivity && !isLoading && (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-800">
-                  No activity found for this period ({format(new Date(dateRange.dateFrom), "MMM d")} - {format(new Date(dateRange.dateTo), "MMM d, yyyy")})
-                </p>
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+          
+          {noActivity && !isLoading && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-800">
+                    No activity found for this period ({format(new Date(dateRange.dateFrom), "MMM d")} - {format(new Date(dateRange.dateTo), "MMM d, yyyy")})
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Main content - flex-1 to fill remaining height */}
-      {isLoading ? (
+      {!hasGeneratedReport ? (
+        // Initial date selection UI - centered on page
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center p-8 max-w-md">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Performance Review</h2>
+              <p className="text-gray-600 mb-6">
+                Choose a date range to generate a comprehensive performance report for your team.
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <DateRangePicker
+                period={period}
+                dateFrom={dateRange.dateFrom}
+                dateTo={dateRange.dateTo}
+                onPeriodChange={handlePeriodChange}
+                onDateRangeChange={handleDateRangeChange}
+                disabled={false}
+                className="w-full"
+              />
+              
+              <button
+                onClick={handleGenerateReport}
+                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+              >
+                Generate Performance Report
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <TaskLoadingState task={currentTask} />
         </div>

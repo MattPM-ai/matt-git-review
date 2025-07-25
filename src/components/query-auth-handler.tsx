@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { validateGitHubOrgJWT } from "@/lib/jwt-utils";
+import { authenticatedFetch } from "@/lib/fetch-interceptor";
 
 interface QueryAuthHandlerProps {
   requiredOrg?: string;
@@ -17,6 +18,7 @@ export function QueryAuthHandler({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [hasValidatedSession, setHasValidatedSession] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -49,6 +51,29 @@ export function QueryAuthHandler({
             validation.orgName?.toLowerCase() !== requiredOrg.toLowerCase()
           ) {
             setError(`Access denied to organization: ${requiredOrg}`);
+            return;
+          }
+
+          // Test if the token is still valid by making an authenticated request
+          try {
+            const mattApiUrl = process.env.NEXT_PUBLIC_GIT_API_HOST || '';
+            const userResponse = await authenticatedFetch(`${mattApiUrl}/users/me`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`,
+              },
+            });
+
+            if (!userResponse.ok) {
+              setError("Authentication token is invalid or expired");
+              return;
+            }
+
+            // Token is valid, proceed with session creation
+          } catch (error) {
+            console.error("Token validation error:", error);
+            setError("Failed to validate authentication token");
             return;
           }
 
@@ -95,12 +120,70 @@ export function QueryAuthHandler({
 
         if (!directToken) {
           setNeedsAuth(true);
+        } else {
+          // We have a direct token in sessionStorage, validate it
+          setIsProcessing(true);
+          try {
+            const mattApiUrl = process.env.NEXT_PUBLIC_GIT_API_HOST || '';
+            const userResponse = await authenticatedFetch(`${mattApiUrl}/users/me`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${directToken}`,
+              },
+            });
+
+            if (!userResponse.ok) {
+              // Token is invalid, clear it and require auth
+              sessionStorage.removeItem("direct_jwt_token");
+              sessionStorage.removeItem("direct_org_name");
+              setNeedsAuth(true);
+            }
+          } catch (error) {
+            console.error("Direct token validation error:", error);
+            // Clear invalid token
+            sessionStorage.removeItem("direct_jwt_token");
+            sessionStorage.removeItem("direct_org_name");
+            setNeedsAuth(true);
+          } finally {
+            setIsProcessing(false);
+          }
         }
       }
     };
 
     processAuth();
   }, [searchParams, requiredOrg, isProcessing, session, status]);
+
+  // Validate session token when we have a new session
+  useEffect(() => {
+    const validateSessionToken = async () => {
+      if (session?.mattJwtToken && status === "authenticated" && !hasValidatedSession) {
+        setHasValidatedSession(true);
+        try {
+          const mattApiUrl = process.env.NEXT_PUBLIC_GIT_API_HOST || '';
+          const userResponse = await authenticatedFetch(`${mattApiUrl}/users/me`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.mattJwtToken}`,
+            },
+          });
+
+          if (!userResponse.ok) {
+            // Token is invalid, needs re-authentication
+            console.error("Session token is invalid or expired");
+            setNeedsAuth(true);
+          }
+        } catch (error) {
+          console.error("Session token validation error:", error);
+          setNeedsAuth(true);
+        }
+      }
+    };
+
+    validateSessionToken();
+  }, [session?.mattJwtToken, status, hasValidatedSession]);
 
   useEffect(() => {
     if (needsAuth) {

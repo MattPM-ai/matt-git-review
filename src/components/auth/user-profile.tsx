@@ -1,12 +1,12 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { SignOutButton } from "./sign-out-button";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 
 export function UserProfile() {
-  const { data: session } = useSession();
+  const { data: session } = useValidatedSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 

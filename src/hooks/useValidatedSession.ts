@@ -2,14 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { authenticatedFetch } from "@/lib/fetch-interceptor";
 
 export function useValidatedSession() {
   const { data: session, status, update } = useSession();
   const [isValidating, setIsValidating] = useState(false);
   const [hasValidated, setHasValidated] = useState(false);
-  const router = useRouter();
   const validationInProgressRef = useRef(false);
 
   useEffect(() => {
@@ -43,8 +41,7 @@ export function useValidatedSession() {
         if (!userResponse.ok) {
           console.error("Matt JWT token is invalid or expired");
           // Sign out and redirect
-          await signOut({ redirect: false });
-          router.push("/");
+          await signOut({ redirectTo: "/" });
         } else {
           // Token is valid
           setHasValidated(true);
@@ -52,8 +49,7 @@ export function useValidatedSession() {
       } catch (error) {
         console.error("Error validating Matt JWT token:", error);
         // On error, sign out to be safe
-        await signOut({ redirect: false });
-        router.push("/");
+        await signOut({ redirectTo: "/" });
       } finally {
         setIsValidating(false);
         validationInProgressRef.current = false;
@@ -61,7 +57,7 @@ export function useValidatedSession() {
     };
 
     validateToken();
-  }, [session?.mattJwtToken, status, hasValidated, router]);
+  }, [session?.mattJwtToken, status, hasValidated]);
 
   // Reset validation state when session changes
   useEffect(() => {

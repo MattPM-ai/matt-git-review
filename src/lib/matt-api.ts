@@ -1,3 +1,5 @@
+import { authenticatedFetch } from './fetch-interceptor';
+
 export interface ActivityFilterDto {
   organizationLogin: string;
   dateFrom?: string;
@@ -154,7 +156,7 @@ class MattAPIClient {
   }
 
   async authenticateUser(accessToken: string): Promise<void> {
-    const response = await fetch(`${this.getBaseUrl()}/users/auth`, {
+    const response = await authenticatedFetch(`${this.getBaseUrl()}/users/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -172,8 +174,12 @@ class MattAPIClient {
     filter: ActivityFilterDto
   ): Promise<ActivitiesResponseDto> {
     console.log("jwtToken", jwtToken);
+    
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
 
-    const response = await fetch(`${this.getBaseUrl()}/activity/filter`, {
+    const response = await authenticatedFetch(`${this.getBaseUrl()}/activity/filter`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +220,10 @@ class MattAPIClient {
     jwtToken: string,
     request: StandupRequest
   ): Promise<StandupTaskResponse> {
-    const response = await fetch(`${this.getBaseUrl()}/standup/generate`, {
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
+    const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -239,7 +248,10 @@ class MattAPIClient {
     jwtToken: string,
     taskId: string
   ): Promise<StandupTask> {
-    const response = await fetch(`${this.getBaseUrl()}/standup/task/${taskId}`, {
+    if (!jwtToken) {
+      throw new Error('No JWT token provided');
+    }
+    const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/task/${taskId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

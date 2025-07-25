@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useValidatedSession } from '@/hooks/useValidatedSession';
 import type { StandupResponse, StandupTask, StandupRequest } from '@/lib/matt-api';
 import { mattAPI, NoActivityError } from '@/lib/matt-api';
 import { loadMockStandup } from '@/lib/mock/mockStandup';
@@ -22,7 +22,7 @@ interface UseStandupDataReturn {
 }
 
 export function useStandupData(options: UseStandupDataOptions): UseStandupDataReturn {
-  const { data: session } = useSession();
+  const { data: session } = useValidatedSession();
   const [standupData, setStandupData] = useState<StandupResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

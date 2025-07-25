@@ -1,10 +1,10 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { useEffect, useState } from "react";
 
 export function SessionHandler({ children }: { children: React.ReactNode }) {
-  const { status } = useSession();
+  const { status } = useValidatedSession();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {

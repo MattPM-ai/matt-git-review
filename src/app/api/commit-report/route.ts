@@ -67,6 +67,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Commit report sent" });
   } catch (error) {
     console.error('Error generating standup report:', error);
+    
+    if (error instanceof Error && (error.message === 'JWT token has expired' || error.message === 'No JWT token provided')) {
+      return NextResponse.json({ error: 'Unauthorized - ' + error.message }, { status: 401 });
+    }
+    
     return NextResponse.json(
       { error: 'Failed to generate standup report' }, 
       { status: 500 }

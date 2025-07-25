@@ -103,8 +103,8 @@ export function DateRangePicker({
         break;
 
       case "weekly":
-        // Show last 8 weeks
-        for (let i = 0; i < 8; i++) {
+        // Show last 3 years of weeks (approximately 156 weeks)
+        for (let i = 0; i < 156; i++) {
           const weekStart = startOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
           let weekEnd = endOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
           
@@ -114,7 +114,7 @@ export function DateRangePicker({
           }
 
           options.push({
-            label: `${format(weekStart, "d MMM")} - ${format(weekEnd, "d MMM")} | ${format(weekStart, "yyyy")}`,
+            label: `${format(weekStart, "d MMM")} - ${format(weekEnd, "d MMM yyyy")}`,
             dateFrom: format(weekStart, "yyyy-MM-dd"),
             dateTo: format(weekEnd, "yyyy-MM-dd"),
           });
@@ -122,8 +122,8 @@ export function DateRangePicker({
         break;
 
       case "monthly":
-        // Show last 12 months
-        for (let i = 0; i < 12; i++) {
+        // Show last 3 years of months (36 months)
+        for (let i = 0; i < 36; i++) {
           const monthStart = startOfMonth(subMonths(currentDate, i));
           let monthEnd = endOfMonth(subMonths(currentDate, i));
           
@@ -133,7 +133,7 @@ export function DateRangePicker({
           }
 
           options.push({
-            label: `${format(monthStart, "d MMM")} - ${format(monthEnd, "d MMM")} | ${format(monthStart, "yyyy")}`,
+            label: `${format(monthStart, "d MMM")} - ${format(monthEnd, "d MMM yyyy")}`,
             dateFrom: format(monthStart, "yyyy-MM-dd"),
             dateTo: format(monthEnd, "yyyy-MM-dd"),
           });
@@ -141,8 +141,8 @@ export function DateRangePicker({
         break;
 
       case "quarterly":
-        // Show last 8 quarters
-        for (let i = 0; i < 8; i++) {
+        // Show last 3 years of quarters (12 quarters)
+        for (let i = 0; i < 12; i++) {
           const quarterStart = startOfQuarter(subQuarters(currentDate, i));
           let quarterEnd = endOfQuarter(subQuarters(currentDate, i));
           
@@ -152,7 +152,7 @@ export function DateRangePicker({
           }
 
           options.push({
-            label: `${format(quarterStart, "d MMM")} - ${format(quarterEnd, "d MMM")} | ${format(quarterStart, "yyyy")}`,
+            label: `${format(quarterStart, "d MMM")} - ${format(quarterEnd, "d MMM yyyy")}`,
             dateFrom: format(quarterStart, "yyyy-MM-dd"),
             dateTo: format(quarterEnd, "yyyy-MM-dd"),
           });
@@ -160,8 +160,8 @@ export function DateRangePicker({
         break;
 
       case "yearly":
-        // Show last 5 years
-        for (let i = 0; i < 5; i++) {
+        // Show last 3 years
+        for (let i = 0; i < 3; i++) {
           const yearStart = startOfYear(subYears(currentDate, i));
           let yearEnd = endOfYear(subYears(currentDate, i));
           
@@ -171,7 +171,7 @@ export function DateRangePicker({
           }
 
           options.push({
-            label: `${format(yearStart, "d MMM")} - ${format(yearEnd, "d MMM")} | ${format(yearStart, "yyyy")}`,
+            label: `${format(yearStart, "d MMM")} - ${format(yearEnd, "d MMM yyyy")}`,
             dateFrom: format(yearStart, "yyyy-MM-dd"),
             dateTo: format(yearEnd, "yyyy-MM-dd"),
           });
@@ -210,7 +210,7 @@ export function DateRangePicker({
 
         case "weekly":
           // Find the week that contains the previous end date
-          for (let i = 0; i < 20; i++) { // Look at more weeks to find the one containing previous end date
+          for (let i = 0; i < 156; i++) { // Look at up to 3 years of weeks to find the one containing previous end date
             const weekStart = startOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
             let weekEnd = endOfWeek(subWeeks(currentDate, i), { weekStartsOn: 1 });
             
@@ -219,7 +219,7 @@ export function DateRangePicker({
             }
 
             options.push({
-              label: `${format(weekStart, "d MMM")} - ${format(weekEnd, "d MMM")} | ${format(weekStart, "yyyy")}`,
+              label: `${format(weekStart, "d MMM")} - ${format(weekEnd, "d MMM yyyy")}`,
               dateFrom: format(weekStart, "yyyy-MM-dd"),
               dateTo: format(weekEnd, "yyyy-MM-dd"),
             });
@@ -233,7 +233,7 @@ export function DateRangePicker({
 
         case "monthly":
           // Find the month that contains the previous end date
-          for (let i = 0; i < 24; i++) { // Look at more months
+          for (let i = 0; i < 36; i++) { // Look at up to 3 years of months
             const monthStart = startOfMonth(subMonths(currentDate, i));
             let monthEnd = endOfMonth(subMonths(currentDate, i));
             
@@ -242,7 +242,7 @@ export function DateRangePicker({
             }
 
             options.push({
-              label: `${format(monthStart, "d MMM")} - ${format(monthEnd, "d MMM")} | ${format(monthStart, "yyyy")}`,
+              label: `${format(monthStart, "d MMM")} - ${format(monthEnd, "d MMM yyyy")}`,
               dateFrom: format(monthStart, "yyyy-MM-dd"),
               dateTo: format(monthEnd, "yyyy-MM-dd"),
             });
@@ -256,7 +256,7 @@ export function DateRangePicker({
 
         case "quarterly":
           // Find the quarter that contains the previous end date
-          for (let i = 0; i < 16; i++) { // Look at more quarters
+          for (let i = 0; i < 12; i++) { // Look at up to 3 years of quarters
             const quarterStart = startOfQuarter(subQuarters(currentDate, i));
             let quarterEnd = endOfQuarter(subQuarters(currentDate, i));
             
@@ -265,7 +265,7 @@ export function DateRangePicker({
             }
 
             options.push({
-              label: `${format(quarterStart, "d MMM")} - ${format(quarterEnd, "d MMM")} | ${format(quarterStart, "yyyy")}`,
+              label: `${format(quarterStart, "d MMM")} - ${format(quarterEnd, "d MMM yyyy")}`,
               dateFrom: format(quarterStart, "yyyy-MM-dd"),
               dateTo: format(quarterEnd, "yyyy-MM-dd"),
             });
@@ -279,7 +279,7 @@ export function DateRangePicker({
 
         case "yearly":
           // Find the year that contains the previous end date
-          for (let i = 0; i < 10; i++) { // Look at more years
+          for (let i = 0; i < 3; i++) { // Look at up to 3 years
             const yearStart = startOfYear(subYears(currentDate, i));
             let yearEnd = endOfYear(subYears(currentDate, i));
             
@@ -288,7 +288,7 @@ export function DateRangePicker({
             }
 
             options.push({
-              label: `${format(yearStart, "d MMM")} - ${format(yearEnd, "d MMM")} | ${format(yearStart, "yyyy")}`,
+              label: `${format(yearStart, "d MMM")} - ${format(yearEnd, "d MMM yyyy")}`,
               dateFrom: format(yearStart, "yyyy-MM-dd"),
               dateTo: format(yearEnd, "yyyy-MM-dd"),
             });

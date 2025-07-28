@@ -91,6 +91,10 @@ pnpm build
     - Created proper `ExtendedUser` interface for custom user fields
     - Fixed email field type mismatch and credential typing issues
     - Application now builds successfully without type errors
+  - **FIXED**: "Token lost access token, session might be corrupted" error
+    - Fixed JWT callback to not expect GitHub access token for subscription auth
+    - Added `isSubscriptionAuth` check to skip access token validation for direct auth
+    - Subscription-based authentication is expected to not have GitHub access tokens
 
 ### Performance Notes
 - Uses React.memo and useCallback for optimization

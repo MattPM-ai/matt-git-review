@@ -193,8 +193,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // For subsequent requests, ensure we have the token
-      if (!token.accessToken && !token.directJWT && token.id) {
+      // For subsequent requests, ensure we have the token (only for GitHub OAuth, not subscription auth)
+      if (!token.accessToken && !token.isSubscriptionAuth && !token.directJWT && token.id) {
         console.error("Token lost access token, session might be corrupted");
         // Mark token as needing re-authentication but don't return null
         token.error = "NoAccessToken";

@@ -26,11 +26,23 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Create NextAuth session token
+    // Create NextAuth-compatible session token
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
     const sessionMaxAge = 30 * 24 * 60 * 60; // 30 days
+    const now = Math.floor(Date.now() / 1000);
     
+    // Create a proper NextAuth JWT token structure
     const sessionToken = await new SignJWT({
+      // Standard NextAuth fields
+      sub: validation.payload.sub || validation.payload.username,
+      name: validation.payload.name || validation.payload.username,
+      email: validation.payload.email || '',
+      picture: validation.payload.avatar_url || '',
+      iat: now,
+      exp: now + sessionMaxAge,
+      jti: crypto.randomUUID(),
+      
+      // Our custom fields
       directJWT: true,
       mattJwtToken: jwtToken,
       mattUser: {
@@ -42,8 +54,6 @@ export async function POST(request: NextRequest) {
       },
       orgName,
       type: 'github_org',
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + sessionMaxAge,
       processed: false,
     })
       .setProtectedHeader({ alg: 'HS256' })

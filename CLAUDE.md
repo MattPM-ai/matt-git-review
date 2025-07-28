@@ -28,10 +28,20 @@ pnpm build
 ## Architecture Notes
 
 ### Authentication Flow
+
+#### Primary GitHub OAuth Flow
 - Uses NextAuth with GitHub provider
 - Custom JWT token validation via useValidatedSession hook
 - Automatic token expiration handling with redirect to login
 - Fetch interceptor for global 401 error handling
+
+#### Subscription-Based Authentication Flow (`_auth` parameter)
+- URL format: `?_auth=[subscriptionId]`
+- Subscription ID is exchanged for JWT token directly from client-side
+- Calls `{{NEXT_PUBLIC_GIT_API_HOST}}/email-subscriptions/[subscriptionId]/generate-token`
+- Received JWT token is validated and used to create NextAuth session
+- Prevents infinite loops by tracking processed subscriptions and auth attempts
+- Follows the same session management as GitHub OAuth
 
 ### Key Components
 - **useValidatedSession**: Custom hook that wraps useSession with JWT validation
@@ -58,6 +68,22 @@ pnpm build
 - Updated dashboard to show centered content when no organizations
 - Removed date pipe separators and extended ranges to 3 years
 - Added performance report date selection requirement
+- **NEW**: Implemented subscription-based authentication flow
+  - Updated QueryAuthHandler to handle subscription IDs instead of direct JWT tokens
+  - Direct client-side API calls to Matt API for token exchange
+  - Added authentication attempt tracking to prevent infinite loops
+  - Modified middleware to pass through subscription IDs
+  - Maintains NextAuth session creation for proper authentication state
+- **FIXED**: Authentication timing issues with server components
+  - Converted activity and standup pages to use client components
+  - Fixed "No authentication token available" errors during subscription auth
+  - Added proper loading states while authentication completes
+  - Server components now delegate to client components for data fetching
+- **FIXED**: NextAuth session token issues for direct JWT authentication
+  - Fixed session.mattJwtToken being undefined for subscription-based auth
+  - Updated direct JWT token creation to use proper NextAuth JWT structure
+  - Enhanced JWT and session callbacks to handle direct authentication properly
+  - Added proper error messages when mattJwtToken is missing from session
 
 ### Performance Notes
 - Uses React.memo and useCallback for optimization

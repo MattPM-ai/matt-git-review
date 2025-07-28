@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { validateGitHubOrgJWT } from "@/lib/jwt-utils";
@@ -17,9 +17,11 @@ export function QueryAuthHandler({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [authAttempted, setAuthAttempted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useValidatedSession();
+  const processedSubscriptionRef = useRef<string | null>(null);
 
   useEffect(() => {
     const processAuth = async () => {
@@ -28,18 +30,62 @@ export function QueryAuthHandler({
         return;
       }
 
-      // Check for query auth parameter
-      const authToken = searchParams.get("_auth");
+      // Check for query auth parameter (subscription ID)
+      const subscriptionId = searchParams.get("_auth");
 
-      if (authToken && !isProcessing) {
+      // Only process if we have a subscription ID and haven't already processed it
+      if (subscriptionId && !isProcessing && processedSubscriptionRef.current !== subscriptionId) {
         setIsProcessing(true);
+        processedSubscriptionRef.current = subscriptionId;
 
         try {
+          // Call Matt API directly to exchange subscription ID for JWT token
+          const gitApiHost = process.env.NEXT_PUBLIC_GIT_API_HOST;
+          if (!gitApiHost) {
+            console.error("NEXT_PUBLIC_GIT_API_HOST is not configured");
+            setError("API configuration error");
+            setAuthAttempted(true);
+            return;
+          }
+
+          const tokenResponse = await fetch(
+            `${gitApiHost}/email-subscriptions/${subscriptionId}/generate-token`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!tokenResponse.ok) {
+            const errorText = await tokenResponse.text();
+            console.error("Token generation failed:", errorText);
+            
+            if (tokenResponse.status === 404) {
+              setError("Subscription not found or expired");
+            } else {
+              setError("Failed to authenticate with subscription");
+            }
+            setAuthAttempted(true);
+            return;
+          }
+
+          const tokenData = await tokenResponse.json();
+          const authToken = tokenData.token;
+
+          if (!authToken) {
+            setError("Invalid token response");
+            setAuthAttempted(true);
+            return;
+          }
+
           // Validate the JWT token
           const validation = validateGitHubOrgJWT(authToken);
 
           if (!validation.isValid) {
             setError(validation.error || "Invalid authentication token");
+            setAuthAttempted(true);
             return;
           }
 
@@ -49,9 +95,9 @@ export function QueryAuthHandler({
             validation.orgName?.toLowerCase() !== requiredOrg.toLowerCase()
           ) {
             setError(`Access denied to organization: ${requiredOrg}`);
+            setAuthAttempted(true);
             return;
           }
-
 
           // Store in sessionStorage for immediate use
           sessionStorage.setItem("direct_jwt_token", authToken);
@@ -79,14 +125,16 @@ export function QueryAuthHandler({
             window.location.reload();
           } else {
             setError("Failed to create authentication session");
+            setAuthAttempted(true);
           }
         } catch (error) {
           console.error("Auth processing error:", error);
           setError("Failed to process authentication");
+          setAuthAttempted(true);
         } finally {
           setIsProcessing(false);
         }
-      } else if (!authToken && !session) {
+      } else if (!subscriptionId && !session && !authAttempted) {
         // No auth token in query params and no existing session
         // Check if we have a direct JWT token in sessionStorage
         const directToken =
@@ -101,8 +149,7 @@ export function QueryAuthHandler({
     };
 
     processAuth();
-  }, [searchParams, requiredOrg, isProcessing, session, status]);
-
+  }, [searchParams, requiredOrg, isProcessing, session, status, authAttempted]);
 
   useEffect(() => {
     if (needsAuth) {

@@ -24,12 +24,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, account, profile, user }) {
-      // Handle direct JWT authentication (from query params)
-      if (token.directJWT && !token.processed) {
-        token.processed = true;
-        return token;
-      }
-
       // Initial sign in
       if (account && profile) {
         console.log("New sign in - Access Token:", account.access_token);
@@ -45,13 +39,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Exchange GitHub token for JWT token from Matt API
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_GIT_API_HOST}/users/auth`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ access_token: account.access_token }),
-          });
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_GIT_API_HOST}/users/auth`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ access_token: account.access_token }),
+            }
+          );
 
           if (response.ok) {
             const authData = await response.json();
@@ -59,7 +56,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.mattUser = authData.user;
             console.log("Successfully exchanged GitHub token for JWT");
           } else {
-            console.error("Failed to exchange token with Matt API:", response.statusText);
+            console.error(
+              "Failed to exchange token with Matt API:",
+              response.statusText
+            );
             // Don't fail the sign-in process if Matt API is down
           }
         } catch (error) {
@@ -78,15 +78,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback", session, token);
+
+      // For direct JWT sessions, we might not have a user object initially
+      if (!session.user && token.directJWT) {
+        session.user = {
+          id: (token.sub as string) || (token.id as string),
+          name: token.name as string,
+          email: token.email as string,
+          image: token.picture as string,
+        };
+      }
+
       if (session.user) {
-        session.user.id = token.id as string;
-        
+        session.user.id = (token.id as string) || (token.sub as string);
+
         // Pass GitHub access token
         if (token.accessToken) {
           session.accessToken = token.accessToken as string;
           console.log("Session created with GitHub access token");
         }
-        
+
         // Pass JWT token from Matt API
         if (token.mattJwtToken) {
           session.mattJwtToken = token.mattJwtToken as string;

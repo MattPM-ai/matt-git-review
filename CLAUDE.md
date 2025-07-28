@@ -79,11 +79,18 @@ pnpm build
   - Fixed "No authentication token available" errors during subscription auth
   - Added proper loading states while authentication completes
   - Server components now delegate to client components for data fetching
-- **FIXED**: NextAuth session token issues for direct JWT authentication
-  - Fixed session.mattJwtToken being undefined for subscription-based auth
-  - Updated direct JWT token creation to use proper NextAuth JWT structure
-  - Enhanced JWT and session callbacks to handle direct authentication properly
-  - Added proper error messages when mattJwtToken is missing from session
+- **FIXED**: NextAuth session token issues for subscription-based authentication
+  - **Root Issue**: Manual session cookie creation didn't work with NextAuth properly
+  - **Solution**: Implemented custom NextAuth Credentials provider for subscription auth
+  - Removed `/api/auth/direct` route and replaced with proper NextAuth provider
+  - Added subscription provider that exchanges subscription ID for JWT token
+  - Updated QueryAuthHandler to use `signIn("subscription")` instead of API calls
+  - Fixed session.mattJwtToken being undefined - now properly set via NextAuth flow
+  - Added organization validation within the provider itself
+  - **FIXED**: TypeScript compilation errors
+    - Created proper `ExtendedUser` interface for custom user fields
+    - Fixed email field type mismatch and credential typing issues
+    - Application now builds successfully without type errors
 
 ### Performance Notes
 - Uses React.memo and useCallback for optimization

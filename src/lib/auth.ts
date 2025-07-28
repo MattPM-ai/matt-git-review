@@ -1,5 +1,26 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import Credentials from "next-auth/providers/credentials";
+import { validateGitHubOrgJWT } from "./jwt-utils";
+
+interface MattUser {
+  id: string;
+  login: string;
+  name: string;
+  avatar_url: string;
+  html_url: string;
+}
+
+interface ExtendedUser {
+  id: string;
+  name: string;
+  email: string;
+  image: string;
+  mattJwtToken: string;
+  mattUser: MattUser;
+  orgName: string;
+  isSubscriptionAuth: boolean;
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: process.env.NODE_ENV === "development",
@@ -13,6 +34,92 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
       },
     }),
+    Credentials({
+      id: "subscription",
+      name: "Subscription",
+      credentials: {
+        subscriptionId: { label: "Subscription ID", type: "text" },
+        requiredOrg: { label: "Required Organization", type: "text" },
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials?.subscriptionId) {
+            return null;
+          }
+
+          // Exchange subscription ID for JWT token
+          const gitApiHost = process.env.NEXT_PUBLIC_GIT_API_HOST;
+          if (!gitApiHost) {
+            console.error("NEXT_PUBLIC_GIT_API_HOST is not configured");
+            return null;
+          }
+
+          const tokenResponse = await fetch(
+            `${gitApiHost}/email-subscriptions/${credentials.subscriptionId}/generate-token`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!tokenResponse.ok) {
+            console.error("Token generation failed:", tokenResponse.status);
+            return null;
+          }
+
+          const tokenData = await tokenResponse.json();
+          const jwtToken = tokenData.token;
+
+          if (!jwtToken) {
+            console.error("No token in response");
+            return null;
+          }
+
+          // Validate the JWT token
+          const validation = validateGitHubOrgJWT(jwtToken);
+          if (!validation.isValid || !validation.payload) {
+            console.error("Invalid JWT token:", validation.error);
+            return null;
+          }
+
+          // Check org access if required
+          if (
+            credentials.requiredOrg &&
+            validation.orgName?.toLowerCase() !==
+              (credentials.requiredOrg as string).toLowerCase()
+          ) {
+            console.error(
+              `Access denied to organization: ${credentials.requiredOrg}`
+            );
+            return null;
+          }
+
+          // Return user object that will be passed to JWT callback
+          return {
+            id: validation.payload.sub || validation.payload.username || "",
+            name: validation.payload.name || validation.payload.username || "",
+            email: (validation.payload.email as string) || "",
+            image: validation.payload.avatar_url || "",
+            // Custom fields
+            mattJwtToken: jwtToken,
+            mattUser: {
+              id: validation.payload.sub || validation.payload.username || "",
+              login: validation.payload.username || "",
+              name: validation.payload.name || validation.payload.username || "",
+              avatar_url: validation.payload.avatar_url || "",
+              html_url: validation.payload.html_url || "",
+            },
+            orgName: validation.orgName,
+            isSubscriptionAuth: true,
+          } as ExtendedUser;
+        } catch (error) {
+          console.error("Subscription auth error:", error);
+          return null;
+        }
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
@@ -24,8 +131,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, account, profile, user }) {
-      // Initial sign in
-      if (account && profile) {
+      // Handle subscription-based authentication
+      if (account?.provider === "subscription" && user) {
+        console.log("Processing subscription authentication");
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
+        token.mattJwtToken = (user as { mattJwtToken?: string }).mattJwtToken;
+        token.mattUser = (user as { mattUser?: MattUser }).mattUser;
+        token.orgName = (user as { orgName?: string }).orgName;
+        token.isSubscriptionAuth = true;
+        console.log(
+          "Subscription auth - mattJwtToken:",
+          token.mattJwtToken ? "present" : "missing"
+        );
+        return token;
+      }
+
+      // Initial GitHub sign in
+      if (account && profile && account.provider === "github") {
         console.log("New sign in - Access Token:", account.access_token);
         console.log("Refresh Token:", account.refresh_token);
         token.accessToken = account.access_token;
@@ -79,16 +204,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       console.log("Session callback", session, token);
-
-      // For direct JWT sessions, we might not have a user object initially
-      if (!session.user && token.directJWT) {
-        session.user = {
-          id: (token.sub as string) || (token.id as string),
-          name: token.name as string,
-          email: token.email as string,
-          image: token.picture as string,
-        };
-      }
 
       if (session.user) {
         session.user.id = (token.id as string) || (token.sub as string);

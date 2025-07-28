@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
-import { validateGitHubOrgJWT } from "@/lib/jwt-utils";
+import { signIn } from "next-auth/react";
 
 interface QueryAuthHandlerProps {
   requiredOrg?: string;
@@ -39,30 +39,16 @@ export function QueryAuthHandler({
         processedSubscriptionRef.current = subscriptionId;
 
         try {
-          // Call Matt API directly to exchange subscription ID for JWT token
-          const gitApiHost = process.env.NEXT_PUBLIC_GIT_API_HOST;
-          if (!gitApiHost) {
-            console.error("NEXT_PUBLIC_GIT_API_HOST is not configured");
-            setError("API configuration error");
-            setAuthAttempted(true);
-            return;
-          }
+          // Use NextAuth signIn with subscription provider
+          const result = await signIn("subscription", {
+            subscriptionId,
+            requiredOrg,
+            redirect: false,
+          });
 
-          const tokenResponse = await fetch(
-            `${gitApiHost}/email-subscriptions/${subscriptionId}/generate-token`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (!tokenResponse.ok) {
-            const errorText = await tokenResponse.text();
-            console.error("Token generation failed:", errorText);
-            
-            if (tokenResponse.status === 404) {
+          if (result?.error) {
+            console.error("Subscription sign in failed:", result.error);
+            if (result.error === "CredentialsSignin") {
               setError("Subscription not found or expired");
             } else {
               setError("Failed to authenticate with subscription");
@@ -71,60 +57,16 @@ export function QueryAuthHandler({
             return;
           }
 
-          const tokenData = await tokenResponse.json();
-          const authToken = tokenData.token;
-
-          if (!authToken) {
-            setError("Invalid token response");
-            setAuthAttempted(true);
-            return;
-          }
-
-          // Validate the JWT token
-          const validation = validateGitHubOrgJWT(authToken);
-
-          if (!validation.isValid) {
-            setError(validation.error || "Invalid authentication token");
-            setAuthAttempted(true);
-            return;
-          }
-
-          // Check org access if required
-          if (
-            requiredOrg &&
-            validation.orgName?.toLowerCase() !== requiredOrg.toLowerCase()
-          ) {
-            setError(`Access denied to organization: ${requiredOrg}`);
-            setAuthAttempted(true);
-            return;
-          }
-
-          // Store in sessionStorage for immediate use
-          sessionStorage.setItem("direct_jwt_token", authToken);
-          sessionStorage.setItem("direct_org_name", validation.orgName || "");
-
-          // Create session via API route
-          const response = await fetch("/api/auth/direct", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              jwtToken: authToken,
-              orgName: validation.orgName,
-            }),
-          });
-
-          if (response.ok) {
+          if (result?.ok) {
             // Remove auth parameter from URL
             const url = new URL(window.location.href);
             url.searchParams.delete("_auth");
             window.history.replaceState({}, "", url.toString());
 
-            // Force page refresh to load with new session
+            // Redirect or refresh to load with new session
             window.location.reload();
           } else {
-            setError("Failed to create authentication session");
+            setError("Authentication failed");
             setAuthAttempted(true);
           }
         } catch (error) {
@@ -136,15 +78,7 @@ export function QueryAuthHandler({
         }
       } else if (!subscriptionId && !session && !authAttempted) {
         // No auth token in query params and no existing session
-        // Check if we have a direct JWT token in sessionStorage
-        const directToken =
-          typeof window !== "undefined"
-            ? sessionStorage.getItem("direct_jwt_token")
-            : null;
-
-        if (!directToken) {
-          setNeedsAuth(true);
-        }
+        setNeedsAuth(true);
       }
     };
 

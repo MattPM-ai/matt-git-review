@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.accessToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session?.mattJwtToken) {
+      return NextResponse.json({ error: 'Unauthorized - No Matt JWT token available' }, { status: 401 });
     }
 
     const { orgName, date, users, email } = await request.json();
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Fetch activities from Matt API
-    const response = await mattAPI.fetchActivities(session.mattJwtToken!, filter);
+    const response = await mattAPI.fetchActivities(session.mattJwtToken, filter);
     
     // Filter only commits
     const filteredCommits = response.activities.filter(activity => 

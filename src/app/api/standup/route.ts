@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Generate standup task using Matt API
-    const taskResponse = await mattAPI.generateStandup(session.mattJwtToken!, standupRequest);
+    const taskResponse = await mattAPI.generateStandup(session.mattJwtToken, standupRequest);
 
     return NextResponse.json(taskResponse);
   } catch (error) {

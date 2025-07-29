@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
-import { validateGitHubOrgJWT } from "@/lib/jwt-utils";
+import { signIn } from "next-auth/react";
 
 interface QueryAuthHandlerProps {
   requiredOrg?: string;
@@ -17,9 +17,11 @@ export function QueryAuthHandler({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [authAttempted, setAuthAttempted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useValidatedSession();
+  const processedSubscriptionRef = useRef<string | null>(null);
 
   useEffect(() => {
     const processAuth = async () => {
@@ -28,81 +30,60 @@ export function QueryAuthHandler({
         return;
       }
 
-      // Check for query auth parameter
-      const authToken = searchParams.get("_auth");
+      // Check for query auth parameter (subscription ID)
+      const subscriptionId = searchParams.get("_auth");
 
-      if (authToken && !isProcessing) {
+      // Only process if we have a subscription ID and haven't already processed it
+      if (subscriptionId && !isProcessing && processedSubscriptionRef.current !== subscriptionId) {
         setIsProcessing(true);
+        processedSubscriptionRef.current = subscriptionId;
 
         try {
-          // Validate the JWT token
-          const validation = validateGitHubOrgJWT(authToken);
-
-          if (!validation.isValid) {
-            setError(validation.error || "Invalid authentication token");
-            return;
-          }
-
-          // Check org access if required
-          if (
-            requiredOrg &&
-            validation.orgName?.toLowerCase() !== requiredOrg.toLowerCase()
-          ) {
-            setError(`Access denied to organization: ${requiredOrg}`);
-            return;
-          }
-
-
-          // Store in sessionStorage for immediate use
-          sessionStorage.setItem("direct_jwt_token", authToken);
-          sessionStorage.setItem("direct_org_name", validation.orgName || "");
-
-          // Create session via API route
-          const response = await fetch("/api/auth/direct", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              jwtToken: authToken,
-              orgName: validation.orgName,
-            }),
+          // Use NextAuth signIn with subscription provider
+          const result = await signIn("subscription", {
+            subscriptionId,
+            requiredOrg,
+            redirect: false,
           });
 
-          if (response.ok) {
+          if (result?.error) {
+            console.error("Subscription sign in failed:", result.error);
+            if (result.error === "CredentialsSignin") {
+              setError("Subscription not found or expired");
+            } else {
+              setError("Failed to authenticate with subscription");
+            }
+            setAuthAttempted(true);
+            return;
+          }
+
+          if (result?.ok) {
             // Remove auth parameter from URL
             const url = new URL(window.location.href);
             url.searchParams.delete("_auth");
             window.history.replaceState({}, "", url.toString());
 
-            // Force page refresh to load with new session
+            // Redirect or refresh to load with new session
             window.location.reload();
           } else {
-            setError("Failed to create authentication session");
+            setError("Authentication failed");
+            setAuthAttempted(true);
           }
         } catch (error) {
           console.error("Auth processing error:", error);
           setError("Failed to process authentication");
+          setAuthAttempted(true);
         } finally {
           setIsProcessing(false);
         }
-      } else if (!authToken && !session) {
+      } else if (!subscriptionId && !session && !authAttempted) {
         // No auth token in query params and no existing session
-        // Check if we have a direct JWT token in sessionStorage
-        const directToken =
-          typeof window !== "undefined"
-            ? sessionStorage.getItem("direct_jwt_token")
-            : null;
-
-        if (!directToken) {
-          setNeedsAuth(true);
-        }
+        setNeedsAuth(true);
       }
     };
 
     processAuth();
-  }, [searchParams, requiredOrg, isProcessing, session, status]);
-
+  }, [searchParams, requiredOrg, isProcessing, session, status, authAttempted]);
 
   useEffect(() => {
     if (needsAuth) {

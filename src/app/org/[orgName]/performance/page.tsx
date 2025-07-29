@@ -1,7 +1,4 @@
-import { auth } from "@/lib/auth";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { PerformanceReviewDashboard } from "@/components/performance-review-dashboard";
-import { QueryAuthHandler } from "@/components/query-auth-handler";
+import { redirect } from "next/navigation";
 
 interface PerformancePageProps {
   params: Promise<{
@@ -19,45 +16,16 @@ export default async function PerformancePage({
   searchParams,
 }: PerformancePageProps) {
   const { orgName } = await params;
-  const session = await auth();
-
-  if (!session) {
-    return (
-      <QueryAuthHandler requiredOrg={orgName}>
-        <PerformancePageContent params={{orgName}} searchParams={searchParams} />
-      </QueryAuthHandler>
-    );
-  }
-
-  return <PerformancePageContent params={{orgName}} searchParams={searchParams} />;
-}
-
-async function PerformancePageContent({
-  params,
-  searchParams,
-}: {
-  params: { orgName: string };
-  searchParams: Promise<{
-    period?: "daily" | "weekly" | "monthly";
-    dateFrom?: string;
-    dateTo?: string;
-  }>;
-}) {
-  const { orgName } = params;
-  const { period = "weekly", dateFrom, dateTo } = await searchParams;
-
-  return (
-    <DashboardLayout
-      orgName={orgName}
-      title="Performance & Standup"
-      currentView="performance"
-    >
-      <PerformanceReviewDashboard
-        orgName={orgName}
-        initialPeriod={period}
-        initialDateFrom={dateFrom}
-        initialDateTo={dateTo}
-      />
-    </DashboardLayout>
-  );
+  const searchParamsResolved = await searchParams;
+  
+  // Build query string from searchParams
+  const queryString = new URLSearchParams();
+  if (searchParamsResolved.period) queryString.append("period", searchParamsResolved.period);
+  if (searchParamsResolved.dateFrom) queryString.append("dateFrom", searchParamsResolved.dateFrom);
+  if (searchParamsResolved.dateTo) queryString.append("dateTo", searchParamsResolved.dateTo);
+  
+  const queryPart = queryString.toString() ? `?${queryString.toString()}` : "";
+  
+  // Redirect to the new org homepage which now shows performance
+  redirect(`/org/${orgName}${queryPart}`);
 }

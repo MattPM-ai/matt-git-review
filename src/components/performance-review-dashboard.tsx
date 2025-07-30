@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
+import { ShareModal } from "./share-modal";
 import { DateRangePicker, type PeriodType } from "./date-range-picker";
 import { TaskLoadingState } from "./task-loading-state";
 import { useStandupData } from "@/hooks/useStandupData";
@@ -91,6 +92,7 @@ export function PerformanceReviewDashboard({
     null
   );
   const [isModalClosing, setIsModalClosing] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleCloseModal = useCallback(() => {
     setIsModalClosing(true);
@@ -221,15 +223,45 @@ export function PerformanceReviewDashboard({
               </p>
             </div>
 
-            <DateRangePicker
-              period={period}
-              dateFrom={dateRange.dateFrom}
-              dateTo={dateRange.dateTo}
-              onPeriodChange={handlePeriodChange}
-              onDateRangeChange={handleDateRangeChange}
-              disabled={isLoading}
-              className="flex-shrink-0"
-            />
+            <div className="flex items-center gap-2">
+              <DateRangePicker
+                period={period}
+                dateFrom={dateRange.dateFrom}
+                dateTo={dateRange.dateTo}
+                onPeriodChange={handlePeriodChange}
+                onDateRangeChange={handleDateRangeChange}
+                disabled={isLoading}
+                className="flex-shrink-0"
+              />
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="hidden sm:block p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Share report"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.562 18 16.018 18 16.5c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3c.482 0 .938.114 1.342.316m0 0a3 3 0 00-4.316-4.316m4.316 4.316a3 3 0 01-4.316 4.316m0-9.632C11.438 8.886 10.982 9 10.5 9c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3c0 .482-.114.938-.316 1.342m0 0a3 3 0 01-4.316-4.316m0 9.632A3 3 0 016 10.5c0-1.657 1.343-3 3-3s3 1.343 3 3a3 3 0 01-.684 1.842"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="sm:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Share report"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.316C18.114 15.562 18 16.018 18 16.5c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3c.482 0 .938.114 1.342.316m0 0a3 3 0 00-4.316-4.316m4.316 4.316a3 3 0 01-4.316 4.316m0-9.632C11.438 8.886 10.982 9 10.5 9c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3c0 .482-.114.938-.316 1.342m0 0a3 3 0 01-4.316-4.316m0 9.632A3 3 0 016 10.5c0-1.657 1.343-3 3-3s3 1.343 3 3a3 3 0 01-.684 1.842"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -450,6 +482,16 @@ export function PerformanceReviewDashboard({
         selectedUser={selectedUser}
         isModalClosing={isModalClosing}
         onClose={handleCloseModal}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        orgName={orgName}
+        dateFrom={dateRange.dateFrom}
+        dateTo={dateRange.dateTo}
+        period={period}
       />
     </div>
   );

@@ -15,6 +15,7 @@ declare module "next-auth" {
       html_url: string
     }
     error?: string
+    isSubscriptionAuth?: boolean
   }
   
   interface JWT {
@@ -31,5 +32,6 @@ declare module "next-auth" {
       html_url: string
     }
     error?: string
+    isSubscriptionAuth?: boolean
   }
 }

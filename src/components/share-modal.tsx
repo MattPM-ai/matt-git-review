@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -14,7 +15,12 @@ interface ShareModalProps {
 export function ShareModal({
   isOpen,
   onClose,
-}: Omit<ShareModalProps, 'orgName' | 'dateFrom' | 'dateTo' | 'period'>) {
+  orgName,
+  dateFrom,
+  dateTo,
+  period,
+}: ShareModalProps) {
+  const { data: session } = useSession();
   const [email, setEmail] = useState("");
   const [subscribeToDaily, setSubscribeToDaily] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
@@ -35,11 +41,47 @@ export function ShareModal({
     setIsSharing(true);
     setShareError("");
 
-    // Simulate API call for now
-    setTimeout(() => {
+    try {
+      const endpoint = subscribeToDaily
+        ? `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/invite-and-send`
+        : `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/send-performance-email`;
+
+      const body = subscribeToDaily
+        ? {
+            email,
+            organizationLogin: orgName,
+            dailyReport: true,
+            weeklyReport: true,
+            monthlyReport: true,
+            dateFrom,
+            dateTo,
+            timeframe: period,
+          }
+        : {
+            email,
+            organizationLogin: orgName,
+            dateFrom,
+            dateTo,
+            timeframe: period,
+          };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.mattJwtToken && {
+            Authorization: `Bearer ${session.mattJwtToken}`,
+          }),
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to share report");
+      }
+
       setShareSuccess(true);
-      setIsSharing(false);
-      
       setTimeout(() => {
         onClose();
         // Reset state after closing
@@ -47,10 +89,26 @@ export function ShareModal({
           setEmail("");
           setShareSuccess(false);
           setShareError("");
+          setSubscribeToDaily(true);
         }, 300);
       }, 1500);
-    }, 1000);
-  }, [email, onClose]);
+    } catch (error) {
+      setShareError(
+        error instanceof Error ? error.message : "Failed to share report"
+      );
+    } finally {
+      setIsSharing(false);
+    }
+  }, [
+    email,
+    subscribeToDaily,
+    orgName,
+    dateFrom,
+    dateTo,
+    period,
+    session?.mattJwtToken,
+    onClose,
+  ]);
 
   if (!isOpen) return null;
 
@@ -68,12 +126,19 @@ export function ShareModal({
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Share Report</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Share Report
+              </h2>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -87,7 +152,10 @@ export function ShareModal({
             {/* Content */}
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Email address
                 </label>
                 <input
@@ -112,7 +180,8 @@ export function ShareModal({
                 <span className="text-sm text-gray-700">
                   Send daily standup summaries to this email
                   <span className="block text-xs text-gray-500 mt-1">
-                    They&apos;ll receive a daily summary of team activity and progress
+                    They&apos;ll receive a daily summary of team activity and
+                    progress
                   </span>
                 </span>
               </label>
@@ -125,7 +194,9 @@ export function ShareModal({
 
               {shareSuccess && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800">Report shared successfully!</p>
+                  <p className="text-sm text-green-800">
+                    Report shared successfully!
+                  </p>
                 </div>
               )}
             </div>

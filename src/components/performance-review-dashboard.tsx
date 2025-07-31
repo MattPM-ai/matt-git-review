@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
+import { useSession } from "next-auth/react";
 import { UserDetailedView } from "./user-detailed-view";
 import { MobileModal } from "./mobile-modal";
 import { ShareModal } from "./share-modal";
@@ -53,6 +54,7 @@ export function PerformanceReviewDashboard({
   initialDateFrom,
   initialDateTo,
 }: PerformanceReviewDashboardProps) {
+  const { data: session } = useSession();
   const [period, setPeriod] = useState<PeriodType>(initialPeriod);
   const periodRef = useRef<PeriodType>(initialPeriod);
 
@@ -246,26 +248,30 @@ export function PerformanceReviewDashboard({
                 disabled={isLoading}
                 className="flex-1"
                 shareButton={
-                  <button
-                    onClick={() => setIsShareModalOpen(true)}
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
-                    title="Share report"
-                  >
-                    <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
-                      <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-                    </svg>
-                  </button>
+                  !session?.isSubscriptionAuth ? (
+                    <button
+                      onClick={() => setIsShareModalOpen(true)}
+                      className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
+                      title="Share report"
+                    >
+                      <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
+                        <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                      </svg>
+                    </button>
+                  ) : undefined
                 }
               />
-              <button
-                onClick={() => setIsShareModalOpen(true)}
-                className="hidden sm:block p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
-                title="Share report"
-              >
-                <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
-                  <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-                </svg>
-              </button>
+              {!session?.isSubscriptionAuth && (
+                <button
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="hidden sm:block p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
+                  title="Share report"
+                >
+                  <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
+                    <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
@@ -493,6 +499,10 @@ export function PerformanceReviewDashboard({
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
+        orgName={orgName}
+        dateFrom={dateRange.dateFrom}
+        dateTo={dateRange.dateTo}
+        period={period}
       />
     </div>
   );

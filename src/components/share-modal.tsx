@@ -14,11 +14,7 @@ interface ShareModalProps {
 export function ShareModal({
   isOpen,
   onClose,
-  orgName,
-  dateFrom,
-  dateTo,
-  period,
-}: ShareModalProps) {
+}: Omit<ShareModalProps, 'orgName' | 'dateFrom' | 'dateTo' | 'period'>) {
   const [email, setEmail] = useState("");
   const [subscribeToDaily, setSubscribeToDaily] = useState(true);
   const [isSharing, setIsSharing] = useState(false);

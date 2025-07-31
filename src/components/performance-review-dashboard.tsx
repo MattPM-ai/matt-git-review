@@ -74,7 +74,10 @@ export function PerformanceReviewDashboard({
 
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const [hasGeneratedReport, setHasGeneratedReport] = useState(false);
+  
+  // Auto-generate report if URL has valid date parameters
+  const shouldAutoGenerate = initialDateFrom && initialDateTo;
+  const [hasGeneratedReport, setHasGeneratedReport] = useState(shouldAutoGenerate);
 
   const {
     standupData,
@@ -158,6 +161,16 @@ export function PerformanceReviewDashboard({
       dateTo: dateRange.dateTo,
     });
   }, [fetchStandupData, dateRange]);
+
+  // Auto-generate report on mount if URL parameters are provided
+  useEffect(() => {
+    if (shouldAutoGenerate && !isLoading && performanceData.length === 0) {
+      fetchStandupData({
+        dateFrom: dateRange.dateFrom,
+        dateTo: dateRange.dateTo,
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Transform standup data into performance data whenever standupData changes
   useEffect(() => {

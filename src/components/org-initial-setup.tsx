@@ -12,7 +12,7 @@ interface OrgInitialSetupProps {
   isEditMode?: boolean;
   initialConfig?: {
     country: string | null;
-    timezone: number | null;
+    timezone: string | null;
     preferredEmailTime: string | null;
     dailyReport: boolean;
     weeklyReport: boolean;
@@ -65,117 +65,52 @@ function getCountryFromTimezone(timezone: string): string {
   return timezoneToCountry[timezone] || '';
 }
 
-// Helper function to get timezone offset from browser timezone
-// This accounts for current DST status
-function getTimezoneOffsetHours(): number {
-  const offsetMinutes = new Date().getTimezoneOffset();
-  return -offsetMinutes / 60; // Convert to hours and flip sign
-}
 
-// Helper function to detect timezone more accurately using Intl API
-function detectTimezoneFromBrowser(): number | null {
+// Helper function to detect timezone using Intl API
+function detectTimezoneFromBrowser(): string | null {
   try {
-    // Get the current timezone identifier
+    // Get the current timezone identifier from the browser
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log('Browser detected timezone:', timeZone);
     
-    // Create dates for both summer and winter to detect DST
-    const january = new Date(2024, 0, 1); // January 1st
-    const july = new Date(2024, 6, 1);    // July 1st
+    // Check if this timezone is in our supported list
+    const supportedTimezone = timezones.find(tz => tz.value === timeZone);
+    if (supportedTimezone) {
+      console.log('Found exact match:', timeZone);
+      return timeZone;
+    }
     
-    // Get offsets for both dates to detect DST pattern
-    const janOffset = -january.getTimezoneOffset() / 60;
-    const julyOffset = -july.getTimezoneOffset() / 60;
-    
-    // Current offset (accounts for current DST status)
-    const currentOffset = getTimezoneOffsetHours();
-    
-    // Map common timezone patterns to standard UTC offsets
-    const timezoneMapping: Record<string, number> = {
-      // US/Canada zones
-      'America/New_York': -5,     // EST (standard time)
-      'America/Chicago': -6,      // CST 
-      'America/Denver': -7,       // MST
-      'America/Los_Angeles': -8,  // PST
-      'America/Anchorage': -9,    // AKST
-      'America/Halifax': -4,      // AST
-      'America/Toronto': -5,      // EST
-      'America/Vancouver': -8,    // PST
-      
-      // Europe zones (most use DST)
-      'Europe/London': 0,         // GMT
-      'Europe/Paris': 1,          // CET
-      'Europe/Berlin': 1,         // CET
-      'Europe/Rome': 1,           // CET
-      'Europe/Madrid': 1,         // CET
-      'Europe/Amsterdam': 1,      // CET
-      'Europe/Stockholm': 1,      // CET
-      'Europe/Oslo': 1,           // CET
-      'Europe/Copenhagen': 1,     // CET
-      'Europe/Helsinki': 2,       // EET
-      'Europe/Warsaw': 1,         // CET
-      'Europe/Prague': 1,         // CET
-      'Europe/Vienna': 1,         // CET
-      'Europe/Zurich': 1,         // CET
-      'Europe/Brussels': 1,       // CET
-      'Europe/Dublin': 0,         // GMT
-      'Europe/Athens': 2,         // EET
-      'Europe/Moscow': 3,         // MSK (no DST since 2014)
-      
-      // Asia zones (mostly no DST)
-      'Asia/Tokyo': 9,            // JST (no DST)
-      'Asia/Seoul': 9,            // KST (no DST)
-      'Asia/Shanghai': 8,         // CST (no DST)
-      'Asia/Hong_Kong': 8,        // HKT (no DST)
-      'Asia/Singapore': 8,        // SGT (no DST)
-      'Asia/Bangkok': 7,          // ICT (no DST)
-      'Asia/Jakarta': 7,          // WIB (no DST)
-      'Asia/Manila': 8,           // PHT (no DST)
-      'Asia/Kolkata': 5.5,        // IST (no DST)
-      'Asia/Dubai': 4,            // GST (no DST)
-      'Asia/Tehran': 3.5,         // IRST (has DST)
-      'Asia/Karachi': 5,          // PKT (no DST)
-      'Asia/Dhaka': 6,            // BST (no DST)
-      'Asia/Yangon': 6.5,         // MMT (no DST)
-      'Asia/Kathmandu': 5.75,     // NPT (no DST)
-      'Asia/Kabul': 4.5,          // AFT (no DST)
-      
-      // Australia/New Zealand (DST in summer)
-      'Australia/Sydney': 10,     // AEST
-      'Australia/Melbourne': 10,  // AEST
-      'Australia/Perth': 8,       // AWST (no DST)
-      'Australia/Darwin': 9.5,    // ACST (no DST)
-      'Australia/Adelaide': 9.5,  // ACST
-      'Australia/Brisbane': 10,   // AEST (no DST)
-      'Pacific/Auckland': 12,     // NZST
-      
-      // Other zones
-      'Pacific/Honolulu': -10,    // HST (no DST)
-      'America/Sao_Paulo': -3,    // BRT
-      'America/Mexico_City': -6,  // CST
-      'America/Caracas': -4,      // VET
-      'America/St_Johns': -3.5,   // NST
-      'Atlantic/Azores': -1,      // AZOT
+    // Common aliases/mappings for timezones not in our list
+    const fallbackMappings: Record<string, string> = {
+      'Europe/Belfast': 'Europe/London',
+      'Europe/Edinburgh': 'Europe/London',
+      'Europe/Jersey': 'Europe/London',
+      'Europe/Guernsey': 'Europe/London',
+      'Europe/Isle_of_Man': 'Europe/London',
+      'America/Montreal': 'America/Toronto',
+      'America/Thunder_Bay': 'America/Toronto',
+      'America/Nipigon': 'America/Toronto',
+      'America/Pangnirtung': 'America/Toronto',
+      'America/Iqaluit': 'America/Toronto',
+      'America/Atikokan': 'America/Toronto',
+      'America/Winnipeg': 'America/Chicago',
+      'America/Phoenix': 'America/Denver',
+      'Asia/Calcutta': 'Asia/Kolkata',
+      'Asia/Saigon': 'Asia/Bangkok',
     };
     
-    // If we have a direct mapping, use the standard time offset
-    if (timezoneMapping[timeZone] !== undefined) {
-      return timezoneMapping[timeZone];
+    if (fallbackMappings[timeZone] && timezones.find(tz => tz.value === fallbackMappings[timeZone])) {
+      console.log(`Mapping ${timeZone} to ${fallbackMappings[timeZone]}`);
+      return fallbackMappings[timeZone];
     }
     
-    // Fallback: use current offset but try to detect standard time
-    // If timezone observes DST, prefer the standard (winter) time offset
-    if (Math.abs(janOffset - julyOffset) > 0.5) {
-      // DST detected - use the smaller offset (standard time)
-      return Math.min(janOffset, julyOffset);
-    }
-    
-    // No DST detected, use current offset
-    return currentOffset;
+    // Return null if not supported - user will need to select manually
+    console.log(`Browser timezone "${timeZone}" not in supported list, user will need to select manually`);
+    return null;
     
   } catch (err) {
-    console.log("Advanced timezone detection failed:", err);
-    // Fallback to simple offset
-    return getTimezoneOffsetHours();
+    console.log("Timezone detection failed:", err);
+    return null;
   }
 }
 
@@ -190,11 +125,11 @@ export function OrgInitialSetup({
   // For edit mode, use initialConfig values
   // For initial setup, use auto-detected values as defaults
   const [country, setCountry] = useState("");
-  const [timezone, setTimezone] = useState<number | "">("");
+  const [timezone, setTimezone] = useState<string | "">("");
   const [preferredEmailTime, setPreferredEmailTime] = useState("09:00");
-  const [dailyReport, setDailyReport] = useState(false);
-  const [weeklyReport, setWeeklyReport] = useState(false);
-  const [monthlyReport, setMonthlyReport] = useState(false);
+  const [dailyReport, setDailyReport] = useState(true);
+  const [weeklyReport, setWeeklyReport] = useState(true);
+  const [monthlyReport, setMonthlyReport] = useState(true);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -206,9 +141,9 @@ export function OrgInitialSetup({
       setCountry(initialConfig.country || "");
       setTimezone(initialConfig.timezone ?? "");
       setPreferredEmailTime(initialConfig.preferredEmailTime || "09:00");
-      setDailyReport(initialConfig.dailyReport ?? false);
-      setWeeklyReport(initialConfig.weeklyReport ?? false);
-      setMonthlyReport(initialConfig.monthlyReport ?? false);
+      setDailyReport(initialConfig.dailyReport ?? true);
+      setWeeklyReport(initialConfig.weeklyReport ?? true);
+      setMonthlyReport(initialConfig.monthlyReport ?? true);
     } else if (!isEditMode) {
       // Initial setup: auto-detect defaults
       
@@ -217,44 +152,42 @@ export function OrgInitialSetup({
         const detectedOffset = detectTimezoneFromBrowser();
         
         if (detectedOffset !== null) {
-          // Find matching timezone in our list
-          const matchingTimezone = timezones.find(tz => 
-            Math.abs(tz.value - detectedOffset) < 0.1 // Allow small floating point differences
-          );
-          
-          if (matchingTimezone) {
-            setTimezone(matchingTimezone.value);
-          }
+          setTimezone(detectedOffset);
         }
       } catch (err) {
         console.log("Could not auto-detect timezone:", err);
       }
       
-      // Auto-detect country - try IP-based detection first
+      // Auto-detect country - prioritize timezone-based detection for consistency
       async function detectCountry() {
+        // First: Try to detect from browser timezone (more reliable for timezone consistency)
         try {
-          // Try IP-based detection using ipapi.co (free, no API key required)
+          const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          console.log("Using browser timezone for country detection:", browserTimezone);
+          const detectedCountry = getCountryFromTimezone(browserTimezone);
+          if (detectedCountry) {
+            console.log("Country detected from timezone:", detectedCountry);
+            setCountry(detectedCountry);
+            return; // Success, consistent with timezone
+          }
+        } catch (err) {
+          console.log("Timezone-based country detection failed:", err);
+        }
+        
+        // Fallback: Try IP-based detection
+        try {
+          console.log("Falling back to IP-based country detection");
           const response = await fetch('https://ipapi.co/json/');
           if (response.ok) {
             const data = await response.json();
             if (data.country_code) {
+              console.log("Country detected from IP:", data.country_code);
               setCountry(data.country_code);
-              return; // Success, no need for fallback
+              return;
             }
           }
         } catch (err) {
           console.log("IP-based country detection failed:", err);
-        }
-        
-        // Fallback: Try to detect from browser timezone
-        try {
-          const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          const detectedCountry = getCountryFromTimezone(browserTimezone);
-          if (detectedCountry) {
-            setCountry(detectedCountry);
-          }
-        } catch (err) {
-          console.log("Timezone-based country detection failed:", err);
         }
       }
       
@@ -281,7 +214,7 @@ export function OrgInitialSetup({
     try {
       const config: UpdateOrgConfigParams = {
         country,
-        timezone: Number(timezone),
+        timezone: timezone as string,
         preferredEmailTime,
         dailyReport,
         weeklyReport,
@@ -347,7 +280,7 @@ export function OrgInitialSetup({
             <select
               id="timezone"
               value={timezone}
-              onChange={(e) => setTimezone(e.target.value ? Number(e.target.value) : "")}
+              onChange={(e) => setTimezone(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
             >

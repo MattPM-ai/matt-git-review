@@ -4,7 +4,7 @@ export interface OrgConfig {
   name: string;
   initialSetupAt: string | null;
   country: string | null;
-  timezone: number | null;
+  timezone: string | null;
   preferredEmailTime: string | null;
   dailyReport: boolean;
   weeklyReport: boolean;
@@ -13,7 +13,7 @@ export interface OrgConfig {
 
 export interface UpdateOrgConfigParams {
   country: string;
-  timezone: number;
+  timezone: string;
   preferredEmailTime: string;
   dailyReport: boolean;
   weeklyReport: boolean;

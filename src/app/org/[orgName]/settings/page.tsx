@@ -14,7 +14,7 @@ export default function OrgSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [config, setConfig] = useState<{
     country: string | null;
-    timezone: number | null;
+    timezone: string | null;
     preferredEmailTime: string | null;
     dailyReport: boolean;
     weeklyReport: boolean;

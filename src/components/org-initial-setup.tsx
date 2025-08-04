@@ -24,104 +24,107 @@ interface OrgInitialSetupProps {
 function getCountryFromTimezone(timezone: string): string {
   // Common timezone to country mappings
   const timezoneToCountry: Record<string, string> = {
-    'America/New_York': 'US',
-    'America/Chicago': 'US',
-    'America/Denver': 'US',
-    'America/Los_Angeles': 'US',
-    'America/Toronto': 'CA',
-    'America/Vancouver': 'CA',
-    'Europe/London': 'GB',
-    'Europe/Paris': 'FR',
-    'Europe/Berlin': 'DE',
-    'Europe/Rome': 'IT',
-    'Europe/Madrid': 'ES',
-    'Europe/Amsterdam': 'NL',
-    'Europe/Stockholm': 'SE',
-    'Europe/Oslo': 'NO',
-    'Europe/Copenhagen': 'DK',
-    'Europe/Helsinki': 'FI',
-    'Europe/Warsaw': 'PL',
-    'Europe/Prague': 'CZ',
-    'Europe/Vienna': 'AT',
-    'Europe/Zurich': 'CH',
-    'Europe/Brussels': 'BE',
-    'Europe/Dublin': 'IE',
-    'Asia/Tokyo': 'JP',
-    'Asia/Seoul': 'KR',
-    'Asia/Shanghai': 'CN',
-    'Asia/Hong_Kong': 'HK',
-    'Asia/Singapore': 'SG',
-    'Asia/Bangkok': 'TH',
-    'Asia/Jakarta': 'ID',
-    'Asia/Manila': 'PH',
-    'Asia/Kolkata': 'IN',
-    'Asia/Dubai': 'AE',
-    'Australia/Sydney': 'AU',
-    'Australia/Melbourne': 'AU',
-    'Australia/Perth': 'AU',
-    'Pacific/Auckland': 'NZ',
+    "America/New_York": "US",
+    "America/Chicago": "US",
+    "America/Denver": "US",
+    "America/Los_Angeles": "US",
+    "America/Toronto": "CA",
+    "America/Vancouver": "CA",
+    "Europe/London": "GB",
+    "Europe/Paris": "FR",
+    "Europe/Berlin": "DE",
+    "Europe/Rome": "IT",
+    "Europe/Madrid": "ES",
+    "Europe/Amsterdam": "NL",
+    "Europe/Stockholm": "SE",
+    "Europe/Oslo": "NO",
+    "Europe/Copenhagen": "DK",
+    "Europe/Helsinki": "FI",
+    "Europe/Warsaw": "PL",
+    "Europe/Prague": "CZ",
+    "Europe/Vienna": "AT",
+    "Europe/Zurich": "CH",
+    "Europe/Brussels": "BE",
+    "Europe/Dublin": "IE",
+    "Asia/Tokyo": "JP",
+    "Asia/Seoul": "KR",
+    "Asia/Shanghai": "CN",
+    "Asia/Hong_Kong": "HK",
+    "Asia/Singapore": "SG",
+    "Asia/Bangkok": "TH",
+    "Asia/Jakarta": "ID",
+    "Asia/Manila": "PH",
+    "Asia/Kolkata": "IN",
+    "Asia/Dubai": "AE",
+    "Australia/Sydney": "AU",
+    "Australia/Melbourne": "AU",
+    "Australia/Perth": "AU",
+    "Pacific/Auckland": "NZ",
   };
-  
-  return timezoneToCountry[timezone] || '';
-}
 
+  return timezoneToCountry[timezone] || "";
+}
 
 // Helper function to detect timezone using Intl API
 function detectTimezoneFromBrowser(): string | null {
   try {
     // Get the current timezone identifier from the browser
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log('Browser detected timezone:', timeZone);
-    
+    console.log("Browser detected timezone:", timeZone);
+
     // Check if this timezone is in our supported list
-    const supportedTimezone = timezones.find(tz => tz.value === timeZone);
+    const supportedTimezone = timezones.find((tz) => tz.value === timeZone);
     if (supportedTimezone) {
-      console.log('Found exact match:', timeZone);
+      console.log("Found exact match:", timeZone);
       return timeZone;
     }
-    
+
     // Common aliases/mappings for timezones not in our list
     const fallbackMappings: Record<string, string> = {
-      'Europe/Belfast': 'Europe/London',
-      'Europe/Edinburgh': 'Europe/London',
-      'Europe/Jersey': 'Europe/London',
-      'Europe/Guernsey': 'Europe/London',
-      'Europe/Isle_of_Man': 'Europe/London',
-      'America/Montreal': 'America/Toronto',
-      'America/Thunder_Bay': 'America/Toronto',
-      'America/Nipigon': 'America/Toronto',
-      'America/Pangnirtung': 'America/Toronto',
-      'America/Iqaluit': 'America/Toronto',
-      'America/Atikokan': 'America/Toronto',
-      'America/Winnipeg': 'America/Chicago',
-      'America/Phoenix': 'America/Denver',
-      'Asia/Calcutta': 'Asia/Kolkata',
-      'Asia/Saigon': 'Asia/Bangkok',
+      "Europe/Belfast": "Europe/London",
+      "Europe/Edinburgh": "Europe/London",
+      "Europe/Jersey": "Europe/London",
+      "Europe/Guernsey": "Europe/London",
+      "Europe/Isle_of_Man": "Europe/London",
+      "America/Montreal": "America/Toronto",
+      "America/Thunder_Bay": "America/Toronto",
+      "America/Nipigon": "America/Toronto",
+      "America/Pangnirtung": "America/Toronto",
+      "America/Iqaluit": "America/Toronto",
+      "America/Atikokan": "America/Toronto",
+      "America/Winnipeg": "America/Chicago",
+      "America/Phoenix": "America/Denver",
+      "Asia/Calcutta": "Asia/Kolkata",
+      "Asia/Saigon": "Asia/Bangkok",
     };
-    
-    if (fallbackMappings[timeZone] && timezones.find(tz => tz.value === fallbackMappings[timeZone])) {
+
+    if (
+      fallbackMappings[timeZone] &&
+      timezones.find((tz) => tz.value === fallbackMappings[timeZone])
+    ) {
       console.log(`Mapping ${timeZone} to ${fallbackMappings[timeZone]}`);
       return fallbackMappings[timeZone];
     }
-    
+
     // Return null if not supported - user will need to select manually
-    console.log(`Browser timezone "${timeZone}" not in supported list, user will need to select manually`);
+    console.log(
+      `Browser timezone "${timeZone}" not in supported list, user will need to select manually`
+    );
     return null;
-    
   } catch (err) {
     console.log("Timezone detection failed:", err);
     return null;
   }
 }
 
-export function OrgInitialSetup({ 
-  orgName, 
+export function OrgInitialSetup({
+  orgName,
   isEditMode = false,
-  initialConfig 
+  initialConfig,
 }: OrgInitialSetupProps) {
   const router = useRouter();
   const { data: session } = useSession();
-  
+
   // For edit mode, use initialConfig values
   // For initial setup, use auto-detected values as defaults
   const [country, setCountry] = useState("");
@@ -130,7 +133,7 @@ export function OrgInitialSetup({
   const [dailyReport, setDailyReport] = useState(true);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [monthlyReport, setMonthlyReport] = useState(true);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -146,24 +149,28 @@ export function OrgInitialSetup({
       setMonthlyReport(initialConfig.monthlyReport ?? true);
     } else if (!isEditMode) {
       // Initial setup: auto-detect defaults
-      
+
       // Auto-detect timezone (DST-aware)
       try {
         const detectedOffset = detectTimezoneFromBrowser();
-        
+
         if (detectedOffset !== null) {
           setTimezone(detectedOffset);
         }
       } catch (err) {
         console.log("Could not auto-detect timezone:", err);
       }
-      
+
       // Auto-detect country - prioritize timezone-based detection for consistency
       async function detectCountry() {
         // First: Try to detect from browser timezone (more reliable for timezone consistency)
         try {
-          const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          console.log("Using browser timezone for country detection:", browserTimezone);
+          const browserTimezone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
+          console.log(
+            "Using browser timezone for country detection:",
+            browserTimezone
+          );
           const detectedCountry = getCountryFromTimezone(browserTimezone);
           if (detectedCountry) {
             console.log("Country detected from timezone:", detectedCountry);
@@ -173,11 +180,11 @@ export function OrgInitialSetup({
         } catch (err) {
           console.log("Timezone-based country detection failed:", err);
         }
-        
+
         // Fallback: Try IP-based detection
         try {
           console.log("Falling back to IP-based country detection");
-          const response = await fetch('https://ipapi.co/json/');
+          const response = await fetch("https://ipapi.co/json/");
           if (response.ok) {
             const data = await response.json();
             if (data.country_code) {
@@ -190,14 +197,14 @@ export function OrgInitialSetup({
           console.log("IP-based country detection failed:", err);
         }
       }
-      
+
       detectCountry();
     }
   }, [isEditMode, initialConfig]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!country || timezone === "") {
       setError("Please fill in all required fields");
       return;
@@ -222,15 +229,20 @@ export function OrgInitialSetup({
       };
 
       await updateOrgConfig(orgName, config, session.mattJwtToken);
-      
+
+      // Success - stop loading state before redirect
+      setIsSubmitting(false);
+
       if (isEditMode) {
         router.push(`/org/${orgName}`);
       } else {
-        // For initial setup, redirect to performance page
-        router.push(`/org/${orgName}`);
+        // For initial setup, force a refresh to re-check setup status
+        window.location.reload();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save configuration");
+      setError(
+        err instanceof Error ? err.message : "Failed to save configuration"
+      );
       setIsSubmitting(false);
     }
   };
@@ -240,20 +252,24 @@ export function OrgInitialSetup({
       <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {isEditMode ? "Organization Settings" : "Welcome to Matt Git Review"}
+            {isEditMode
+              ? "Organization Settings"
+              : "Welcome to Matt Git Review"}
           </h1>
           <p className="text-gray-600">
-            {isEditMode 
+            {isEditMode
               ? `Update settings for ${orgName}`
-              : "Let's set up your organization to get started with automated reports"
-            }
+              : "Let's set up your organization to get started with automated reports"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Country */}
           <div>
-            <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="country"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Country <span className="text-red-500">*</span>
             </label>
             <select
@@ -274,7 +290,10 @@ export function OrgInitialSetup({
 
           {/* Timezone */}
           <div>
-            <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="timezone"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Timezone <span className="text-red-500">*</span>
             </label>
             <select
@@ -295,7 +314,10 @@ export function OrgInitialSetup({
 
           {/* Preferred Email Time */}
           <div>
-            <label htmlFor="emailTime" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="emailTime"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Preferred Email Time
             </label>
             <input
@@ -306,7 +328,8 @@ export function OrgInitialSetup({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Time when you prefer to receive email reports (in your selected timezone)
+              Time when you prefer to receive email reports (in your selected
+              timezone)
             </p>
           </div>
 
@@ -406,8 +429,10 @@ export function OrgInitialSetup({
                   </svg>
                   Saving...
                 </>
+              ) : isEditMode ? (
+                "Save Changes"
               ) : (
-                isEditMode ? "Save Changes" : "Complete Setup"
+                "Complete Setup"
               )}
             </button>
           </div>

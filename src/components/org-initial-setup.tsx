@@ -66,9 +66,117 @@ function getCountryFromTimezone(timezone: string): string {
 }
 
 // Helper function to get timezone offset from browser timezone
+// This accounts for current DST status
 function getTimezoneOffsetHours(): number {
   const offsetMinutes = new Date().getTimezoneOffset();
   return -offsetMinutes / 60; // Convert to hours and flip sign
+}
+
+// Helper function to detect timezone more accurately using Intl API
+function detectTimezoneFromBrowser(): number | null {
+  try {
+    // Get the current timezone identifier
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    // Create dates for both summer and winter to detect DST
+    const january = new Date(2024, 0, 1); // January 1st
+    const july = new Date(2024, 6, 1);    // July 1st
+    
+    // Get offsets for both dates to detect DST pattern
+    const janOffset = -january.getTimezoneOffset() / 60;
+    const julyOffset = -july.getTimezoneOffset() / 60;
+    
+    // Current offset (accounts for current DST status)
+    const currentOffset = getTimezoneOffsetHours();
+    
+    // Map common timezone patterns to standard UTC offsets
+    const timezoneMapping: Record<string, number> = {
+      // US/Canada zones
+      'America/New_York': -5,     // EST (standard time)
+      'America/Chicago': -6,      // CST 
+      'America/Denver': -7,       // MST
+      'America/Los_Angeles': -8,  // PST
+      'America/Anchorage': -9,    // AKST
+      'America/Halifax': -4,      // AST
+      'America/Toronto': -5,      // EST
+      'America/Vancouver': -8,    // PST
+      
+      // Europe zones (most use DST)
+      'Europe/London': 0,         // GMT
+      'Europe/Paris': 1,          // CET
+      'Europe/Berlin': 1,         // CET
+      'Europe/Rome': 1,           // CET
+      'Europe/Madrid': 1,         // CET
+      'Europe/Amsterdam': 1,      // CET
+      'Europe/Stockholm': 1,      // CET
+      'Europe/Oslo': 1,           // CET
+      'Europe/Copenhagen': 1,     // CET
+      'Europe/Helsinki': 2,       // EET
+      'Europe/Warsaw': 1,         // CET
+      'Europe/Prague': 1,         // CET
+      'Europe/Vienna': 1,         // CET
+      'Europe/Zurich': 1,         // CET
+      'Europe/Brussels': 1,       // CET
+      'Europe/Dublin': 0,         // GMT
+      'Europe/Athens': 2,         // EET
+      'Europe/Moscow': 3,         // MSK (no DST since 2014)
+      
+      // Asia zones (mostly no DST)
+      'Asia/Tokyo': 9,            // JST (no DST)
+      'Asia/Seoul': 9,            // KST (no DST)
+      'Asia/Shanghai': 8,         // CST (no DST)
+      'Asia/Hong_Kong': 8,        // HKT (no DST)
+      'Asia/Singapore': 8,        // SGT (no DST)
+      'Asia/Bangkok': 7,          // ICT (no DST)
+      'Asia/Jakarta': 7,          // WIB (no DST)
+      'Asia/Manila': 8,           // PHT (no DST)
+      'Asia/Kolkata': 5.5,        // IST (no DST)
+      'Asia/Dubai': 4,            // GST (no DST)
+      'Asia/Tehran': 3.5,         // IRST (has DST)
+      'Asia/Karachi': 5,          // PKT (no DST)
+      'Asia/Dhaka': 6,            // BST (no DST)
+      'Asia/Yangon': 6.5,         // MMT (no DST)
+      'Asia/Kathmandu': 5.75,     // NPT (no DST)
+      'Asia/Kabul': 4.5,          // AFT (no DST)
+      
+      // Australia/New Zealand (DST in summer)
+      'Australia/Sydney': 10,     // AEST
+      'Australia/Melbourne': 10,  // AEST
+      'Australia/Perth': 8,       // AWST (no DST)
+      'Australia/Darwin': 9.5,    // ACST (no DST)
+      'Australia/Adelaide': 9.5,  // ACST
+      'Australia/Brisbane': 10,   // AEST (no DST)
+      'Pacific/Auckland': 12,     // NZST
+      
+      // Other zones
+      'Pacific/Honolulu': -10,    // HST (no DST)
+      'America/Sao_Paulo': -3,    // BRT
+      'America/Mexico_City': -6,  // CST
+      'America/Caracas': -4,      // VET
+      'America/St_Johns': -3.5,   // NST
+      'Atlantic/Azores': -1,      // AZOT
+    };
+    
+    // If we have a direct mapping, use the standard time offset
+    if (timezoneMapping[timeZone] !== undefined) {
+      return timezoneMapping[timeZone];
+    }
+    
+    // Fallback: use current offset but try to detect standard time
+    // If timezone observes DST, prefer the standard (winter) time offset
+    if (Math.abs(janOffset - julyOffset) > 0.5) {
+      // DST detected - use the smaller offset (standard time)
+      return Math.min(janOffset, julyOffset);
+    }
+    
+    // No DST detected, use current offset
+    return currentOffset;
+    
+  } catch (err) {
+    console.log("Advanced timezone detection failed:", err);
+    // Fallback to simple offset
+    return getTimezoneOffsetHours();
+  }
 }
 
 export function OrgInitialSetup({ 
@@ -104,17 +212,19 @@ export function OrgInitialSetup({
     } else if (!isEditMode) {
       // Initial setup: auto-detect defaults
       
-      // Auto-detect timezone
+      // Auto-detect timezone (DST-aware)
       try {
-        const timezoneOffset = getTimezoneOffsetHours();
+        const detectedOffset = detectTimezoneFromBrowser();
         
-        // Find matching timezone in our list
-        const matchingTimezone = timezones.find(tz => 
-          Math.abs(tz.value - timezoneOffset) < 0.1 // Allow small floating point differences
-        );
-        
-        if (matchingTimezone) {
-          setTimezone(matchingTimezone.value);
+        if (detectedOffset !== null) {
+          // Find matching timezone in our list
+          const matchingTimezone = timezones.find(tz => 
+            Math.abs(tz.value - detectedOffset) < 0.1 // Allow small floating point differences
+          );
+          
+          if (matchingTimezone) {
+            setTimezone(matchingTimezone.value);
+          }
         }
       } catch (err) {
         console.log("Could not auto-detect timezone:", err);

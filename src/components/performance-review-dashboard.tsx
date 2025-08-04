@@ -78,7 +78,7 @@ export function PerformanceReviewDashboard({
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   
   // Auto-generate report if URL has valid date parameters
-  const shouldAutoGenerate = initialDateFrom && initialDateTo;
+  const shouldAutoGenerate = !!(initialDateFrom && initialDateTo);
   const [hasGeneratedReport, setHasGeneratedReport] = useState(shouldAutoGenerate);
 
   const {

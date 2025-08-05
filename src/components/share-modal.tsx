@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { getOrgConfig, type OrgConfig } from "@/lib/org-config";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -22,10 +23,36 @@ export function ShareModal({
 }: ShareModalProps) {
   const { data: session } = useSession();
   const [email, setEmail] = useState("");
-  const [subscribeToDaily, setSubscribeToDaily] = useState(true);
+  const [subscribeToReports, setSubscribeToReports] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
   const [shareError, setShareError] = useState("");
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [orgConfig, setOrgConfig] = useState<OrgConfig | null>(null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+  // Get the smallest enabled report frequency
+  const getSmallestReportFrequency = useCallback(() => {
+    if (!orgConfig) return null;
+    
+    if (orgConfig.dailyReport) return "daily";
+    if (orgConfig.weeklyReport) return "weekly";
+    if (orgConfig.monthlyReport) return "monthly";
+    return null;
+  }, [orgConfig]);
+
+  const smallestFrequency = getSmallestReportFrequency();
+  const hasAnyReports = smallestFrequency !== null;
+
+  // Load org config when modal opens
+  useEffect(() => {
+    if (isOpen && !orgConfig && session?.mattJwtToken) {
+      setIsLoadingConfig(true);
+      getOrgConfig(orgName, session.mattJwtToken)
+        .then(setOrgConfig)
+        .catch(console.error)
+        .finally(() => setIsLoadingConfig(false));
+    }
+  }, [isOpen, orgConfig, orgName, session?.mattJwtToken]);
 
   const handleShare = useCallback(async () => {
     if (!email) {
@@ -42,17 +69,17 @@ export function ShareModal({
     setShareError("");
 
     try {
-      const endpoint = subscribeToDaily
+      const endpoint = subscribeToReports
         ? `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/invite-and-send`
         : `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/send-performance-email`;
 
-      const body = subscribeToDaily
+      const body = subscribeToReports
         ? {
             email,
             organizationLogin: orgName,
-            dailyReport: true,
-            weeklyReport: true,
-            monthlyReport: true,
+            dailyReport: orgConfig?.dailyReport || false,
+            weeklyReport: orgConfig?.weeklyReport || false,
+            monthlyReport: orgConfig?.monthlyReport || false,
             dateFrom,
             dateTo,
             timeframe: period,
@@ -89,7 +116,7 @@ export function ShareModal({
           setEmail("");
           setShareSuccess(false);
           setShareError("");
-          setSubscribeToDaily(true);
+          setSubscribeToReports(true);
         }, 300);
       }, 1500);
     } catch (error) {
@@ -101,13 +128,14 @@ export function ShareModal({
     }
   }, [
     email,
-    subscribeToDaily,
+    subscribeToReports,
     orgName,
     dateFrom,
     dateTo,
     period,
     session?.mattJwtToken,
     onClose,
+    orgConfig,
   ]);
 
   if (!isOpen) return null;
@@ -169,22 +197,24 @@ export function ShareModal({
                 />
               </div>
 
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={subscribeToDaily}
-                  onChange={(e) => setSubscribeToDaily(e.target.checked)}
-                  className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                  disabled={isSharing}
-                />
-                <span className="text-sm text-gray-700">
-                  Send daily standup summaries to this email
-                  <span className="block text-xs text-gray-500 mt-1">
-                    They&apos;ll receive a daily summary of team activity and
-                    progress
+              {hasAnyReports && !isLoadingConfig && (
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={subscribeToReports}
+                    onChange={(e) => setSubscribeToReports(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    disabled={isSharing}
+                  />
+                  <span className="text-sm text-gray-700">
+                    Send {smallestFrequency} standup summaries to this email
+                    <span className="block text-xs text-gray-500 mt-1">
+                      They&apos;ll receive a {smallestFrequency} summary of team activity and
+                      progress
+                    </span>
                   </span>
-                </span>
-              </label>
+                </label>
+              )}
 
               {shareError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">

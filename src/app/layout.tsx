@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GitHub Organization Connect",
-  description: "Connect your GitHub organization to our app",
+  title: "Git Performance Ranking & Standup",
+  description:
+    "Connect your GitHub organization to generate automated performance rankings and standup",
 };
 
 export default function RootLayout({

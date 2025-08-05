@@ -40,10 +40,12 @@ export default async function Home({ searchParams }: HomeProps) {
               </svg>
             </div>
 
-            <h1 className="text-4xl font-bold text-gray-900">Git Standup</h1>
+            <h1 className="text-4xl text-center font-bold text-gray-900 max-w-sm mx-auto">
+              Git Performance Ranking & Standup
+            </h1>
             <p className="text-lg text-gray-600 max-w-md mx-auto">
               Connect your GitHub organization to generate automated performance
-              reviews and standup summaries
+              rankings and standup
             </p>
           </div>
 

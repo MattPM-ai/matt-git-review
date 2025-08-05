@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                   </h2>
                   <p className="text-gray-600 mb-6">
                     Get started by connecting your GitHub organization to access
-                    performance reviews and standup summaries.
+                    performance rankings and standup summaries.
                   </p>
                 </div>
                 <a

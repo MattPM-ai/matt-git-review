@@ -46,9 +46,9 @@ export interface ExternalSubscription {
 }
 
 export interface UpdateSubscriptionParams {
-  daily_report: boolean;
-  weekly_report: boolean;
-  monthly_report: boolean;
+  dailyReport: boolean;
+  weeklyReport: boolean;
+  monthlyReport: boolean;
 }
 
 export async function getOrgMembers(

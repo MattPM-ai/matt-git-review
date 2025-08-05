@@ -52,9 +52,9 @@ export function ManageSubscriptionModal({
 
     try {
       const params: UpdateSubscriptionParams = {
-        daily_report: dailyReport,
-        weekly_report: weeklyReport,
-        monthly_report: monthlyReport,
+        dailyReport: dailyReport,
+        weeklyReport: weeklyReport,
+        monthlyReport: monthlyReport,
       };
 
       await updateSubscription(subscription.id, params, session.mattJwtToken);

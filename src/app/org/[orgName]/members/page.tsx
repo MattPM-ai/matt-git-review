@@ -187,28 +187,28 @@ export default function OrgMembersPage() {
               ) : (
                 <div className="divide-y divide-gray-200">
                   {gitMembers.map((member) => (
-                    <div key={member.id} className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div key={member.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <Image
                           src={member.avatarUrl}
-                          alt={member.name}
+                          alt={`${member.name} avatar`}
                           width={40}
                           height={40}
-                          className="rounded-full"
+                          className="rounded-full flex-shrink-0"
                         />
-                        <div>
-                          <div className="font-medium text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-900 truncate">
                             {member.name}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 truncate">
                             @{member.username} • {member.email || "No email"}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3">
                         {/* Subscription status */}
                         {member.subscription ? (
-                          <div className="flex items-center gap-2 text-sm">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-sm">
                             {member.subscription.dailyReport && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 ✓ Daily
@@ -239,7 +239,7 @@ export default function OrgMembersPage() {
                               weeklyReport: member.subscription!.weeklyReport,
                               monthlyReport: member.subscription!.monthlyReport,
                             }, member.name)}
-                            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full sm:w-auto flex-shrink-0"
                           >
                             Manage
                           </button>
@@ -265,15 +265,15 @@ export default function OrgMembersPage() {
               ) : (
                 <div className="divide-y divide-gray-200">
                   {externalEmails.map((subscription) => (
-                    <div key={subscription.id} className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div key={subscription.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                           </svg>
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-900 truncate">
                             {subscription.email}
                           </div>
                           <div className="text-sm text-gray-500">
@@ -281,9 +281,9 @@ export default function OrgMembersPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3">
                         {/* Subscription status */}
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-sm">
                           {subscription.daily_report && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               ✓ Daily
@@ -302,7 +302,7 @@ export default function OrgMembersPage() {
                         </div>
                         
                         {/* Action buttons */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <button
                             onClick={() => handleManageSubscription({
                               id: subscription.id,
@@ -311,14 +311,14 @@ export default function OrgMembersPage() {
                               weeklyReport: subscription.weekly_report,
                               monthlyReport: subscription.monthly_report,
                             })}
-                            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex-1 sm:flex-initial"
                           >
                             Manage
                           </button>
                           <button
                             onClick={() => handleDeleteSubscription(subscription.id)}
                             disabled={deletingId === subscription.id}
-                            className="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial"
                           >
                             {deletingId === subscription.id ? "Deleting..." : "Delete"}
                           </button>

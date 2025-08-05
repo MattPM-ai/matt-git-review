@@ -4,7 +4,7 @@ import { UserProfile } from "@/components/auth/user-profile";
 interface DashboardLayoutProps {
   orgName: string;
   title?: string;
-  currentView?: "standup" | "activity" | "performance" | "contributions";
+  currentView?: "standup" | "activity" | "performance" | "contributions" | "members" | "settings";
   sidebar?: React.ReactNode;
   children: React.ReactNode;
 }

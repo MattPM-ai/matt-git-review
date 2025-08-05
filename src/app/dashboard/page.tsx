@@ -101,7 +101,7 @@ export default async function DashboardPage() {
                     View
                   </a>
                   <a
-                    href={`/org/${org.login}/settings`}
+                    href={`/org/${org.login}/manage`}
                     className="rounded-md bg-gray-100 p-2 text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     title="Settings"
                   >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
@@ -17,12 +17,14 @@ import Image from "next/image";
 export default function OrgMembersPage() {
   const params = useParams();
   const orgName = params.orgName as string;
+  const router = useRouter();
   const { data: session, status } = useSession();
   
   const [membersData, setMembersData] = useState<MembersResponse | null>(null);
   const [externalSubscriptions, setExternalSubscriptions] = useState<ExternalSubscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedSubscription, setSelectedSubscription] = useState<{
     id: string;
     email: string;
@@ -32,7 +34,6 @@ export default function OrgMembersPage() {
   } | null>(null);
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Check if user has github_user token (not github_org)
   const hasGitHubUserAccess = session?.user && !session.isSubscriptionAuth;
@@ -75,6 +76,7 @@ export default function OrgMembersPage() {
     setIsManageModalOpen(true);
   }, []);
 
+
   const handleDeleteSubscription = useCallback(async (subscriptionId: string) => {
     if (!session?.mattJwtToken || !confirm("Are you sure you want to delete this subscription?")) {
       return;
@@ -95,6 +97,7 @@ export default function OrgMembersPage() {
   const handleModalSuccess = useCallback(() => {
     fetchData(); // Refresh data after successful update
   }, [fetchData]);
+
 
   if (status === "loading" || isLoading) {
     return (

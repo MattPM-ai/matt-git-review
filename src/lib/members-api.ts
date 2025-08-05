@@ -113,6 +113,26 @@ export async function updateSubscription(
   }
 }
 
+export async function getSubscription(
+  subscriptionId: string,
+  jwtToken: string
+): Promise<ExternalSubscription> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/${subscriptionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch subscription: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 export async function deleteSubscription(
   subscriptionId: string,
   jwtToken: string

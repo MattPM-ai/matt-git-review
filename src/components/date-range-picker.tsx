@@ -34,6 +34,7 @@ interface DateRangePickerProps {
   onDateRangeChange: (dateRange: DateRange) => void;
   className?: string;
   disabled?: boolean;
+  shareButton?: React.ReactNode;
 }
 
 interface PeriodOption {
@@ -58,6 +59,7 @@ export function DateRangePicker({
   onDateRangeChange,
   className = "",
   disabled = false,
+  shareButton,
 }: DateRangePickerProps) {
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
@@ -351,8 +353,9 @@ export function DateRangePicker({
 
   return (
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
-      {/* Period Selector Dropdown */}
-      <div className="relative" ref={periodDropdownRef}>
+      {/* Period Selector Dropdown - Mobile: flex row with share button */}
+      <div className="flex items-center gap-2 sm:contents">
+        <div className="relative flex-1 sm:flex-none" ref={periodDropdownRef}>
         <button
           onClick={() => !disabled && setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
           disabled={disabled}
@@ -386,6 +389,14 @@ export function DateRangePicker({
                 {option.label}
               </button>
             ))}
+          </div>
+        )}
+        </div>
+        
+        {/* Mobile Share Button */}
+        {shareButton && (
+          <div className="sm:hidden flex-shrink-0">
+            {shareButton}
           </div>
         )}
       </div>

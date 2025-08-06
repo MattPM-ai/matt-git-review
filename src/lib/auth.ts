@@ -227,6 +227,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (token.error) {
           session.error = token.error as string;
         }
+
+        // Pass subscription auth flag
+        if (token.isSubscriptionAuth) {
+          session.isSubscriptionAuth = true;
+        }
       }
       return session;
     },

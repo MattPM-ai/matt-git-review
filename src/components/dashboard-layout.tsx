@@ -4,7 +4,7 @@ import { UserProfile } from "@/components/auth/user-profile";
 interface DashboardLayoutProps {
   orgName: string;
   title?: string;
-  currentView?: "standup" | "activity" | "performance" | "contributions";
+  currentView?: "standup" | "activity" | "performance" | "contributions" | "members" | "settings";
   sidebar?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -40,12 +40,14 @@ export function DashboardLayout({
               <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate min-w-0">
                 {orgName}
               </h1>
-              <Link
-                href={`/org/${orgName}/dashboards`}
-                className="text-sm text-gray-500 hover:text-gray-700 flex-shrink-0"
-              >
-                All Dashboards
-              </Link>
+              {process.env.NODE_ENV === "development" && (
+                <Link
+                  href={`/org/${orgName}/dashboards`}
+                  className="text-sm text-gray-500 hover:text-gray-700 flex-shrink-0"
+                >
+                  All
+                </Link>
+              )}
             </div>
             <div className="flex-shrink-0">
               <UserProfile />
@@ -59,9 +61,7 @@ export function DashboardLayout({
         {/* Sidebar - only show if provided */}
         {sidebar && (
           <div className="w-full lg:w-80 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0 overflow-y-auto">
-            <div className="p-4 lg:p-6">
-              {sidebar}
-            </div>
+            <div className="p-4 lg:p-6">{sidebar}</div>
           </div>
         )}
 

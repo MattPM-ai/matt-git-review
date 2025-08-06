@@ -48,12 +48,9 @@ export function DailyTimeline({ dailyStandups, variant = "desktop" }: DailyTimel
               </h5>
               {isDesktop && (
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>{daily.totalCommits}c</span>
-                  <span>{daily.totalPRs}pr</span>
-                  <span>{daily.totalIssues}i</span>
+                  <span>{daily.totalCommits} commits</span>
                   <span className="text-green-600">
-                    {daily.totalManHoursMin}-
-                    {daily.totalManHoursMax}h
+                    {daily.totalManHoursMin}-{daily.totalManHoursMax} man-hours
                   </span>
                 </div>
               )}
@@ -62,84 +59,27 @@ export function DailyTimeline({ dailyStandups, variant = "desktop" }: DailyTimel
             {!isDesktop && (
               <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
                 <span>{daily.totalCommits} commits</span>
-                <span>{daily.totalPRs} PRs</span>
-                <span>{daily.totalIssues} issues</span>
                 <span className="text-green-600">
-                  {daily.totalManHoursMin}-{daily.totalManHoursMax}h
+                  {daily.totalManHoursMin}-{daily.totalManHoursMax} man-hours
                 </span>
               </div>
             )}
 
-            {daily.summary && (
-              <p className={`text-gray-600 mb-${isDesktop ? '2' : '3'} bg-gray-50 p-${isDesktop ? '2' : '3'} rounded ${isDesktop ? 'text-xs' : 'text-sm'}`}>
-                {daily.summary}
-              </p>
+            {daily.workDone.length > 0 && (
+              <ul className={`space-y-1`}>
+                {daily.workDone.map((item, itemIndex) => (
+                  <li
+                    key={itemIndex}
+                    className={`flex items-start gap-${isDesktop ? '1' : '2'} text-gray-600 ${isDesktop ? 'text-xs' : 'text-sm'}`}
+                  >
+                    <span className="text-emerald-500 mt-0.5">
+                      ✓
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             )}
-
-            <div className={`space-y-${isDesktop ? '2' : '3'}`}>
-              {daily.workDone.length > 0 && (
-                <div>
-                  <p className={`font-medium text-gray-700 mb-${isDesktop ? '1' : '2'} ${isDesktop ? 'text-xs' : 'text-sm'}`}>
-                    Completed:
-                  </p>
-                  <ul className={`space-y-1 ml-${isDesktop ? '2' : '3'}`}>
-                    {daily.workDone.map((item, itemIndex) => (
-                      <li
-                        key={itemIndex}
-                        className={`flex items-start gap-${isDesktop ? '1' : '2'} text-gray-600 ${isDesktop ? 'text-xs' : 'text-sm'}`}
-                      >
-                        <span className="text-emerald-500 mt-0.5">
-                          ✓
-                        </span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {daily.workingOn.length > 0 && (
-                <div>
-                  <p className={`font-medium text-gray-700 mb-${isDesktop ? '1' : '2'} ${isDesktop ? 'text-xs' : 'text-sm'}`}>
-                    Working on:
-                  </p>
-                  <ul className={`space-y-1 ml-${isDesktop ? '2' : '3'}`}>
-                    {daily.workingOn.map((item, itemIndex) => (
-                      <li
-                        key={itemIndex}
-                        className={`flex items-start gap-${isDesktop ? '1' : '2'} text-gray-600 ${isDesktop ? 'text-xs' : 'text-sm'}`}
-                      >
-                        <span className="text-blue-500 mt-0.5">
-                          ⚡
-                        </span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {daily.ongoingIssues.length > 0 && (
-                <div>
-                  <p className={`font-medium text-gray-700 mb-${isDesktop ? '1' : '2'} ${isDesktop ? 'text-xs' : 'text-sm'}`}>
-                    Issues:
-                  </p>
-                  <ul className={`space-y-1 ml-${isDesktop ? '2' : '3'}`}>
-                    {daily.ongoingIssues.map((item, itemIndex) => (
-                      <li
-                        key={itemIndex}
-                        className={`flex items-start gap-${isDesktop ? '1' : '2'} text-gray-600 ${isDesktop ? 'text-xs' : 'text-sm'}`}
-                      >
-                        <span className="text-red-500 mt-0.5">
-                          ⚠
-                        </span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
           </div>
         ))}
       </div>

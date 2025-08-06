@@ -105,3 +105,6 @@ pnpm build
 - Lint checks pass (only minor img optimization warnings)
 - Manual testing recommended for authentication flows
 - Test with both authenticated and unauthenticated states
+
+### Style Note
+- Clickable button should have `hover:cursor-pointer`

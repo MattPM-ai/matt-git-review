@@ -1,194 +1,55 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { UserProfile } from "@/components/auth/user-profile";
-import Image from "next/image";
+"use client";
 
-interface Organization {
-  id: number;
-  login: string;
-  description?: string;
-  avatar_url: string;
-}
+import { useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { DashboardContent } from "@/components/dashboard-content";
 
-async function getGitHubOrgs(accessToken: string) {
-  const response = await fetch("https://api.github.com/user/orgs", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-  });
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch organizations");
+  useEffect(() => {
+    if (status === "loading") return;
+    
+    if (!session || !session.accessToken) {
+      router.push("/");
+    }
+  }, [session, status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg className="animate-spin h-8 w-8 mx-auto text-indigo-600" viewBox="0 0 24 24">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
-
-  return response.json();
-}
-
-export default async function DashboardPage() {
-  const session = await auth();
 
   if (!session || !session.accessToken) {
-    redirect("/");
+    return null;
   }
 
-  let organizations = [];
-  let error = null;
+  const handleError = () => {
+    signOut({ callbackUrl: "/" });
+  };
 
-  try {
-    organizations = await getGitHubOrgs(session.accessToken);
-  } catch (e) {
-    console.error("Failed to fetch orgs:", e);
-    error = "Failed to fetch organizations. Please sign in again.";
-  }
-
-  const githubAppSlug = process.env.GITHUB_APP_SLUG || "your-github-app-slug";
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-            <UserProfile />
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Your GitHub Organizations
-            </h2>
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 mb-4">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Existing Organizations */}
-            {organizations.map((org: Organization) => (
-              <div
-                key={org.id}
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={org.avatar_url}
-                    alt={org.login}
-                    width={48}
-                    height={48}
-                    className="rounded-full"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{org.login}</h3>
-                    {org.description && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        {org.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <a
-                  href={`/org/${org.login}`}
-                  className="mt-4 block w-full rounded-md bg-gray-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  View
-                </a>
-              </div>
-            ))}
-
-            {/* Add Organization Skeleton Card */}
-            <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 hover:border-gray-400 hover:bg-gray-100 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-500">
-                    Add Organization
-                  </h3>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Connect your GitHub organization
-                  </p>
-                </div>
-              </div>
-              <a
-                href={`https://github.com/apps/${githubAppSlug}/installations/new`}
-                className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-              >
-                + Add Organization
-              </a>
-            </div>
-          </div>
-
-          {organizations.length === 0 && !error && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
-              <div className="text-center max-w-md px-4">
-                <div className="mb-6">
-                  <div className="mx-auto w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Connect Your Organization
-                  </h2>
-                  <p className="text-gray-600 mb-6">
-                    Get started by connecting your GitHub organization to access
-                    performance reviews and standup summaries.
-                  </p>
-                </div>
-                <a
-                  href={`https://github.com/apps/${githubAppSlug}/installations/new`}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  Connect Organization
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
+  return <DashboardContent session={session} onError={handleError} />;
 }

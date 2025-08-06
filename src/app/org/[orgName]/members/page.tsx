@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
@@ -17,7 +17,6 @@ import Image from "next/image";
 export default function OrgMembersPage() {
   const params = useParams();
   const orgName = params.orgName as string;
-  const router = useRouter();
   const { data: session, status } = useSession();
   
   const [membersData, setMembersData] = useState<MembersResponse | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import {
@@ -15,7 +15,6 @@ export default function SubscriptionPage() {
   const params = useParams();
   const orgName = params.orgName as string;
   const subscriptionId = params.subscriptionId as string;
-  const router = useRouter();
   const { data: session, status } = useSession();
 
   const [subscription, setSubscription] = useState<ExternalSubscription | null>(null);

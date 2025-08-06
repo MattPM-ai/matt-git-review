@@ -52,9 +52,9 @@ export default async function Home({ searchParams }: HomeProps) {
           <div className="space-y-6">
             <SignInButton />
 
-            <p className="text-sm text-gray-500">
+            {/* <p className="text-sm text-gray-500">
               Secure authentication with GitHub
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

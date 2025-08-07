@@ -40,45 +40,91 @@ interface UserDetailsContentProps {
   variant?: "desktop" | "mobile";
 }
 
-export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDetailsContentProps) {
+export function UserDetailsContent({
+  selectedUser,
+  variant = "desktop",
+}: UserDetailsContentProps) {
   const isDesktop = variant === "desktop";
-  
+
   return (
-    <div className={`space-y-4 ${isDesktop ? '' : ''}`}>
+    <div className={`space-y-4 ${isDesktop ? "" : ""}`}>
       {/* Metrics */}
-      <div className={`grid gap-3 ${isDesktop ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2'}`}>
-        <div className={`bg-gray-50 rounded-lg text-center ${isDesktop ? 'p-2' : 'p-3'}`}>
-          <div className={`font-semibold text-green-600 ${isDesktop ? '' : 'text-lg'}`}>
-            {selectedUser.totalManHoursMin}-
-            {selectedUser.totalManHoursMax}h
+      <div
+        className={`grid gap-3 ${
+          isDesktop ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2"
+        }`}
+      >
+        <div
+          className={`bg-gray-50 rounded-lg text-center ${
+            isDesktop ? "p-2" : "p-3"
+          }`}
+        >
+          <div
+            className={`font-semibold text-green-600 ${
+              isDesktop ? "" : "text-lg"
+            }`}
+          >
+            {selectedUser.totalManHoursMin} - {selectedUser.totalManHoursMax}h
           </div>
           <div className="text-sm text-gray-500">Man-Hours</div>
         </div>
-        <div className={`bg-gray-50 rounded-lg text-center ${isDesktop ? 'p-2' : 'p-3'}`}>
-          <div className={`font-semibold text-blue-600 ${isDesktop ? '' : 'text-lg'}`}>
+        <div
+          className={`bg-gray-50 rounded-lg text-center ${
+            isDesktop ? "p-2" : "p-3"
+          }`}
+        >
+          <div
+            className={`font-semibold text-blue-600 ${
+              isDesktop ? "" : "text-lg"
+            }`}
+          >
             {selectedUser.avgManHours.toFixed(1)}h
           </div>
           <div className="text-sm text-gray-500">Average</div>
         </div>
-        <div className={`bg-gray-50 rounded-lg text-center ${isDesktop ? 'p-2' : 'p-3'}`}>
-          <div className={`font-semibold text-purple-600 ${isDesktop ? '' : 'text-lg'}`}>
+        <div
+          className={`bg-gray-50 rounded-lg text-center ${
+            isDesktop ? "p-2" : "p-3"
+          }`}
+        >
+          <div
+            className={`font-semibold text-purple-600 ${
+              isDesktop ? "" : "text-lg"
+            }`}
+          >
             {selectedUser.totalActivities}
           </div>
           <div className="text-sm text-gray-500">Activities</div>
         </div>
-        <div className={`bg-gray-50 rounded-lg text-center ${isDesktop ? 'p-2' : 'p-3'}`}>
-          <div className={`font-semibold text-orange-600 ${isDesktop ? '' : 'text-lg'}`}>
+        <div
+          className={`bg-gray-50 rounded-lg text-center ${
+            isDesktop ? "p-2" : "p-3"
+          }`}
+        >
+          <div
+            className={`font-semibold text-orange-600 ${
+              isDesktop ? "" : "text-lg"
+            }`}
+          >
             {selectedUser.activeDays}
           </div>
-          <div className="text-sm text-gray-500">{isDesktop ? 'Days' : 'Active Days'}</div>
+          <div className="text-sm text-gray-500">
+            {isDesktop ? "Days" : "Active Days"}
+          </div>
         </div>
       </div>
 
       {/* Activity breakdown */}
-      <div className={`flex items-center justify-center gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg ${isDesktop ? 'p-2' : 'p-3'}`}>
+      <div
+        className={`flex items-center justify-center gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg ${
+          isDesktop ? "p-2" : "p-3"
+        }`}
+      >
         <span className="flex items-center gap-1">
           <svg
-            className={`text-green-600 ${isDesktop ? 'w-3.5 h-3.5' : 'w-4 h-4'}`}
+            className={`text-green-600 ${
+              isDesktop ? "w-3.5 h-3.5" : "w-4 h-4"
+            }`}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -92,7 +138,7 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
         </span>
         <span className="flex items-center gap-1">
           <svg
-            className={`text-blue-600 ${isDesktop ? 'w-3.5 h-3.5' : 'w-4 h-4'}`}
+            className={`text-blue-600 ${isDesktop ? "w-3.5 h-3.5" : "w-4 h-4"}`}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -106,7 +152,9 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
         </span>
         <span className="flex items-center gap-1">
           <svg
-            className={`text-purple-600 ${isDesktop ? 'w-3.5 h-3.5' : 'w-4 h-4'}`}
+            className={`text-purple-600 ${
+              isDesktop ? "w-3.5 h-3.5" : "w-4 h-4"
+            }`}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -126,7 +174,11 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
           <h4 className="text-sm font-semibold text-gray-700 mb-2">
             Time Estimate Rationale
           </h4>
-          <p className={`text-sm text-gray-600 bg-gray-50 rounded-lg ${isDesktop ? 'p-3' : 'p-3'}`}>
+          <p
+            className={`text-sm text-gray-600 bg-gray-50 rounded-lg ${
+              isDesktop ? "p-3" : "p-3"
+            }`}
+          >
             {selectedUser.manHoursRationale}
           </p>
         </div>
@@ -138,15 +190,13 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
           <h4 className="text-sm font-semibold text-gray-700 mb-2">
             Work Completed
           </h4>
-          <ul className={`${isDesktop ? 'space-y-1' : 'space-y-2'}`}>
+          <ul className={`${isDesktop ? "space-y-1" : "space-y-2"}`}>
             {selectedUser.workDone.map((item, index) => (
               <li
                 key={index}
                 className="flex items-start gap-2 text-sm text-gray-700"
               >
-                <span className="text-emerald-500 mt-0.5 font-medium">
-                  ✓
-                </span>
+                <span className="text-emerald-500 mt-0.5 font-medium">✓</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -160,15 +210,13 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
           <h4 className="text-sm font-semibold text-gray-700 mb-2">
             Currently Working On
           </h4>
-          <ul className={`${isDesktop ? 'space-y-1' : 'space-y-2'}`}>
+          <ul className={`${isDesktop ? "space-y-1" : "space-y-2"}`}>
             {selectedUser.workingOn.map((item, index) => (
               <li
                 key={index}
                 className="flex items-start gap-2 text-sm text-gray-700"
               >
-                <span className="text-blue-500 mt-0.5 font-medium">
-                  ⚡
-                </span>
+                <span className="text-blue-500 mt-0.5 font-medium">⚡</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -182,15 +230,13 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
           <h4 className="text-sm font-semibold text-gray-700 mb-2">
             Ongoing Issues
           </h4>
-          <ul className={`${isDesktop ? 'space-y-1' : 'space-y-2'}`}>
+          <ul className={`${isDesktop ? "space-y-1" : "space-y-2"}`}>
             {selectedUser.ongoingIssues.map((item, index) => (
               <li
                 key={index}
                 className="flex items-start gap-2 text-sm text-gray-700"
               >
-                <span className="text-red-500 mt-0.5 font-medium">
-                  ⚠
-                </span>
+                <span className="text-red-500 mt-0.5 font-medium">⚠</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -199,13 +245,12 @@ export function UserDetailsContent({ selectedUser, variant = "desktop" }: UserDe
       )}
 
       {/* Daily Timeline */}
-      {selectedUser.dailyStandups &&
-        selectedUser.dailyStandups.length > 0 && (
-          <DailyTimeline 
-            dailyStandups={selectedUser.dailyStandups} 
-            variant={variant}
-          />
-        )}
+      {selectedUser.dailyStandups && selectedUser.dailyStandups.length > 0 && (
+        <DailyTimeline
+          dailyStandups={selectedUser.dailyStandups}
+          variant={variant}
+        />
+      )}
     </div>
   );
 }

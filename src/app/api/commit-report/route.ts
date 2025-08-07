@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { orgName, date, users, email } = await request.json();
+    const { orgName, date, users } = await request.json();
 
     if (!orgName || !date || !users) {
       return NextResponse.json(

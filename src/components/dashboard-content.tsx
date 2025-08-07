@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { UserProfile } from "@/components/auth/user-profile";
 import Image from "next/image";
+import Link from "next/link";
 import type { Session } from "next-auth";
 
 interface Organization {
@@ -91,11 +92,33 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-2 sm:py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Organizations
-            </h1>
+            <div className="flex items-center gap-4">
+              {/* MattPM Logo - Icon only on mobile, full branding on desktop */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 group"
+              >
+                <Image
+                  src="/icon.png"
+                  alt="MattPM"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7"
+                />
+                <span className="hidden lg:inline text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+                  MattPM
+                </span>
+              </Link>
+              
+              {/* Separator - Always visible */}
+              <div className="w-px h-6 bg-gray-300"></div>
+              
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Organizations
+              </h1>
+            </div>
             <UserProfile />
           </div>
         </div>

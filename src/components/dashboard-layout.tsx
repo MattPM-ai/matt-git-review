@@ -1,10 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
 import { UserProfile } from "@/components/auth/user-profile";
 
 interface DashboardLayoutProps {
   orgName: string;
   title?: string;
-  currentView?: "standup" | "activity" | "performance" | "contributions" | "members" | "settings";
+  currentView?:
+    | "standup"
+    | "activity"
+    | "performance"
+    | "contributions"
+    | "members"
+    | "settings";
   sidebar?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -18,9 +25,10 @@ export function DashboardLayout({
     <div className="h-screen bg-gray-50 flex flex-col">
       {/* Navbar */}
       <header className="bg-white shadow-sm flex-shrink-0 border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+              {/* Back button - Always visible, leftmost */}
               <Link
                 href="/dashboard"
                 className="text-gray-500 hover:text-gray-700 flex-shrink-0"
@@ -37,10 +45,31 @@ export function DashboardLayout({
                   />
                 </svg>
               </Link>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate min-w-0">
+
+              {/* MattPM Logo - Icon only on mobile, full branding on desktop */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 flex-shrink-0 group"
+              >
+                <Image
+                  src="/icon.png"
+                  alt="MattPM"
+                  width={24}
+                  height={24}
+                  className="w-6 h-6"
+                />
+                <span className="hidden lg:inline text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+                  MattPM
+                </span>
+              </Link>
+
+              {/* Separator - Always visible */}
+              <div className="w-px h-6 bg-gray-300"></div>
+
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate min-w-0">
                 {orgName}
               </h1>
-              {process.env.NODE_ENV === "development" && (
+              {process.env.NEXT_PUBLIC_SHOW_ALL_DASHBOARDS === "true" && (
                 <Link
                   href={`/org/${orgName}/dashboards`}
                   className="text-sm text-gray-500 hover:text-gray-700 flex-shrink-0"

@@ -26,7 +26,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="w-full max-w-lg text-center space-y-8">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center">
+            <div className="flex items-center justify-center gap-3">
               <Image
                 src="/icon.png"
                 alt="MattPM Icon"
@@ -35,6 +35,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 className="w-16 h-16"
                 priority
               />
+              <span className="text-5xl font-bold text-gray-900">MattPM</span>
             </div>
 
             <h1 className="text-4xl text-center font-bold text-gray-900 max-w-sm mx-auto">

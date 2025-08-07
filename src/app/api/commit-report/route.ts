@@ -84,7 +84,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Total number of commits", filteredCommits.length);
-    sendStandupsByUserToN8n(commitsByUser, email);
 
     return NextResponse.json({ message: "Commit report sent" });
   } catch (error) {
@@ -106,11 +105,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function sendStandupsByUserToN8n(
-  _commitsByUser: { [key: string]: n8nCommitStruct },
-  _email: string
-) {
-  console.warn("DEPRECATED: sendStandupsByUserToN8n");
 }

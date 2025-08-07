@@ -93,7 +93,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
       <header className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Organizations
+            </h1>
             <UserProfile />
           </div>
         </div>
@@ -102,9 +104,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
+            {/* <h2 className="text-lg font-medium text-gray-900 mb-4">
               Your GitHub Organizations
-            </h2>
+            </h2> */}
 
             {error && (
               <div className="rounded-md bg-red-50 p-4 mb-4">
@@ -165,7 +167,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                       href={`/org/${org.login}`}
                       className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
-                      View
+                      View Report
                     </a>
                     <a
                       href={`/org/${org.login}/manage`}

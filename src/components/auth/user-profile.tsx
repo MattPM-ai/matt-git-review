@@ -56,7 +56,7 @@ export function UserProfile() {
       <div className="lg:hidden">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors hover:cursor-pointer"
         >
           {session.user.image && (
             <Image
@@ -75,7 +75,12 @@ export function UserProfile() {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
 
@@ -97,7 +102,9 @@ export function UserProfile() {
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {session.user.name}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {session.user.email}
+                  </p>
                 </div>
               </div>
             </div>

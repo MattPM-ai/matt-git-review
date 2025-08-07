@@ -2,7 +2,10 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { updateSubscription, type UpdateSubscriptionParams } from "@/lib/members-api";
+import {
+  updateSubscription,
+  type UpdateSubscriptionParams,
+} from "@/lib/members-api";
 
 interface ManageSubscriptionModalProps {
   isOpen: boolean;
@@ -26,9 +29,15 @@ export function ManageSubscriptionModal({
   onSuccess,
 }: ManageSubscriptionModalProps) {
   const { data: session } = useSession();
-  const [dailyReport, setDailyReport] = useState(subscription?.dailyReport ?? false);
-  const [weeklyReport, setWeeklyReport] = useState(subscription?.weeklyReport ?? false);
-  const [monthlyReport, setMonthlyReport] = useState(subscription?.monthlyReport ?? false);
+  const [dailyReport, setDailyReport] = useState(
+    subscription?.dailyReport ?? false
+  );
+  const [weeklyReport, setWeeklyReport] = useState(
+    subscription?.weeklyReport ?? false
+  );
+  const [monthlyReport, setMonthlyReport] = useState(
+    subscription?.monthlyReport ?? false
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
 
@@ -61,7 +70,9 @@ export function ManageSubscriptionModal({
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update subscription");
+      setError(
+        err instanceof Error ? err.message : "Failed to update subscription"
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -118,7 +129,9 @@ export function ManageSubscriptionModal({
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600 mb-4">
-                  {memberName ? `Managing subscription for ${memberName}` : `Managing subscription for ${subscription.email}`}
+                  {memberName
+                    ? `Managing subscription for ${memberName}`
+                    : `Managing subscription for ${subscription.email}`}
                 </p>
               </div>
 
@@ -189,7 +202,7 @@ export function ManageSubscriptionModal({
             <div className="mt-6 flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium hover:cursor-pointer"
                 disabled={isUpdating}
               >
                 Cancel
@@ -197,7 +210,7 @@ export function ManageSubscriptionModal({
               <button
                 onClick={handleSave}
                 disabled={isUpdating}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
               >
                 {isUpdating ? (
                   <>

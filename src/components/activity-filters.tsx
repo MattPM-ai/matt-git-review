@@ -1,112 +1,125 @@
-'use client'
+"use client";
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { CalendarDatePicker } from './calendar-date-picker'
-import type { SimplifiedActivityDto, ActivitiesResponseDto } from '@/lib/matt-api'
+import { useRouter, useSearchParams } from "next/navigation";
+import { CalendarDatePicker } from "./calendar-date-picker";
+import type {
+  SimplifiedActivityDto,
+  ActivitiesResponseDto,
+} from "@/lib/matt-api";
 
 interface ActivityFiltersProps {
-  members: ActivitiesResponseDto['users'][string][]
-  selectedUser?: string
-  selectedType?: string
-  selectedDateFrom?: string
-  selectedDateTo?: string
-  commitDates?: string[]
-  allActivities?: SimplifiedActivityDto[]
+  members: ActivitiesResponseDto["users"][string][];
+  selectedUser?: string;
+  selectedType?: string;
+  selectedDateFrom?: string;
+  selectedDateTo?: string;
+  commitDates?: string[];
+  allActivities?: SimplifiedActivityDto[];
 }
 
-export function ActivityFilters({ 
-  members, 
-  selectedUser, 
-  selectedType, 
-  selectedDateFrom, 
+export function ActivityFilters({
+  members,
+  selectedUser,
+  selectedType,
+  selectedDateFrom,
   commitDates = [],
-  allActivities = []
+  allActivities = [],
 }: ActivityFiltersProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleUserFilter = (user: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (user) {
-      params.set('user', user)
+      params.set("user", user);
     } else {
-      params.delete('user')
+      params.delete("user");
     }
-    router.push(`?${params.toString()}`)
-  }
+    router.push(`?${params.toString()}`);
+  };
 
   const handleTypeFilter = (type: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (type) {
-      params.set('type', type)
+      params.set("type", type);
     } else {
-      params.delete('type')
+      params.delete("type");
     }
-    router.push(`?${params.toString()}`)
-  }
+    router.push(`?${params.toString()}`);
+  };
 
   const handleDateFilter = (date: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (date) {
-      params.set('dateFrom', date)
+      params.set("dateFrom", date);
     } else {
-      params.delete('dateFrom')
+      params.delete("dateFrom");
     }
-    router.push(`?${params.toString()}`)
-  }
+    router.push(`?${params.toString()}`);
+  };
 
   const handleDateRangeFilter = (dateFrom: string, dateTo: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (dateFrom) {
-      params.set('dateFrom', dateFrom)
+      params.set("dateFrom", dateFrom);
     } else {
-      params.delete('dateFrom')
+      params.delete("dateFrom");
     }
     if (dateTo) {
-      params.set('dateTo', dateTo)
+      params.set("dateTo", dateTo);
     } else {
-      params.delete('dateTo')
+      params.delete("dateTo");
     }
-    router.push(`?${params.toString()}`)
-  }
+    router.push(`?${params.toString()}`);
+  };
 
   const clearFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('user')
-    params.delete('type')
-    params.delete('dateFrom')
-    params.delete('dateTo')
-    router.push(`?${params.toString()}`)
-  }
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("user");
+    params.delete("type");
+    params.delete("dateFrom");
+    params.delete("dateTo");
+    router.push(`?${params.toString()}`);
+  };
 
   // Calculate activity statistics
   const stats = {
     total: allActivities.length,
-    commits: allActivities.filter(a => a.type === 'commit').length,
-    issues: allActivities.filter(a => a.type === 'issue').length,
-    pulls: allActivities.filter(a => a.type === 'pull').length,
-  }
+    commits: allActivities.filter((a) => a.type === "commit").length,
+    issues: allActivities.filter((a) => a.type === "issue").length,
+    pulls: allActivities.filter((a) => a.type === "pull").length,
+  };
 
   return (
     <div className="space-y-6">
       {/* Activity Statistics */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Activity Overview</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-3">
+          Activity Overview
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {stats.total}
+            </div>
             <div className="text-sm text-gray-500">Total Activities</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.commits}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.commits}
+            </div>
             <div className="text-sm text-gray-500">Commits</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">{stats.issues}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.issues}
+            </div>
             <div className="text-sm text-gray-500">Issues</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.pulls}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.pulls}
+            </div>
             <div className="text-sm text-gray-500">Pull Requests</div>
           </div>
         </div>
@@ -119,7 +132,7 @@ export function ActivityFilters({
           {(selectedUser || selectedType || selectedDateFrom) && (
             <button
               onClick={clearFilters}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors hover:cursor-pointer"
             >
               Clear all
             </button>
@@ -133,7 +146,7 @@ export function ActivityFilters({
               Filter by User
             </label>
             <select
-              value={selectedUser || ''}
+              value={selectedUser || ""}
               onChange={(e) => handleUserFilter(e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
@@ -152,7 +165,7 @@ export function ActivityFilters({
               Filter by Type
             </label>
             <select
-              value={selectedType || ''}
+              value={selectedType || ""}
               onChange={(e) => handleTypeFilter(e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
@@ -171,15 +184,22 @@ export function ActivityFilters({
             <div className="grid grid-cols-1 gap-2">
               <input
                 type="date"
-                value={selectedDateFrom || ''}
-                onChange={(e) => handleDateRangeFilter(e.target.value, searchParams.get('dateTo') || '')}
+                value={selectedDateFrom || ""}
+                onChange={(e) =>
+                  handleDateRangeFilter(
+                    e.target.value,
+                    searchParams.get("dateTo") || ""
+                  )
+                }
                 className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="From date"
               />
               <input
                 type="date"
-                value={searchParams.get('dateTo') || ''}
-                onChange={(e) => handleDateRangeFilter(selectedDateFrom || '', e.target.value)}
+                value={searchParams.get("dateTo") || ""}
+                onChange={(e) =>
+                  handleDateRangeFilter(selectedDateFrom || "", e.target.value)
+                }
                 className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="To date"
               />
@@ -191,7 +211,9 @@ export function ActivityFilters({
       {/* Quick Date Filters */}
       {commitDates.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Quick Jump to Date</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-3">
+            Quick Jump to Date
+          </h3>
           <CalendarDatePicker
             commitDates={commitDates}
             selectedDate={selectedDateFrom}
@@ -204,23 +226,34 @@ export function ActivityFilters({
       {/* Active Filters Summary */}
       {(selectedUser || selectedType || selectedDateFrom) && (
         <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Active Filters:</h3>
+          <h3 className="text-sm font-medium text-blue-900 mb-2">
+            Active Filters:
+          </h3>
           <div className="space-y-1 text-sm text-blue-800">
             {selectedUser && (
-              <div>User: {members.find(m => m.login === selectedUser)?.name || selectedUser}</div>
+              <div>
+                User:{" "}
+                {members.find((m) => m.login === selectedUser)?.name ||
+                  selectedUser}
+              </div>
             )}
             {selectedType && (
-              <div>Type: {selectedType === 'commits' ? 'Commits' : selectedType === 'issues' ? 'Issues' : 'Pull Requests'}</div>
+              <div>
+                Type:{" "}
+                {selectedType === "commits"
+                  ? "Commits"
+                  : selectedType === "issues"
+                  ? "Issues"
+                  : "Pull Requests"}
+              </div>
             )}
-            {selectedDateFrom && (
-              <div>From: {selectedDateFrom}</div>
-            )}
-            {searchParams.get('dateTo') && (
-              <div>To: {searchParams.get('dateTo')}</div>
+            {selectedDateFrom && <div>From: {selectedDateFrom}</div>}
+            {searchParams.get("dateTo") && (
+              <div>To: {searchParams.get("dateTo")}</div>
             )}
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

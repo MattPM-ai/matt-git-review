@@ -1,16 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  format,
-  subDays,
-} from "date-fns";
+import { format, subDays } from "date-fns";
 import type { ActivitiesResponseDto } from "@/lib/matt-api";
 import { TaskLoadingState } from "./task-loading-state";
 import { useStandupData } from "@/hooks/useStandupData";
 
 // Define local types to replace the old GitHub API types
-type GitHubUser = ActivitiesResponseDto['users'][string];
+type GitHubUser = ActivitiesResponseDto["users"][string];
 type CommitAuthor = {
   login: string;
   name?: string;
@@ -30,10 +27,13 @@ export function StandupDashboard({
   orgName,
   dailyCommitAuthors = {},
 }: StandupDashboardProps) {
-  const [isGeneratingCommitReport, setIsGeneratingCommitReport] = useState(false);
-  const [commitReportError, setCommitReportError] = useState<string | null>(null);
+  const [isGeneratingCommitReport, setIsGeneratingCommitReport] =
+    useState(false);
+  const [commitReportError, setCommitReportError] = useState<string | null>(
+    null
+  );
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
 
   // Client-side date selection for instant response
@@ -42,7 +42,7 @@ export function StandupDashboard({
   );
 
   const selectedDateObj = new Date(clientSelectedDate);
-  
+
   const {
     standupData: standupSummaries,
     isLoading: isGeneratingStandups,
@@ -86,8 +86,8 @@ export function StandupDashboard({
 
     try {
       const today = new Date();
-      const formattedDate = format(today, 'yyyy-MM-dd');
-      
+      const formattedDate = format(today, "yyyy-MM-dd");
+
       const response = await fetch("/api/commit-report", {
         method: "POST",
         headers: {
@@ -104,45 +104,43 @@ export function StandupDashboard({
       if (!response.ok) {
         throw new Error("Failed to generate commit report");
       }
-
     } catch (error) {
       console.error("Error generating commit report:", error);
       setCommitReportError("Failed to generate commit report");
     } finally {
       setIsGeneratingCommitReport(false);
     }
-  }
+  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  }
+  };
 
   const handleEmailSubmit = () => {
     setEmailError(null);
-    
+
     if (!email.trim()) {
-      setEmailError('Email is required');
+      setEmailError("Email is required");
       return;
     }
-    
+
     if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address (e.g., email@example.com)');
+      setEmailError(
+        "Please enter a valid email address (e.g., email@example.com)"
+      );
       return;
     }
-    
+
     generateCommitReport(email);
     setIsEmailModalOpen(false);
-    setEmail('');
-  }
-
-
+    setEmail("");
+  };
 
   const todaysAuthors = dailyCommitAuthors[clientSelectedDate] || [];
   const uniqueAuthors = Array.from(
     new Map(todaysAuthors.map((author) => [author.login, author])).values()
   );
-
 
   return (
     <div>
@@ -151,7 +149,7 @@ export function StandupDashboard({
         <button
           onClick={generateStandupSummaries}
           disabled={isGeneratingStandups}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium hover:cursor-pointer"
         >
           {isGeneratingStandups ? (
             <>
@@ -198,7 +196,7 @@ export function StandupDashboard({
         <button
           onClick={() => setIsEmailModalOpen(true)}
           disabled={isGeneratingCommitReport}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium hover:cursor-pointer"
         >
           {isGeneratingCommitReport ? (
             <>
@@ -261,7 +259,10 @@ export function StandupDashboard({
         <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
           <div className="space-y-3">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <input
@@ -275,7 +276,7 @@ export function StandupDashboard({
                 placeholder="email@example.com"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleEmailSubmit();
                   }
                 }}
@@ -284,39 +285,64 @@ export function StandupDashboard({
                 <p className="mt-1 text-sm text-red-600">{emailError}</p>
               )}
             </div>
-            
+
             <div className="flex gap-2">
               <button
                 onClick={handleEmailSubmit}
                 disabled={isGeneratingCommitReport}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium hover:cursor-pointer"
               >
                 {isGeneratingCommitReport ? (
                   <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Sending...
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                     Send Report
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={() => {
                   setIsEmailModalOpen(false);
-                  setEmail('');
+                  setEmail("");
                   setEmailError(null);
                 }}
                 disabled={isGeneratingCommitReport}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium hover:cursor-pointer"
               >
                 Cancel
               </button>
@@ -356,7 +382,8 @@ export function StandupDashboard({
               No Activity for {format(selectedDateObj, "MMMM d, yyyy")}
             </p>
             <p className="text-sm text-gray-500">
-              There was no development activity on this date.<br />
+              There was no development activity on this date.
+              <br />
               Try selecting a different date from the calendar.
             </p>
           </div>
@@ -364,7 +391,10 @@ export function StandupDashboard({
           // Show actual standup summaries
           <>
             {standupSummaries.map((summary) => (
-              <div key={summary.username} className="bg-white rounded-lg shadow p-6">
+              <div
+                key={summary.username}
+                className="bg-white rounded-lg shadow p-6"
+              >
                 <div className="flex items-center gap-4 mb-4">
                   <img
                     src={summary.avatar_url}
@@ -372,7 +402,9 @@ export function StandupDashboard({
                     className="w-12 h-12 rounded-full"
                   />
                   <div>
-                    <h3 className="font-semibold text-gray-900">{summary.name}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      {summary.name}
+                    </h3>
                     <p className="text-gray-600">@{summary.username}</p>
                   </div>
                 </div>
@@ -382,7 +414,9 @@ export function StandupDashboard({
                     <p className="text-gray-700">{summary.standup.summary}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Work Done</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      Work Done
+                    </h4>
                     <ul className="list-disc list-inside text-gray-700 space-y-1">
                       {summary.standup.workDone.map((work, index) => (
                         <li key={index}>{work}</li>
@@ -390,7 +424,9 @@ export function StandupDashboard({
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Working On</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      Working On
+                    </h4>
                     <ul className="list-disc list-inside text-gray-700 space-y-1">
                       {summary.standup.workingOn.map((work, index) => (
                         <li key={index}>{work}</li>
@@ -399,7 +435,9 @@ export function StandupDashboard({
                   </div>
                   {summary.standup.ongoingIssues.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Ongoing Issues</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        Ongoing Issues
+                      </h4>
                       <ul className="list-disc list-inside text-gray-700 space-y-1">
                         {summary.standup.ongoingIssues.map((issue, index) => (
                           <li key={index}>{issue}</li>
@@ -409,21 +447,30 @@ export function StandupDashboard({
                   )}
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium">Commits:</span> {summary.standup.totalCommits}
+                      <span className="font-medium">Commits:</span>{" "}
+                      {summary.standup.totalCommits}
                     </div>
                     <div>
-                      <span className="font-medium">PRs:</span> {summary.standup.totalPRs}
+                      <span className="font-medium">PRs:</span>{" "}
+                      {summary.standup.totalPRs}
                     </div>
                     <div>
-                      <span className="font-medium">Issues:</span> {summary.standup.totalIssues}
+                      <span className="font-medium">Issues:</span>{" "}
+                      {summary.standup.totalIssues}
                     </div>
                     <div>
-                      <span className="font-medium">Hours:</span> {summary.standup.totalManHoursMin}-{summary.standup.totalManHoursMax}h
+                      <span className="font-medium">Hours:</span>{" "}
+                      {summary.standup.totalManHoursMin}-
+                      {summary.standup.totalManHoursMax}h
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Hours Rationale</h4>
-                    <p className="text-gray-700 text-sm">{summary.standup.manHoursRationale}</p>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      Hours Rationale
+                    </h4>
+                    <p className="text-gray-700 text-sm">
+                      {summary.standup.manHoursRationale}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -447,7 +494,9 @@ export function StandupDashboard({
                       <h4 className="font-semibold text-gray-900">
                         {summary.name || summary.username}
                       </h4>
-                      <span className="text-sm text-gray-500">@{summary.username}</span>
+                      <span className="text-sm text-gray-500">
+                        @{summary.username}
+                      </span>
                       <svg
                         className="w-4 h-4 text-indigo-500"
                         fill="currentColor"
@@ -471,20 +520,31 @@ export function StandupDashboard({
                       {/* Activity metrics */}
                       <div className="flex flex-wrap gap-4 p-3 bg-white rounded-md border border-gray-100">
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-green-600">{summary.standup.totalCommits}</div>
+                          <div className="text-lg font-semibold text-green-600">
+                            {summary.standup.totalCommits}
+                          </div>
                           <div className="text-xs text-gray-500">Commits</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-blue-600">{summary.standup.totalPRs}</div>
+                          <div className="text-lg font-semibold text-blue-600">
+                            {summary.standup.totalPRs}
+                          </div>
                           <div className="text-xs text-gray-500">PRs</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-purple-600">{summary.standup.totalIssues}</div>
+                          <div className="text-lg font-semibold text-purple-600">
+                            {summary.standup.totalIssues}
+                          </div>
                           <div className="text-xs text-gray-500">Issues</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-orange-600">{summary.standup.totalManHoursMin}-{summary.standup.totalManHoursMax}h</div>
-                          <div className="text-xs text-gray-500">Est. Hours</div>
+                          <div className="text-lg font-semibold text-orange-600">
+                            {summary.standup.totalManHoursMin}-
+                            {summary.standup.totalManHoursMax}h
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Est. Hours
+                          </div>
                         </div>
                       </div>
 
@@ -502,9 +562,7 @@ export function StandupDashboard({
                                 <span className="text-emerald-500 mt-0.5 font-medium">
                                   ✓
                                 </span>
-                                <span className="leading-relaxed">
-                                  {item}
-                                </span>
+                                <span className="leading-relaxed">{item}</span>
                               </li>
                             ))}
                           </ul>
@@ -525,9 +583,7 @@ export function StandupDashboard({
                                 <span className="text-indigo-500 mt-0.5 font-medium">
                                   →
                                 </span>
-                                <span className="leading-relaxed">
-                                  {item}
-                                </span>
+                                <span className="leading-relaxed">{item}</span>
                               </li>
                             ))}
                           </ul>
@@ -540,26 +596,29 @@ export function StandupDashboard({
                             Ongoing Issues:
                           </p>
                           <ul className="text-sm text-gray-700 space-y-1.5">
-                            {summary.standup.ongoingIssues.map((item, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-2"
-                              >
-                                <span className="text-amber-500 mt-0.5 font-medium">
-                                  ⚠
-                                </span>
-                                <span className="leading-relaxed">
-                                  {item}
-                                </span>
-                              </li>
-                            ))}
+                            {summary.standup.ongoingIssues.map(
+                              (item, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <span className="text-amber-500 mt-0.5 font-medium">
+                                    ⚠
+                                  </span>
+                                  <span className="leading-relaxed">
+                                    {item}
+                                  </span>
+                                </li>
+                              )
+                            )}
                           </ul>
                         </div>
                       )}
 
                       {summary.standup.manHoursRationale && (
                         <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                          <strong>Time Estimate Rationale:</strong> {summary.standup.manHoursRationale}
+                          <strong>Time Estimate Rationale:</strong>{" "}
+                          {summary.standup.manHoursRationale}
                         </div>
                       )}
                     </div>
@@ -589,8 +648,8 @@ export function StandupDashboard({
               No AI summaries generated yet
             </p>
             <p className="text-sm">
-              Click &quot;Refresh AI Summaries&quot; to generate standup summaries
-              for team members who committed today.
+              Click &quot;Refresh AI Summaries&quot; to generate standup
+              summaries for team members who committed today.
             </p>
           </div>
         ) : (

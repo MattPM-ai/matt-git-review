@@ -34,7 +34,11 @@ export function QueryAuthHandler({
       const subscriptionId = searchParams.get("_auth");
 
       // Only process if we have a subscription ID and haven't already processed it
-      if (subscriptionId && !isProcessing && processedSubscriptionRef.current !== subscriptionId) {
+      if (
+        subscriptionId &&
+        !isProcessing &&
+        processedSubscriptionRef.current !== subscriptionId
+      ) {
         setIsProcessing(true);
         processedSubscriptionRef.current = subscriptionId;
 
@@ -125,7 +129,7 @@ export function QueryAuthHandler({
           </p>
           <button
             onClick={() => router.push("/")}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium hover:cursor-pointer"
           >
             Sign In
           </button>
@@ -172,7 +176,7 @@ export function QueryAuthHandler({
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => router.push("/")}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium hover:cursor-pointer"
           >
             Return Home
           </button>

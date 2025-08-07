@@ -76,10 +76,11 @@ export function PerformanceReviewDashboard({
 
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  
+
   // Auto-generate report if URL has valid date parameters
   const shouldAutoGenerate = !!(initialDateFrom && initialDateTo);
-  const [hasGeneratedReport, setHasGeneratedReport] = useState(shouldAutoGenerate);
+  const [hasGeneratedReport, setHasGeneratedReport] =
+    useState(shouldAutoGenerate);
 
   const {
     standupData,
@@ -254,7 +255,11 @@ export function PerformanceReviewDashboard({
                       className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
                       title="Share report"
                     >
-                      <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
+                      <svg
+                        fill="#000000"
+                        viewBox="-2 -2 24 24"
+                        className="w-5 h-5"
+                      >
                         <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
                       </svg>
                     </button>
@@ -353,7 +358,7 @@ export function PerformanceReviewDashboard({
 
               <button
                 onClick={handleGenerateReport}
-                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium hover:cursor-pointer"
               >
                 Generate Report
               </button>

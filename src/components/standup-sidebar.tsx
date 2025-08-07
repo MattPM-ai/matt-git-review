@@ -15,7 +15,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ActivitiesResponseDto } from "@/lib/matt-api";
 
 // Define local types to replace the old GitHub API types
-type GitHubUser = ActivitiesResponseDto['users'][string];
+type GitHubUser = ActivitiesResponseDto["users"][string];
 type CommitAuthor = {
   login: string;
   name?: string;
@@ -109,7 +109,7 @@ export function StandupSidebar({
           <div className="flex gap-2">
             <button
               onClick={handlePreviousMonth}
-              className="p-1 hover:bg-gray-200 rounded"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
             >
               <svg
                 className="w-5 h-5"
@@ -127,7 +127,7 @@ export function StandupSidebar({
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-1 hover:bg-gray-200 rounded"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
             >
               <svg
                 className="w-5 h-5"
@@ -164,11 +164,9 @@ export function StandupSidebar({
           {monthDays.map((day) => {
             const dateStr = format(day, "yyyy-MM-dd");
             const hasCommits = commitDatesSet.has(dateStr);
-            const isSelected =
-              format(day, "yyyy-MM-dd") === clientSelectedDate;
+            const isSelected = format(day, "yyyy-MM-dd") === clientSelectedDate;
             const isToday =
-              format(day, "yyyy-MM-dd") ===
-              format(new Date(), "yyyy-MM-dd");
+              format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
 
             return (
               <button

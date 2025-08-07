@@ -1,51 +1,56 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { DayPicker } from 'react-day-picker'
-import { format } from 'date-fns'
-import 'react-day-picker/style.css'
+import { useState, useEffect } from "react";
+import { DayPicker } from "react-day-picker";
+import { format } from "date-fns";
+import "react-day-picker/style.css";
 
 interface CalendarDatePickerProps {
-  selectedDate?: string
-  onDateChange: (date: string) => void
-  commitDates?: string[]
-  label: string
+  selectedDate?: string;
+  onDateChange: (date: string) => void;
+  commitDates?: string[];
+  label: string;
 }
 
-export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [], label }: CalendarDatePickerProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function CalendarDatePicker({
+  selectedDate,
+  onDateChange,
+  commitDates = [],
+  label,
+}: CalendarDatePickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Date | undefined>(
     selectedDate ? new Date(selectedDate) : undefined
-  )
+  );
 
   useEffect(() => {
     if (selectedDate) {
-      setSelected(new Date(selectedDate))
+      setSelected(new Date(selectedDate));
     } else {
-      setSelected(undefined)
+      setSelected(undefined);
     }
-  }, [selectedDate])
+  }, [selectedDate]);
 
   const handleDayClick = (day: Date | undefined) => {
     if (day) {
-      onDateChange(format(day, 'yyyy-MM-dd'))
-      setIsOpen(false)
+      onDateChange(format(day, "yyyy-MM-dd"));
+      setIsOpen(false);
     }
-  }
+  };
 
-  const commitDatesSet = new Set(commitDates)
+  const commitDatesSet = new Set(commitDates);
 
   const modifiers = {
-    hasCommits: (day: Date) => commitDatesSet.has(format(day, 'yyyy-MM-dd'))
-  }
+    hasCommits: (day: Date) => commitDatesSet.has(format(day, "yyyy-MM-dd")),
+  };
 
   const modifiersStyles = {
     hasCommits: {
-      backgroundColor: '#10b981',
-      color: 'white',
-      fontWeight: 'bold'
-    }
-  }
+      backgroundColor: "#10b981",
+      color: "white",
+      fontWeight: "bold",
+    },
+  };
 
   return (
     <div className="relative">
@@ -56,17 +61,25 @@ export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white border px-3 py-2 text-left flex items-center justify-between"
+          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white border px-3 py-2 text-left flex items-center justify-between hover:cursor-pointer"
         >
-          <span className="text-gray-700">
-            Go to date
-          </span>
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <span className="text-gray-700">Go to date</span>
+          <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         </button>
       </div>
-      
+
       {isOpen && (
         <>
           <div
@@ -94,5 +107,5 @@ export function CalendarDatePicker({ selectedDate, onDateChange, commitDates = [
         </>
       )}
     </div>
-  )
+  );
 }

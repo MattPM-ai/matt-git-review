@@ -39,7 +39,11 @@ interface MobileModalProps {
   onClose: () => void;
 }
 
-export function MobileModal({ selectedUser, isModalClosing, onClose }: MobileModalProps) {
+export function MobileModal({
+  selectedUser,
+  isModalClosing,
+  onClose,
+}: MobileModalProps) {
   if (!selectedUser) {
     return null;
   }
@@ -77,7 +81,7 @@ export function MobileModal({ selectedUser, isModalClosing, onClose }: MobileMod
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 hover:cursor-pointer"
           >
             <svg
               className="w-5 h-5 text-gray-500"

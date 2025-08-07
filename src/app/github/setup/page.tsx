@@ -1,34 +1,40 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import Image from "next/image"
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import Image from "next/image";
 
 interface SetupPageProps {
   searchParams: Promise<{
-    installation_id?: string
-    setup_action?: string
-    state?: string
-  }>
+    installation_id?: string;
+    setup_action?: string;
+    state?: string;
+  }>;
 }
 
-export default async function GitHubSetupPage({ searchParams }: SetupPageProps) {
-  const params = await searchParams
-  const session = await auth()
+export default async function GitHubSetupPage({
+  searchParams,
+}: SetupPageProps) {
+  const params = await searchParams;
+  const session = await auth();
 
   if (!session) {
     // Store installation details and redirect to login
-    const urlParams = new URLSearchParams(params as Record<string, string>)
-    redirect(`/?setup_redirect=${encodeURIComponent(`/github/setup?${urlParams.toString()}`)}`)
+    const urlParams = new URLSearchParams(params as Record<string, string>);
+    redirect(
+      `/?setup_redirect=${encodeURIComponent(
+        `/github/setup?${urlParams.toString()}`
+      )}`
+    );
   }
 
-  const { installation_id, setup_action } = params
+  const { installation_id, setup_action } = params;
 
   if (!installation_id || !setup_action) {
-    redirect("/dashboard")
+    redirect("/dashboard");
   }
 
   // Verify user has access to this installation
-  let installationData = null
-  let error = null
+  let installationData = null;
+  let error = null;
 
   try {
     const response = await fetch("https://api.github.com/user/installations", {
@@ -36,16 +42,16 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
         Authorization: `Bearer ${session.accessToken}`,
         Accept: "application/vnd.github.v3+json",
       },
-    })
+    });
 
     if (response.ok) {
-      const data = await response.json()
+      const data = await response.json();
       installationData = data.installations.find(
         (inst: { id: number }) => inst.id === parseInt(installation_id)
-      )
+      );
     }
   } catch {
-    error = "Failed to verify installation access"
+    error = "Failed to verify installation access";
   }
 
   if (!installationData) {
@@ -81,7 +87,7 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -110,7 +116,9 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
               </h1>
               <p className="text-gray-600">
                 Your GitHub App has been installed on{" "}
-                <span className="font-medium">{installationData.account.login}</span>
+                <span className="font-medium">
+                  {installationData.account.login}
+                </span>
               </p>
             </div>
 
@@ -141,7 +149,9 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
                   <strong>Repository Access:</strong>{" "}
                   {installationData.repository_selection === "all"
                     ? "All repositories"
-                    : `${installationData.repositories?.length || 0} selected repositories`}
+                    : `${
+                        installationData.repositories?.length || 0
+                      } selected repositories`}
                 </p>
                 <p>
                   <strong>Installed:</strong>{" "}
@@ -162,13 +172,13 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
             <div className="flex gap-4 justify-center">
               <a
                 href="/dashboard"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors hover:cursor-pointer"
               >
                 Go to Dashboard
               </a>
               <a
                 href={`/configure?installation_id=${installation_id}`}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors hover:cursor-pointer"
               >
                 Configure Settings
               </a>
@@ -177,5 +187,5 @@ export default async function GitHubSetupPage({ searchParams }: SetupPageProps) 
         </div>
       </div>
     </div>
-  )
+  );
 }

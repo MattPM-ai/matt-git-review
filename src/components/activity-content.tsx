@@ -480,7 +480,7 @@ export function ActivityContent({
         <div className="mb-6">
           <button
             onClick={handleLoadNewer}
-            className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-blue-700 font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-blue-700 font-medium transition-colors duration-200 flex items-center justify-center gap-2 hover:cursor-pointer"
           >
             <svg
               className="w-4 h-4"
@@ -548,7 +548,7 @@ export function ActivityContent({
                   <div className="p-4 border-t border-gray-200 bg-gray-100">
                     <button
                       onClick={() => loadMoreForDate(dateState.date)}
-                      className="w-full py-2 px-4 bg-white hover:bg-gray-50 border border-gray-200 rounded-md text-gray-700 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+                      className="w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded text-gray-700 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2 hover:cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4"
@@ -580,7 +580,7 @@ export function ActivityContent({
         <div className="mt-6">
           <button
             onClick={handleLoadMore}
-            className="w-full py-3 px-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-blue-700 font-medium transition-colors duration-200 flex items-center justify-center gap-2 hover:cursor-pointer"
           >
             <svg
               className="w-4 h-4"

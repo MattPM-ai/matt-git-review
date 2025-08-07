@@ -33,7 +33,7 @@ export function ShareModal({
   // Get the smallest enabled report frequency
   const getSmallestReportFrequency = useCallback(() => {
     if (!orgConfig) return null;
-    
+
     if (orgConfig.dailyReport) return "daily";
     if (orgConfig.weeklyReport) return "weekly";
     if (orgConfig.monthlyReport) return "monthly";
@@ -209,8 +209,8 @@ export function ShareModal({
                   <span className="text-sm text-gray-700">
                     Send {smallestFrequency} standup summaries to this email
                     <span className="block text-xs text-gray-500 mt-1">
-                      They&apos;ll receive a {smallestFrequency} summary of team activity and
-                      progress
+                      They&apos;ll receive a {smallestFrequency} summary of team
+                      activity and progress
                     </span>
                   </span>
                 </label>
@@ -235,7 +235,7 @@ export function ShareModal({
             <div className="mt-6 flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium hover:cursor-pointer"
                 disabled={isSharing}
               >
                 Cancel
@@ -243,7 +243,7 @@ export function ShareModal({
               <button
                 onClick={handleShare}
                 disabled={isSharing || !email}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
               >
                 {isSharing ? (
                   <>

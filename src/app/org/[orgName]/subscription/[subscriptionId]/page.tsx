@@ -17,11 +17,13 @@ export default function SubscriptionPage() {
   const subscriptionId = params.subscriptionId as string;
   const { data: session, status } = useSession();
 
-  const [subscription, setSubscription] = useState<ExternalSubscription | null>(null);
+  const [subscription, setSubscription] = useState<ExternalSubscription | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   // Form states
   const [dailyReport, setDailyReport] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(false);
@@ -37,14 +39,16 @@ export default function SubscriptionPage() {
       setError(null);
       const data = await getSubscription(subscriptionId, session.mattJwtToken);
       setSubscription(data);
-      
+
       // Set form states
       setDailyReport(data.daily_report);
       setWeeklyReport(data.weekly_report);
       setMonthlyReport(data.monthly_report);
     } catch (err) {
       console.error("Failed to fetch subscription:", err);
-      setError(err instanceof Error ? err.message : "Failed to load subscription");
+      setError(
+        err instanceof Error ? err.message : "Failed to load subscription"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -70,33 +74,45 @@ export default function SubscriptionPage() {
       };
 
       await updateSubscription(subscriptionId, params, session.mattJwtToken);
-      
+
       // Show success message
-      const successMessage = document.createElement('div');
-      successMessage.className = 'fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50';
-      successMessage.textContent = 'Subscription updated successfully';
+      const successMessage = document.createElement("div");
+      successMessage.className =
+        "fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50";
+      successMessage.textContent = "Subscription updated successfully";
       document.body.appendChild(successMessage);
-      
+
       setTimeout(() => {
         successMessage.remove();
       }, 3000);
-      
+
       // Refresh subscription data
       await fetchSubscription();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update subscription");
+      setError(
+        err instanceof Error ? err.message : "Failed to update subscription"
+      );
     } finally {
       setIsUpdating(false);
     }
-  }, [subscriptionId, session?.mattJwtToken, dailyReport, weeklyReport, monthlyReport, fetchSubscription]);
-
+  }, [
+    subscriptionId,
+    session?.mattJwtToken,
+    dailyReport,
+    weeklyReport,
+    monthlyReport,
+    fetchSubscription,
+  ]);
 
   if (status === "loading" || isLoading) {
     return (
       <DashboardLayout orgName={orgName} title="Subscription Management">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <svg className="animate-spin h-8 w-8 mx-auto text-indigo-600" viewBox="0 0 24 24">
+            <svg
+              className="animate-spin h-8 w-8 mx-auto text-indigo-600"
+              viewBox="0 0 24 24"
+            >
               <circle
                 className="opacity-25"
                 cx="12"
@@ -119,21 +135,30 @@ export default function SubscriptionPage() {
     );
   }
 
-
   if (error && !subscription) {
     return (
       <DashboardLayout orgName={orgName} title="Subscription Management">
         <div className="flex items-center justify-center h-64">
           <div className="text-center max-w-md">
             <div className="mb-4">
-              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="mx-auto h-12 w-12 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
             </div>
             <p className="text-gray-900 font-medium">{error}</p>
             <button
               onClick={() => fetchSubscription()}
-              className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium hover:cursor-pointer"
             >
               Try Again
             </button>
@@ -155,15 +180,15 @@ export default function SubscriptionPage() {
             <h2 className="text-lg font-medium text-gray-900">
               Manage Email Subscription
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {subscription.email}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{subscription.email}</p>
           </div>
 
           <div className="p-6 space-y-6">
             {/* Email Reports */}
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Email Reports</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Email Reports
+              </h3>
               <div className="space-y-3">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
@@ -232,7 +257,7 @@ export default function SubscriptionPage() {
               <button
                 onClick={handleUpdate}
                 disabled={isUpdating}
-                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
               >
                 {isUpdating ? (
                   <>
@@ -258,7 +283,6 @@ export default function SubscriptionPage() {
                   "Save Changes"
                 )}
               </button>
-
             </div>
           </div>
         </div>

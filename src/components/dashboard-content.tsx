@@ -42,7 +42,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
       } catch (e) {
         console.error("Failed to fetch orgs:", e);
         setError("Failed to fetch organizations. Please sign in again.");
-        
+
         // Auto sign out after showing error briefly
         setTimeout(() => {
           onError();
@@ -63,7 +63,10 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <svg className="animate-spin h-8 w-8 mx-auto text-indigo-600" viewBox="0 0 24 24">
+          <svg
+            className="animate-spin h-8 w-8 mx-auto text-indigo-600"
+            viewBox="0 0 24 24"
+          >
             <circle
               className="opacity-25"
               cx="12"
@@ -106,7 +109,10 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
             {error && (
               <div className="rounded-md bg-red-50 p-4 mb-4">
                 <div className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4 text-red-800" viewBox="0 0 24 24">
+                  <svg
+                    className="animate-spin h-4 w-4 text-red-800"
+                    viewBox="0 0 24 24"
+                  >
                     <circle
                       className="opacity-25"
                       cx="12"
@@ -191,7 +197,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
               ))}
 
               {/* Add Organization Skeleton Card */}
-              <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 hover:border-gray-400 hover:bg-gray-100 transition-colors">
+              <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 hover:border-gray-400 hover:bg-gray-100 transition-colors hover:cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                     <svg
@@ -219,7 +225,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                 </div>
                 <a
                   href={`https://github.com/apps/${githubAppSlug}/installations/new`}
-                  className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                  className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer"
                 >
                   + Add Organization
                 </a>
@@ -256,7 +262,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                 </div>
                 <a
                   href={`https://github.com/apps/${githubAppSlug}/installations/new`}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer"
                 >
                   <svg
                     className="w-5 h-5 mr-2"

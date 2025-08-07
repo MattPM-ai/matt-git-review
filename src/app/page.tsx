@@ -26,16 +26,16 @@ export default async function Home({ searchParams }: HomeProps) {
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="w-full max-w-lg text-center space-y-8">
           <div className="space-y-4">
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-5">
               <Image
                 src="/icon.png"
-                alt="MattPM Icon"
+                alt="Matt PM Icon"
                 width={64}
                 height={64}
                 className="w-16 h-16"
                 priority
               />
-              <span className="text-5xl font-bold text-gray-900">MattPM</span>
+              <span className="text-5xl font-bold text-gray-900">Matt PM</span>
             </div>
 
             <h1 className="text-4xl text-center font-bold text-gray-900 max-w-sm mx-auto">

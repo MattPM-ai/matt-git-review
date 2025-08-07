@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import {
   getSubscription,
@@ -13,7 +14,8 @@ import {
 
 export default function SubscriptionPage() {
   const params = useParams();
-  const orgName = params.orgName as string;
+  const orgLogin = params.orgName as string;
+  const { orgName } = useOrgConfig(orgLogin);
   const subscriptionId = params.subscriptionId as string;
   const { data: session, status } = useSession();
 

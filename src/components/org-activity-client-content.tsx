@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ActivityFilters } from "@/components/activity-filters";
 import { ActivityContent } from "@/components/activity-content";
@@ -22,10 +23,11 @@ interface OrgActivityClientContentProps {
 }
 
 export function OrgActivityClientContent({
-  orgName,
+  orgName: orgLogin,
   searchParams,
 }: OrgActivityClientContentProps) {
   const { data: session, status } = useValidatedSession();
+  const { orgName } = useOrgConfig(orgLogin);
   const [activityData, setActivityData] =
     useState<ActivitiesResponseDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export function OrgActivityClientContent({
       try {
         // Build filter for API request
         const filter: ActivityFilterDto = {
-          organizationLogin: orgName,
+          organizationLogin: orgLogin,
           limit: 1000, // Get a reasonable amount of activities
         };
 
@@ -117,7 +119,7 @@ export function OrgActivityClientContent({
   }, [
     session,
     status,
-    orgName,
+    orgLogin,
     selectedUser,
     selectedType,
     selectedDateFrom,

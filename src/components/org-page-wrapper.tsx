@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { getOrgConfig } from "@/lib/org-config";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import { OrgInitialSetup } from "./org-initial-setup";
 import { DashboardLayout } from "./dashboard-layout";
 import { PerformanceReviewDashboard } from "./performance-review-dashboard";
@@ -15,12 +16,13 @@ interface OrgPageWrapperProps {
 }
 
 export function OrgPageWrapper({
-  orgName,
+  orgName: orgLogin,
   initialPeriod,
   initialDateFrom,
   initialDateTo,
 }: OrgPageWrapperProps) {
   const { data: session } = useSession();
+  const { orgName } = useOrgConfig(orgLogin);
   const [isLoading, setIsLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
 
@@ -32,7 +34,7 @@ export function OrgPageWrapper({
       }
 
       try {
-        const config = await getOrgConfig(orgName, session.mattJwtToken);
+        const config = await getOrgConfig(orgLogin, session.mattJwtToken);
         setNeedsSetup(!config.initialSetupAt);
         setIsLoading(false);
       } catch (err) {
@@ -44,7 +46,7 @@ export function OrgPageWrapper({
     }
 
     checkSetupStatus();
-  }, [orgName, session?.mattJwtToken]);
+  }, [orgLogin, session?.mattJwtToken]);
 
   if (isLoading) {
     return (
@@ -73,7 +75,7 @@ export function OrgPageWrapper({
   }
 
   if (needsSetup) {
-    return <OrgInitialSetup orgName={orgName} />;
+    return <OrgInitialSetup orgName={orgLogin} />;
   }
 
   return (
@@ -83,7 +85,7 @@ export function OrgPageWrapper({
       currentView="performance"
     >
       <PerformanceReviewDashboard
-        orgName={orgName}
+        orgName={orgLogin}
         initialPeriod={initialPeriod}
         initialDateFrom={initialDateFrom}
         initialDateTo={initialDateTo}

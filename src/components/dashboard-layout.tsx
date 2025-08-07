@@ -46,20 +46,20 @@ export function DashboardLayout({
                 </svg>
               </Link>
 
-              {/* MattPM Logo - Icon only on mobile, full branding on desktop */}
+              {/* Matt PM Logo - Icon only on mobile, full branding on desktop */}
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 flex-shrink-0 group"
               >
                 <Image
                   src="/icon.png"
-                  alt="MattPM"
+                  alt="Matt PM"
                   width={24}
                   height={24}
                   className="w-6 h-6"
                 />
                 <span className="hidden lg:inline text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-                  MattPM
+                  Matt PM
                 </span>
               </Link>
 

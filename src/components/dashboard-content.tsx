@@ -92,29 +92,26 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-2 sm:py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* MattPM Logo - Icon only on mobile, full branding on desktop */}
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 group"
-              >
+              {/* Matt PM Logo - Icon only on mobile, full branding on desktop */}
+              <Link href="/dashboard" className="flex items-center gap-2 group">
                 <Image
                   src="/icon.png"
-                  alt="MattPM"
+                  alt="Matt PM"
                   width={28}
                   height={28}
                   className="w-7 h-7"
                 />
                 <span className="hidden lg:inline text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-                  MattPM
+                  Matt PM
                 </span>
               </Link>
-              
+
               {/* Separator - Always visible */}
               <div className="w-px h-6 bg-gray-300"></div>
-              
+
               <h1 className="text-2xl font-semibold text-gray-900">
                 Organizations
               </h1>
@@ -243,9 +240,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                     <h3 className="font-medium text-gray-500">
                       Add Organization
                     </h3>
-                    <p className="text-sm text-gray-400 mt-1">
+                    {/* <p className="text-sm text-gray-400 mt-1">
                       Connect your GitHub organization
-                    </p>
+                    </p> */}
                   </div>
                 </div>
                 <a

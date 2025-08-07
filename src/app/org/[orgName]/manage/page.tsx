@@ -2,11 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import { DashboardLayout } from "@/components/dashboard-layout";
 
 export default function OrgManagePage() {
   const params = useParams();
-  const orgName = params.orgName as string;
+  const orgLogin = params.orgName as string;
+  const { orgName } = useOrgConfig(orgLogin);
   const router = useRouter();
   const { data: session, status } = useSession();
 

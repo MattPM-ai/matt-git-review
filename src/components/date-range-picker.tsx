@@ -54,7 +54,7 @@ const PERIOD_OPTIONS: PeriodOption[] = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
   { value: "yearly", label: "Yearly" },
-  { value: "custom", label: "Custom Range" },
+  { value: "custom", label: "Custom" },
 ];
 
 export function DateRangePicker({
@@ -481,7 +481,7 @@ export function DateRangePicker({
       {/* Date Range Selector */}
       {period === "custom" ? (
         // Custom Date Range Inputs
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <input
             type="date"
             value={customStartDate}
@@ -524,7 +524,7 @@ export function DateRangePicker({
           }
           max={format(today, "yyyy-MM-dd")}
           disabled={disabled}
-          className={`px-3 py-2 text-sm border border-gray-300 rounded-lg ${
+          className={`px-3 py-2 text-sm border border-gray-300 rounded-lg w-full ${
             disabled
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

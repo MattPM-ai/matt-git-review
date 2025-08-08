@@ -73,24 +73,14 @@ export function ShareModal({
         ? `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/invite-and-send`
         : `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/send-performance-email`;
 
-      const body = subscribeToReports
-        ? {
-            email,
-            organizationLogin: orgName,
-            dailyReport: orgConfig?.dailyReport || false,
-            weeklyReport: orgConfig?.weeklyReport || false,
-            monthlyReport: orgConfig?.monthlyReport || false,
-            dateFrom,
-            dateTo,
-            timeframe: period,
-          }
-        : {
-            email,
-            organizationLogin: orgName,
-            dateFrom,
-            dateTo,
-            timeframe: period,
-          };
+      const body = {
+        email,
+        organizationLogin: orgName,
+        subscribe: subscribeToReports,
+        dateFrom,
+        dateTo,
+        timeframe: period,
+      };
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -135,7 +125,6 @@ export function ShareModal({
     period,
     session?.mattJwtToken,
     onClose,
-    orgConfig,
   ]);
 
   if (!isOpen) return null;
@@ -207,10 +196,9 @@ export function ShareModal({
                     disabled={isSharing}
                   />
                   <span className="text-sm text-gray-700">
-                    Send {smallestFrequency} standup summaries to this email
+                    Send daily reports to this email
                     <span className="block text-xs text-gray-500 mt-1">
-                      They&apos;ll receive a {smallestFrequency} summary of team
-                      activity and progress
+                      They&apos;ll receive daily summaries of team activity and progress
                     </span>
                   </span>
                 </label>

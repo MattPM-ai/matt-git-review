@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { UserProfile } from "@/components/auth/user-profile";
 import Image from "next/image";
+import Link from "next/link";
 import type { Session } from "next-auth";
 
 interface Organization {
@@ -91,9 +92,30 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+            <div className="flex items-center gap-4">
+              {/* Matt PM Logo - Icon only on mobile, full branding on desktop */}
+              <Link href="/dashboard" className="flex items-center gap-2 group">
+                <Image
+                  src="/icon.png"
+                  alt="Matt PM"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7"
+                />
+                <span className="hidden lg:inline text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+                  Matt PM
+                </span>
+              </Link>
+
+              {/* Separator - Always visible */}
+              <div className="w-px h-6 bg-gray-300"></div>
+
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Organizations
+              </h1>
+            </div>
             <UserProfile />
           </div>
         </div>
@@ -102,9 +124,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
+            {/* <h2 className="text-lg font-medium text-gray-900 mb-4">
               Your GitHub Organizations
-            </h2>
+            </h2> */}
 
             {error && (
               <div className="rounded-md bg-red-50 p-4 mb-4">
@@ -165,7 +187,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                       href={`/org/${org.login}`}
                       className="flex-1 rounded-md bg-gray-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
-                      View
+                      View Report
                     </a>
                     <a
                       href={`/org/${org.login}/manage`}
@@ -218,9 +240,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                     <h3 className="font-medium text-gray-500">
                       Add Organization
                     </h3>
-                    <p className="text-sm text-gray-400 mt-1">
+                    {/* <p className="text-sm text-gray-400 mt-1">
                       Connect your GitHub organization
-                    </p>
+                    </p> */}
                   </div>
                 </div>
                 <a

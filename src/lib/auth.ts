@@ -107,7 +107,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             mattUser: {
               id: validation.payload.sub || validation.payload.username || "",
               login: validation.payload.username || "",
-              name: validation.payload.name || validation.payload.username || "",
+              name:
+                validation.payload.name || validation.payload.username || "",
               avatar_url: validation.payload.avatar_url || "",
               html_url: validation.payload.html_url || "",
             },
@@ -133,7 +134,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, account, profile, user }) {
       // Handle subscription-based authentication
       if (account?.provider === "subscription" && user) {
-        console.log("Processing subscription authentication");
+        // console.log("Processing subscription authentication");
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
@@ -142,17 +143,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.mattUser = (user as { mattUser?: MattUser }).mattUser;
         token.orgName = (user as { orgName?: string }).orgName;
         token.isSubscriptionAuth = true;
-        console.log(
-          "Subscription auth - mattJwtToken:",
-          token.mattJwtToken ? "present" : "missing"
-        );
+        // console.log(
+        //   "Subscription auth - mattJwtToken:",
+        //   token.mattJwtToken ? "present" : "missing"
+        // );
         return token;
       }
 
       // Initial GitHub sign in
       if (account && profile && account.provider === "github") {
-        console.log("New sign in - Access Token:", account.access_token);
-        console.log("Refresh Token:", account.refresh_token);
+        // console.log("New sign in - Access Token:", account.access_token);
+        // console.log("Refresh Token:", account.refresh_token);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.id = profile.id as string;
@@ -179,7 +180,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             const authData = await response.json();
             token.mattJwtToken = authData.access_token;
             token.mattUser = authData.user;
-            console.log("Successfully exchanged GitHub token for JWT");
+            // console.log("Successfully exchanged GitHub token for JWT");
           } else {
             console.error(
               "Failed to exchange token with Matt API:",
@@ -194,7 +195,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // For subsequent requests, ensure we have the token (only for GitHub OAuth, not subscription auth)
-      if (!token.accessToken && !token.isSubscriptionAuth && !token.directJWT && token.id) {
+      if (
+        !token.accessToken &&
+        !token.isSubscriptionAuth &&
+        !token.directJWT &&
+        token.id
+      ) {
         console.error("Token lost access token, session might be corrupted");
         // Mark token as needing re-authentication but don't return null
         token.error = "NoAccessToken";
@@ -203,7 +209,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log("Session callback", session, token);
+      // console.log("Session callback", session, token);
 
       if (session.user) {
         session.user.id = (token.id as string) || (token.sub as string);
@@ -211,14 +217,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Pass GitHub access token
         if (token.accessToken) {
           session.accessToken = token.accessToken as string;
-          console.log("Session created with GitHub access token");
+          // console.log("Session created with GitHub access token");
         }
 
         // Pass JWT token from Matt API
         if (token.mattJwtToken) {
           session.mattJwtToken = token.mattJwtToken as string;
           session.mattUser = token.mattUser as typeof session.mattUser;
-          console.log("Session created with Matt JWT token");
+          // console.log("Session created with Matt JWT token");
         } else {
           console.warn("Session without Matt JWT token - API calls may fail");
         }

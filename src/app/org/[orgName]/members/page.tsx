@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import {
   getOrgMembers,
   getExternalSubscriptions,
@@ -16,8 +17,9 @@ import Image from "next/image";
 
 export default function OrgMembersPage() {
   const params = useParams();
-  const orgName = params.orgName as string;
+  const orgLogin = params.orgName as string;
   const { data: session, status } = useSession();
+  const { orgName } = useOrgConfig(orgLogin);
 
   const [membersData, setMembersData] = useState<MembersResponse | null>(null);
   const [externalSubscriptions, setExternalSubscriptions] = useState<
@@ -50,8 +52,8 @@ export default function OrgMembersPage() {
     try {
       setError(null);
       const [membersResponse, externalsResponse] = await Promise.all([
-        getOrgMembers(orgName, session.mattJwtToken),
-        getExternalSubscriptions(orgName, session.mattJwtToken),
+        getOrgMembers(orgLogin, session.mattJwtToken),
+        getExternalSubscriptions(orgLogin, session.mattJwtToken),
       ]);
 
       setMembersData(membersResponse);
@@ -62,7 +64,7 @@ export default function OrgMembersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [orgName, session?.mattJwtToken, hasGitHubUserAccess]);
+  }, [orgLogin, session?.mattJwtToken, hasGitHubUserAccess]);
 
   useEffect(() => {
     if (status !== "loading") {

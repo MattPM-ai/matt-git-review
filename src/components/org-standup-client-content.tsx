@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
+import { useOrgConfig } from "@/hooks/use-org-config";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { StandupDashboard } from "@/components/standup-dashboard";
 import { StandupSidebar } from "@/components/standup-sidebar";
@@ -16,10 +17,11 @@ interface OrgStandupClientContentProps {
 }
 
 export function OrgStandupClientContent({
-  orgName,
+  orgName: orgLogin,
   searchParams,
 }: OrgStandupClientContentProps) {
   const { data: session, status } = useValidatedSession();
+  const { orgName } = useOrgConfig(orgLogin);
   const [activityData, setActivityData] = useState<ActivitiesResponseDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +51,7 @@ export function OrgStandupClientContent({
       try {
         // Build filter to fetch only commits for calendar/sidebar data
         const filter: ActivityFilterDto = {
-          organizationLogin: orgName,
+          organizationLogin: orgLogin,
           activityTypes: ["commit"],
           limit: 1000, // Get a reasonable amount of commits
         };
@@ -71,7 +73,7 @@ export function OrgStandupClientContent({
     };
 
     fetchActivities();
-  }, [session, status, orgName, dateFrom]);
+  }, [session, status, orgLogin, dateFrom]);
 
   const members = activityData ? Object.values(activityData.users) : [];
   const commits = activityData

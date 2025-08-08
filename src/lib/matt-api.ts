@@ -1,4 +1,4 @@
-import { authenticatedFetch } from './fetch-interceptor';
+import { authenticatedFetch } from "./fetch-interceptor";
 
 export interface ActivityFilterDto {
   organizationLogin: string;
@@ -109,16 +109,16 @@ export interface StandupResponse {
 }
 
 export enum TaskStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 export class NoActivityError extends Error {
-  constructor(message: string = 'No activity found for this period') {
+  constructor(message: string = "No activity found for this period") {
     super(message);
-    this.name = 'NoActivityError';
+    this.name = "NoActivityError";
   }
 }
 
@@ -156,13 +156,16 @@ class MattAPIClient {
   }
 
   async authenticateUser(accessToken: string): Promise<void> {
-    const response = await authenticatedFetch(`${this.getBaseUrl()}/users/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ access_token: accessToken }),
-    });
+    const response = await authenticatedFetch(
+      `${this.getBaseUrl()}/users/auth`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ access_token: accessToken }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to authenticate user: ${response.statusText}`);
@@ -173,20 +176,21 @@ class MattAPIClient {
     jwtToken: string,
     filter: ActivityFilterDto
   ): Promise<ActivitiesResponseDto> {
-    console.log("jwtToken", jwtToken);
-    
     if (!jwtToken) {
-      throw new Error('No JWT token provided');
+      throw new Error("No JWT token provided");
     }
 
-    const response = await authenticatedFetch(`${this.getBaseUrl()}/activity/filter`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(filter),
-    });
+    const response = await authenticatedFetch(
+      `${this.getBaseUrl()}/activity/filter`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify(filter),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch activities: ${response.statusText}`);
@@ -221,16 +225,19 @@ class MattAPIClient {
     request: StandupRequest
   ): Promise<StandupTaskResponse> {
     if (!jwtToken) {
-      throw new Error('No JWT token provided');
+      throw new Error("No JWT token provided");
     }
-    const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/generate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(request),
-    });
+    const response = await authenticatedFetch(
+      `${this.getBaseUrl()}/standup/generate`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify(request),
+      }
+    );
 
     if (response.status === 204) {
       // No content - no activity for this period
@@ -244,20 +251,20 @@ class MattAPIClient {
     return response.json();
   }
 
-  async getStandupTask(
-    jwtToken: string,
-    taskId: string
-  ): Promise<StandupTask> {
+  async getStandupTask(jwtToken: string, taskId: string): Promise<StandupTask> {
     if (!jwtToken) {
-      throw new Error('No JWT token provided');
+      throw new Error("No JWT token provided");
     }
-    const response = await authenticatedFetch(`${this.getBaseUrl()}/standup/task/${taskId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtToken}`,
-      },
-    });
+    const response = await authenticatedFetch(
+      `${this.getBaseUrl()}/standup/task/${taskId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get standup task: ${response.statusText}`);
@@ -276,7 +283,7 @@ class MattAPIClient {
       const poll = async () => {
         try {
           const task = await this.getStandupTask(jwtToken, taskId);
-          
+
           if (onProgress) {
             onProgress(task);
           }
@@ -285,10 +292,12 @@ class MattAPIClient {
             if (task.result) {
               resolve(task.result);
             } else {
-              reject(new Error('Task completed but no result found'));
+              reject(new Error("Task completed but no result found"));
             }
           } else if (task.status === TaskStatus.FAILED) {
-            reject(new Error(task.error_message || 'Standup generation failed'));
+            reject(
+              new Error(task.error_message || "Standup generation failed")
+            );
           } else {
             // Continue polling if status is PENDING or PROCESSING
             setTimeout(poll, pollInterval);

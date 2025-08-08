@@ -14,9 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Git Performance Ranking & Standup",
+  title: "Matt PM - Git Performance Ranking & Standup",
   description:
     "Connect your GitHub organization to generate automated performance rankings and standup",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

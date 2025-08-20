@@ -9,6 +9,7 @@ export interface OrgConfig {
   dailyReport: boolean;
   weeklyReport: boolean;
   monthlyReport: boolean;
+  sendEmptyWeekdayReports: boolean;
 }
 
 export interface UpdateOrgConfigParams {
@@ -18,6 +19,7 @@ export interface UpdateOrgConfigParams {
   dailyReport: boolean;
   weeklyReport: boolean;
   monthlyReport: boolean;
+  sendEmptyWeekdayReports: boolean;
 }
 
 export async function getOrgConfig(

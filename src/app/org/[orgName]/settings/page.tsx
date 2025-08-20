@@ -19,6 +19,7 @@ export default function OrgSettingsPage() {
     dailyReport: boolean;
     weeklyReport: boolean;
     monthlyReport: boolean;
+    sendEmptyWeekdayReports: boolean;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 

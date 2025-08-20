@@ -108,7 +108,7 @@ export default function OrgManagePage() {
           <div className="divide-y divide-gray-200">
             {/* Members & Subscriptions */}
             <button
-              onClick={() => router.push(`/org/${orgName}/members`)}
+              onClick={() => router.push(`/org/${orgLogin}/members`)}
               className="w-full p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
             >
               <div className="flex items-center justify-between">
@@ -156,7 +156,7 @@ export default function OrgManagePage() {
 
             {/* Organization Configuration */}
             <button
-              onClick={() => router.push(`/org/${orgName}/settings`)}
+              onClick={() => router.push(`/org/${orgLogin}/settings`)}
               className="w-full p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
             >
               <div className="flex items-center justify-between">
@@ -212,7 +212,7 @@ export default function OrgManagePage() {
         {/* Back to Organization */}
         <div className="mt-6 text-center">
           <button
-            onClick={() => router.push(`/org/${orgName}`)}
+            onClick={() => router.push(`/org/${orgLogin}`)}
             className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             <svg

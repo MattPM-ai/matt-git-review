@@ -17,6 +17,7 @@ interface OrgInitialSetupProps {
     dailyReport: boolean;
     weeklyReport: boolean;
     monthlyReport: boolean;
+    sendEmptyWeekdayReports: boolean;
   };
 }
 
@@ -133,6 +134,7 @@ export function OrgInitialSetup({
   const [dailyReport, setDailyReport] = useState(true);
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [monthlyReport, setMonthlyReport] = useState(true);
+  const [sendEmptyWeekdayReports, setSendEmptyWeekdayReports] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -147,6 +149,7 @@ export function OrgInitialSetup({
       setDailyReport(initialConfig.dailyReport ?? true);
       setWeeklyReport(initialConfig.weeklyReport ?? true);
       setMonthlyReport(initialConfig.monthlyReport ?? true);
+      setSendEmptyWeekdayReports(initialConfig.sendEmptyWeekdayReports ?? false);
     } else if (!isEditMode) {
       // Initial setup: auto-detect defaults
 
@@ -226,6 +229,7 @@ export function OrgInitialSetup({
         dailyReport,
         weeklyReport,
         monthlyReport,
+        sendEmptyWeekdayReports,
       };
 
       await updateOrgConfig(orgName, config, session.mattJwtToken);
@@ -380,6 +384,21 @@ export function OrgInitialSetup({
                   Monthly Report
                   <span className="block text-xs text-gray-500">
                     Receive monthly performance summaries
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sendEmptyWeekdayReports}
+                  onChange={(e) => setSendEmptyWeekdayReports(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <span className="text-sm text-gray-700">
+                  Send Empty Weekday Reports
+                  <span className="block text-xs text-gray-500">
+                    Receive daily reports even when there&apos;s no activity on weekdays
                   </span>
                 </span>
               </label>

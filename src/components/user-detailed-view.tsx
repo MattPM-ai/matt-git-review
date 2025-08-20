@@ -16,14 +16,14 @@ interface PerformanceData {
   activeDays: number;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
+  concerns: string;
   manHoursRationale: string;
   dailyStandups?: Array<{
-    date?: Date;
+    date: string;
     summary: string;
     workDone: string[];
     workingOn: string[];
-    ongoingIssues: string[];
+    concerns: string;
     totalCommits: number;
     totalPRs: number;
     totalIssues: number;

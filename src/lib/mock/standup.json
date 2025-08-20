@@ -22,7 +22,7 @@
         "Refining prompt accuracy and validating man-hours estimation",
         "Improving multi-user standup generation"
       ],
-      "ongoingIssues": ["Uncertainty if session expire fix works properly"],
+      "concerns": "Uncertainty if session expire fix works properly",
       "totalCommits": 44,
       "totalPRs": 0,
       "totalIssues": 0,
@@ -41,7 +41,7 @@
             "Verifying session expiration fix effectiveness",
             "Improving git sync reliability"
           ],
-          "ongoingIssues": ["Uncertainty if session expire fix works properly"],
+          "concerns": "Uncertainty if session expire fix works properly",
           "totalCommits": 2,
           "totalPRs": 0,
           "totalIssues": 0,

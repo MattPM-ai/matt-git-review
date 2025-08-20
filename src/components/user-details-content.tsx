@@ -3,11 +3,11 @@
 import { DailyTimeline } from "./daily-timeline";
 
 interface DailyStandup {
-  date?: Date;
+  date: string;
   summary: string;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
+  concerns: string;
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;
@@ -30,7 +30,7 @@ interface PerformanceData {
   activeDays: number;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
+  concerns: string;
   manHoursRationale: string;
   dailyStandups?: DailyStandup[];
 }
@@ -168,6 +168,28 @@ export function UserDetailsContent({
         </span>
       </div>
 
+      {selectedUser.concerns && selectedUser.concerns.trim() && (
+        <div className="flex items-start gap-2">
+          <div className="pt-0.5">
+            <svg
+              className="w-4 h-4 text-red-600 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 2a8 8 0 100 16 8 8 0 000-16zm.75 5.25a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 8a1 1 0 110-2 1 1 0 010 2z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <span className="text-red-700 text-sm font-bold">
+            {selectedUser.concerns}
+          </span>
+        </div>
+      )}
+
       {/* Man hours rationale */}
       {selectedUser.manHoursRationale && (
         <div>
@@ -217,26 +239,6 @@ export function UserDetailsContent({
                 className="flex items-start gap-2 text-sm text-gray-700"
               >
                 <span className="text-blue-500 mt-0.5 font-medium">⚡</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Ongoing issues */}
-      {selectedUser.ongoingIssues.length > 0 && (
-        <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-            Ongoing Issues
-          </h4>
-          <ul className={`${isDesktop ? "space-y-1" : "space-y-2"}`}>
-            {selectedUser.ongoingIssues.map((item, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-2 text-sm text-gray-700"
-              >
-                <span className="text-red-500 mt-0.5 font-medium">⚠</span>
                 <span>{item}</span>
               </li>
             ))}

@@ -87,17 +87,17 @@ export interface StandupRequest {
 }
 
 export interface StandupSummary {
-  date?: Date;
+  date: string;
   summary: string;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;
   totalManHoursMin: number;
   totalManHoursMax: number;
   manHoursRationale: string;
+  concerns: string;
   dailyStandups?: StandupSummary[];
 }
 

@@ -31,14 +31,14 @@ interface PerformanceData {
   activeDays: number;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
+  concerns: string;
   manHoursRationale: string;
   dailyStandups?: Array<{
-    date?: Date;
+    date: string;
     summary: string;
     workDone: string[];
     workingOn: string[];
-    ongoingIssues: string[];
+    concerns: string;
     totalCommits: number;
     totalPRs: number;
     totalIssues: number;
@@ -206,7 +206,7 @@ export function PerformanceReviewDashboard({
           activeDays,
           workDone: user.standup.workDone,
           workingOn: user.standup.workingOn,
-          ongoingIssues: user.standup.ongoingIssues,
+          concerns: user.standup.concerns,
           manHoursRationale: user.standup.manHoursRationale,
           dailyStandups: user.standup.dailyStandups,
         };

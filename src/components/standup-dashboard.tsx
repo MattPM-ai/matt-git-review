@@ -433,16 +433,12 @@ export function StandupDashboard({
                       ))}
                     </ul>
                   </div>
-                  {summary.standup.ongoingIssues.length > 0 && (
+                  {summary.standup.concerns && summary.standup.concerns.trim() && (
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">
-                        Ongoing Issues
+                        Concerns
                       </h4>
-                      <ul className="list-disc list-inside text-gray-700 space-y-1">
-                        {summary.standup.ongoingIssues.map((issue, index) => (
-                          <li key={index}>{issue}</li>
-                        ))}
-                      </ul>
+                      <p className="text-gray-700">{summary.standup.concerns}</p>
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -590,28 +586,14 @@ export function StandupDashboard({
                         </div>
                       )}
 
-                      {summary.standup.ongoingIssues.length > 0 && (
+                      {summary.standup.concerns && summary.standup.concerns.trim() && (
                         <div>
                           <p className="text-xs font-semibold text-gray-600 mb-2">
-                            Ongoing Issues:
+                            Concerns:
                           </p>
-                          <ul className="text-sm text-gray-700 space-y-1.5">
-                            {summary.standup.ongoingIssues.map(
-                              (item, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2"
-                                >
-                                  <span className="text-amber-500 mt-0.5 font-medium">
-                                    ⚠
-                                  </span>
-                                  <span className="leading-relaxed">
-                                    {item}
-                                  </span>
-                                </li>
-                              )
-                            )}
-                          </ul>
+                          <p className="text-sm text-gray-700 leading-relaxed">
+                            {summary.standup.concerns}
+                          </p>
                         </div>
                       )}
 

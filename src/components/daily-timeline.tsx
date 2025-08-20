@@ -3,11 +3,11 @@
 import { format } from "date-fns";
 
 interface DailyStandup {
-  date?: Date;
+  date: string;
   summary: string;
   workDone: string[];
   workingOn: string[];
-  ongoingIssues: string[];
+  concerns: string;
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;

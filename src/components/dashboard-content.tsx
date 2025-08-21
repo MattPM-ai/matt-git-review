@@ -5,12 +5,20 @@ import { UserProfile } from "@/components/auth/user-profile";
 import Image from "next/image";
 import Link from "next/link";
 import type { Session } from "next-auth";
+import { mattAPI } from "@/lib/matt-api";
 
 interface Organization {
   id: number;
   login: string;
   description?: string;
   avatar_url: string;
+}
+
+interface MattOrganization {
+  id: string;
+  login: string;
+  name: string;
+  // Add other fields as needed
 }
 
 interface DashboardContentProps {
@@ -22,23 +30,71 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isResyncing, setIsResyncing] = useState(false);
 
   useEffect(() => {
-    async function fetchOrganizations() {
+    async function fetchAndCompareOrganizations() {
       try {
-        const response = await fetch("https://api.github.com/user/orgs", {
+        // Fetch organizations from GitHub API
+        const githubResponse = await fetch("https://api.github.com/user/orgs", {
           headers: {
             Authorization: `Bearer ${session.accessToken}`,
             Accept: "application/vnd.github.v3+json",
           },
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch organizations");
+        if (!githubResponse.ok) {
+          throw new Error("Failed to fetch organizations from GitHub");
         }
 
-        const data = await response.json();
-        setOrganizations(data);
+        const githubOrgs: Organization[] = await githubResponse.json();
+        
+        // Extract and sort GitHub org logins in lowercase
+        const githubLogins = githubOrgs
+          .map(org => org.login.toLowerCase())
+          .sort();
+
+        // Fetch organizations from Matt API if we have a JWT token
+        if (session?.mattJwtToken) {
+          try {
+            const mattResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_GIT_API_HOST}/organizations`,
+              {
+                headers: {
+                  Authorization: `Bearer ${session.mattJwtToken}`,
+                  Accept: "application/json",
+                },
+              }
+            );
+
+            if (mattResponse.ok) {
+              const mattOrgs: MattOrganization[] = await mattResponse.json();
+              
+              // Extract and sort Matt API org logins in lowercase
+              const mattLogins = mattOrgs
+                .map(org => org.login.toLowerCase())
+                .sort();
+
+              // Compare the lists
+              const areEqual = githubLogins.length === mattLogins.length &&
+                githubLogins.every((login, index) => login === mattLogins[index]);
+
+              // Force resync if lists are different
+              if (!areEqual) {
+                console.log('Organization lists differ, forcing resync:', {
+                  github: githubLogins,
+                  matt: mattLogins
+                });
+                await forceResync();
+              }
+            }
+          } catch (mattError) {
+            console.warn('Failed to fetch or compare Matt API organizations:', mattError);
+            // Continue with GitHub orgs even if Matt API fails
+          }
+        }
+
+        setOrganizations(githubOrgs);
         setError(null);
       } catch (e) {
         console.error("Failed to fetch orgs:", e);
@@ -53,10 +109,27 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
       }
     }
 
-    if (session?.accessToken) {
-      fetchOrganizations();
+    async function forceResync() {
+      if (!session?.accessToken) return;
+      
+      try {
+        setIsResyncing(true);
+        console.log('Forcing resync with Matt API...');
+        
+        await mattAPI.authenticateUser(session.accessToken);
+        console.log('Resync completed successfully');
+      } catch (error) {
+        console.error('Failed to resync organizations:', error);
+        // Don't show error to user as this is an automatic background process
+      } finally {
+        setIsResyncing(false);
+      }
     }
-  }, [session?.accessToken, onError]);
+
+    if (session?.accessToken) {
+      fetchAndCompareOrganizations();
+    }
+  }, [session?.accessToken, session?.mattJwtToken, onError]);
 
   const githubAppSlug = "matt-pm-ai"; // TODO: Add NEXT_PUBLIC_GITHUB_APP_SLUG to env
 
@@ -83,7 +156,9 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <p className="mt-4 text-gray-600">Loading organizations...</p>
+          <p className="mt-4 text-gray-600">
+            {isResyncing ? 'Syncing organizations...' : 'Loading organizations...'}
+          </p>
         </div>
       </div>
     );

@@ -55,7 +55,7 @@ export function MobileModal({
     >
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div
-        className={`relative bg-white rounded-t-2xl w-full max-h-[90vh] flex flex-col ${
+        className={`relative bg-white rounded-t-2xl w-full max-h-[90dvh] flex flex-col ${
           isModalClosing ? "animate-slide-down" : "animate-slide-up"
         }`}
         onClick={(e) => e.stopPropagation()}

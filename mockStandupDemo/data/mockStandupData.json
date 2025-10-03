@@ -1,0 +1,144 @@
+[
+  {
+    "username": "sarah-chen",
+    "name": "Sarah Chen",
+    "avatar_url": "https://ui-avatars.com/api/?name=Sarah+Chen&size=150&background=6366f1&color=fff",
+    "standup": {
+      "date": "2025-10-03",
+      "summary": "Sarah focused on optimizing database performance and implementing new API endpoints for the reporting module. She successfully reduced query times by 40% through index optimization and query refactoring, and completed the initial implementation of the analytics API with comprehensive test coverage.",
+      "workDone": [
+        "Optimized database queries reducing average response time from 850ms to 510ms",
+        "Implemented analytics API endpoints with pagination and filtering",
+        "Added comprehensive unit and integration tests for new API routes",
+        "Refactored user authentication middleware for better performance",
+        "Updated API documentation with new endpoint specifications"
+      ],
+      "workingOn": [
+        "Implementing caching layer for frequently accessed data",
+        "Setting up Redis integration for session management",
+        "Code review for the payment processing module"
+      ],
+      "concerns": "",
+      "totalCommits": 18,
+      "totalPRs": 4,
+      "totalIssues": 1,
+      "totalManHoursMin": 7,
+      "totalManHoursMax": 9,
+      "manHoursRationale": "Full day of development including complex database optimization work, API implementation, and thorough testing. The range accounts for additional time spent on documentation and code reviews."
+    }
+  },
+  {
+    "username": "marcus-rodriguez",
+    "name": "Marcus Rodriguez",
+    "avatar_url": "https://ui-avatars.com/api/?name=Marcus+Rodriguez&size=150&background=10b981&color=fff",
+    "standup": {
+      "date": "2025-10-03",
+      "summary": "Marcus concentrated on frontend development, building out the new dashboard interface and enhancing the component library. He completed the responsive redesign of the main dashboard, implemented several reusable UI components, and fixed critical accessibility issues that were identified in the previous sprint.",
+      "workDone": [
+        "Completed responsive dashboard redesign with mobile-first approach",
+        "Created reusable Card, Modal, and Dropdown components for the design system",
+        "Fixed 12 accessibility issues including ARIA labels and keyboard navigation",
+        "Implemented dark mode toggle with persistent user preferences",
+        "Optimized bundle size by code-splitting large components"
+      ],
+      "workingOn": [
+        "Building data visualization components using D3.js",
+        "Implementing skeleton loading states for async content",
+        "Setting up Storybook for component documentation"
+      ],
+      "concerns": "",
+      "totalCommits": 12,
+      "totalPRs": 5,
+      "totalIssues": 3,
+      "totalManHoursMin": 6,
+      "totalManHoursMax": 8,
+      "manHoursRationale": "Standard development day with focus on UI components and accessibility improvements. Multiple PRs indicate good progress with iterative development and code reviews."
+    }
+  },
+  {
+    "username": "aisha-patel",
+    "name": "Aisha Patel",
+    "avatar_url": "https://ui-avatars.com/api/?name=Aisha+Patel&size=150&background=f59e0b&color=fff",
+    "standup": {
+      "date": "2025-10-03",
+      "summary": "Aisha worked on infrastructure improvements and CI/CD pipeline enhancements. She successfully migrated the staging environment to Kubernetes, set up comprehensive monitoring with Prometheus and Grafana, and resolved several deployment issues that were causing intermittent failures in the automated testing pipeline.",
+      "workDone": [
+        "Migrated staging environment to Kubernetes cluster with zero downtime",
+        "Set up Prometheus metrics collection and Grafana dashboards",
+        "Implemented automated SSL certificate renewal with Let's Encrypt",
+        "Fixed CI/CD pipeline failures related to Docker image caching",
+        "Created runbooks for common operational procedures"
+      ],
+      "workingOn": [
+        "Configuring auto-scaling policies for production workloads",
+        "Setting up log aggregation with ELK stack",
+        "Planning disaster recovery procedures and backup strategy"
+      ],
+      "concerns": "",
+      "totalCommits": 6,
+      "totalPRs": 2,
+      "totalIssues": 4,
+      "totalManHoursMin": 5,
+      "totalManHoursMax": 7,
+      "manHoursRationale": "Infrastructure work often involves waiting for deployments and testing. Hours reflect hands-on configuration time plus monitoring and validation of changes across environments."
+    }
+  },
+  {
+    "username": "jordan-kim",
+    "name": "Jordan Kim",
+    "avatar_url": "https://ui-avatars.com/api/?name=Jordan+Kim&size=150&background=8b5cf6&color=fff",
+    "standup": {
+      "date": "2025-10-03",
+      "summary": "Jordan focused on bug fixes, documentation improvements, and learning new parts of the codebase. They successfully resolved several user-reported issues, improved the developer onboarding documentation, and began working on understanding the authentication flow to contribute to upcoming security enhancements.",
+      "workDone": [
+        "Fixed pagination bug on the user management page",
+        "Resolved email notification formatting issues",
+        "Updated developer setup documentation with troubleshooting section",
+        "Added inline code comments to improve code readability",
+        "Fixed responsive layout issues on mobile devices",
+        "Completed security training module and best practices review"
+      ],
+      "workingOn": [
+        "Learning OAuth2 flow and JWT token management",
+        "Implementing form validation improvements",
+        "Writing integration tests for user registration flow"
+      ],
+      "concerns": "Need help understanding the authentication flow, particularly how refresh tokens are handled and when they should be renewed. Planning to pair with Sarah next week.",
+      "totalCommits": 10,
+      "totalPRs": 3,
+      "totalIssues": 2,
+      "totalManHoursMin": 6,
+      "totalManHoursMax": 8,
+      "manHoursRationale": "Full day of development work including bug fixes, documentation, and learning time. The range accounts for additional time spent researching and understanding authentication patterns."
+    }
+  },
+  {
+    "username": "alex-thompson",
+    "name": "Alex Thompson",
+    "avatar_url": "https://ui-avatars.com/api/?name=Alex+Thompson&size=150&background=ef4444&color=fff",
+    "standup": {
+      "date": "2025-10-03",
+      "summary": "Alex spent the day on technical leadership activities including code reviews, architecture planning, and team mentoring. They reviewed multiple pull requests, provided detailed feedback on the proposed microservices migration plan, and conducted a pair programming session with Jordan on authentication patterns.",
+      "workDone": [
+        "Reviewed 6 pull requests with detailed feedback and suggestions",
+        "Conducted architecture review meeting for microservices migration",
+        "Pair programmed with Jordan on authentication implementation",
+        "Updated technical roadmap based on recent sprint retrospective",
+        "Documented design decisions for the new event-driven architecture"
+      ],
+      "workingOn": [
+        "Planning Q4 technical initiatives and priorities",
+        "Evaluating new technologies for the observability stack",
+        "Preparing presentation on system scalability for stakeholders"
+      ],
+      "concerns": "",
+      "totalCommits": 4,
+      "totalPRs": 6,
+      "totalIssues": 5,
+      "totalManHoursMin": 4,
+      "totalManHoursMax": 6,
+      "manHoursRationale": "Focus on leadership activities rather than direct code contribution. Hours reflect code reviews, meetings, mentoring, and planning activities which generate fewer commits but high PR engagement."
+    }
+  }
+]
+

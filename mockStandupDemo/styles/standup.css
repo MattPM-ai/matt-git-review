@@ -1,0 +1,74 @@
+/**
+ * STYLESHEET: Standup Components
+ * 
+ * PURPOSE: Additional custom styles for standup components
+ * 
+ * NOTE: This project primarily uses Tailwind CSS for styling.
+ * This file contains only supplementary styles that cannot be
+ * achieved with Tailwind utility classes alone.
+ * 
+ * CONTENTS:
+ * - Custom animations (optional)
+ * - Print-specific styles (optional)
+ * - Additional utility classes (if needed)
+ */
+
+/* ============================================================================
+ * Custom Animations
+ * ============================================================================ */
+
+/* Smooth card entry animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.standup-card-enter {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* ============================================================================
+ * Print Styles
+ * ============================================================================ */
+
+@media print {
+  .standup-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .standup-header {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
+
+/* ============================================================================
+ * Utility Classes
+ * ============================================================================ */
+
+/* Custom scrollbar for long content (optional enhancement) */
+.standup-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.standup-scrollable::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.standup-scrollable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.standup-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+

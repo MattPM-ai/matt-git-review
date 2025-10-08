@@ -142,13 +142,16 @@ export function ActivityFilters({
         <div className="space-y-4">
           {/* User Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="user-filter">
               Filter by User
             </label>
             <select
               value={selectedUser || ""}
               onChange={(e) => handleUserFilter(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5"
+              id="user-filter"
+              aria-label="User filter"
+              name="user-filter"
             >
               <option value="">All users</option>
               {members.map((member) => (
@@ -161,13 +164,16 @@ export function ActivityFilters({
 
           {/* Activity Type Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="type-filter">
               Filter by Type
             </label>
             <select
               value={selectedType || ""}
               onChange={(e) => handleTypeFilter(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5"
+              id="type-filter"
+              aria-label="Type filter"
+              name="type-filter"
             >
               <option value="">All types</option>
               <option value="commits">Commits</option>
@@ -178,10 +184,10 @@ export function ActivityFilters({
 
           {/* Date Range Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="date-range-filter-from">
               Filter by Date Range
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 min-w-0">
               <input
                 type="date"
                 value={selectedDateFrom || ""}
@@ -191,40 +197,44 @@ export function ActivityFilters({
                     searchParams.get("dateTo") || ""
                   )
                 }
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0"
+                id="date-range-filter"
+                aria-label="Date range filter"
+                name="date-range-filter-from"
                 placeholder="From date"
               />
+              <div className="flex-shrink-0 flex items-center justify-center text-gray-500 text-sm">
+                to
+              </div>
               <input
                 type="date"
                 value={searchParams.get("dateTo") || ""}
                 onChange={(e) =>
                   handleDateRangeFilter(selectedDateFrom || "", e.target.value)
                 }
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0"
+                id="date-range-filter"
+                aria-label="Date range filter"
+                name="date-range-filter-to"
                 placeholder="To date"
               />
             </div>
           </div>
+          {/* Quick Date Filters */}
+          {commitDates.length > 0 && (
+          // {true && (
+            <CalendarDatePicker
+              commitDates={commitDates}
+              selectedDate={selectedDateFrom}
+              onDateChange={handleDateFilter}
+              label="Select Date"
+            />
+          )}
         </div>
       </div>
 
-      {/* Quick Date Filters */}
-      {commitDates.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">
-            Quick Jump to Date
-          </h3>
-          <CalendarDatePicker
-            commitDates={commitDates}
-            selectedDate={selectedDateFrom}
-            onDateChange={handleDateFilter}
-            label="Select Date"
-          />
-        </div>
-      )}
-
       {/* Active Filters Summary */}
-      {(selectedUser || selectedType || selectedDateFrom) && (
+      {/* {(selectedUser || selectedType || selectedDateFrom) && (
         <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
           <h3 className="text-sm font-medium text-blue-900 mb-2">
             Active Filters:
@@ -253,7 +263,7 @@ export function ActivityFilters({
             )}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

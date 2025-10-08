@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Clock } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -290,9 +291,7 @@ export function ContributionsChart({
         ) : noActivity ? (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <div className="mb-4">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Clock className="mx-auto h-12 w-12 text-gray-400" />
             </div>
             <p className="text-lg font-medium text-gray-900 mb-2">No Activity Found</p>
             <p className="text-sm text-gray-500">

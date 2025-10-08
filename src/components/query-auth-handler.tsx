@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { Shield, AlertTriangle, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { signIn } from "next-auth/react";
@@ -101,25 +102,7 @@ export function QueryAuthHandler({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center p-8">
           <div className="text-blue-600 mb-4">
-            <svg
-              className="mx-auto h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-1a2 2 0 00-2-2H6a2 2 0 00-2 2v1a2 2 0 002 2z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 19H6.5A2.5 2.5 0 014 16.5V8a2 2 0 012-2h8a2 2 0 012 2v8.5a2.5 2.5 0 01-2.5 2.5H16"
-              />
-            </svg>
+            <Shield className="mx-auto h-12 w-12" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Authentication Required
@@ -143,7 +126,7 @@ export function QueryAuthHandler({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <Loader2 className="animate-spin h-8 w-8 text-indigo-600 mx-auto mb-4" />
           <p className="text-gray-600">Authenticating...</p>
         </div>
       </div>
@@ -156,19 +139,7 @@ export function QueryAuthHandler({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center p-8">
           <div className="text-red-600 mb-4">
-            <svg
-              className="mx-auto h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+            <AlertTriangle className="mx-auto h-12 w-12" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Authentication Error

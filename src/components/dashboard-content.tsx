@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Session } from "next-auth";
 import { mattAPI } from "@/lib/matt-api";
+import { Plus } from "lucide-react";
 
 interface Organization {
   id: number;
@@ -324,7 +325,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                   href={`https://github.com/apps/${githubAppSlug}/installations/new`}
                   className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer"
                 >
-                  + Add Organization
+                  <span className="inline-flex items-center gap-2"><Plus className="w-4 h-4" /> Add Organization</span>
                 </a>
               </div>
             </div>

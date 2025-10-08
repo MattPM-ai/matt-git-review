@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -438,21 +439,11 @@ export function DateRangePicker({
             }`}
           >
             <span>{currentPeriodLabel}</span>
-            <svg
+            <ChevronDown
               className={`w-4 h-4 ml-2 transition-transform ${
                 isPeriodDropdownOpen ? "rotate-180" : ""
               }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            />
           </button>
 
           {isPeriodDropdownOpen && !disabled && (
@@ -545,21 +536,11 @@ export function DateRangePicker({
             }`}
           >
             <span className="truncate">{formatCurrentRange()}</span>
-            <svg
+            <ChevronDown
               className={`w-4 h-4 ml-2 flex-shrink-0 transition-transform ${
                 isDateDropdownOpen ? "rotate-180" : ""
               }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            />
           </button>
 
           {isDateDropdownOpen && !disabled && (

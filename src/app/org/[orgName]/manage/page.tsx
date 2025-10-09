@@ -66,7 +66,7 @@ export default function OrgManagePage() {
       currentView="settings"
     >
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white shadow rounded-lg border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
               Organization Settings
@@ -80,7 +80,7 @@ export default function OrgManagePage() {
             {/* Members & Subscriptions */}
             <button
               onClick={() => router.push(`/org/${orgLogin}/members`)}
-              className="w-full p-4 bg-white border border-gray-200 hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
+              className="w-full p-4 bg-white hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export default function OrgManagePage() {
             {/* Organization Configuration */}
             <button
               onClick={() => router.push(`/org/${orgLogin}/settings`)}
-              className="w-full p-4 bg-white border border-gray-200 rounded-b-lg hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
+              className="w-full p-4 bg-white rounded-b-lg hover:bg-gray-50 transition-colors text-left hover:cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

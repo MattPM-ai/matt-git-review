@@ -44,6 +44,9 @@ export function ShareModal({
   const smallestFrequency = getSmallestReportFrequency();
   const hasAnyReports = smallestFrequency !== null;
 
+  // Validate email format
+  const isEmailValid = email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   // Load org config when modal opens
   useEffect(() => {
     if (isOpen && !orgConfig && session?.mattJwtToken) {
@@ -56,16 +59,6 @@ export function ShareModal({
   }, [isOpen, orgConfig, orgName, session?.mattJwtToken]);
 
   const handleShare = useCallback(async () => {
-    if (!email) {
-      setShareError("Please enter an email address");
-      return;
-    }
-
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setShareError("Please enter a valid email address");
-      return;
-    }
-
     setIsSharing(true);
     setShareError("");
 
@@ -219,7 +212,7 @@ export function ShareModal({
               </button>
               <button
                 onClick={handleShare}
-                disabled={isSharing || !email}
+                disabled={isSharing || !isEmailValid}
                 className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
               >
                 {isSharing ? (

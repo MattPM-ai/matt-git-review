@@ -280,19 +280,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
               <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 hover:border-gray-400 hover:bg-gray-100 transition-colors hover:cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
+                    <Plus className="w-6 h-6 text-gray-400" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-500">
@@ -305,7 +293,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                 </div>
                 <a
                   href={`https://github.com/apps/${githubAppSlug}/installations/new`}
-                  className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer"
+                  className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer flex items-center justify-center"
                 >
                   <span className="inline-flex items-center gap-2"><Plus className="w-4 h-4" /> Add Organization</span>
                 </a>

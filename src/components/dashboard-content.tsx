@@ -277,6 +277,7 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
               ))}
 
               {/* Add Organization Skeleton Card */}
+              <Link href={`https://github.com/apps/${githubAppSlug}/installations/new`}>
               <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 hover:border-gray-400 hover:bg-gray-100 transition-colors hover:cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
@@ -291,13 +292,14 @@ export function DashboardContent({ session, onError }: DashboardContentProps) {
                     </p> */}
                   </div>
                 </div>
-                <a
-                  href={`https://github.com/apps/${githubAppSlug}/installations/new`}
+                <div
+                  // href={`https://github.com/apps/${githubAppSlug}/installations/new`}
                   className="mt-4 w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors hover:cursor-pointer flex items-center justify-center"
                 >
                   <span className="inline-flex items-center gap-2"><Plus className="w-4 h-4" /> Add Organization</span>
-                </a>
+                </div>
               </div>
+              </Link>
             </div>
           )}
 

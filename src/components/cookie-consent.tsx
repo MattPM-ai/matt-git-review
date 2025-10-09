@@ -32,7 +32,7 @@ export function CookieConsent() {
         <div className="text-sm">
           <p>
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{' '}
-            <a href="/privacy" className="underline hover:text-gray-300">
+            <a href="https://www.mattpm.ai/privacy-policy" className="underline hover:text-gray-300">
               Learn more
             </a>
           </p>

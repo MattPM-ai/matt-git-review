@@ -56,7 +56,7 @@ export function UserProfile() {
       <div className="lg:hidden">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex items-center gap-2 rounded-lg hover:bg-gray-100 transition-colors hover:cursor-pointer"
+          className="flex items-center gap-2 rounded-lg hover:bg-gray-100 transition-colors hover:cursor-pointer py-1 px-2"
         >
           {session.user.image && (
             <Image

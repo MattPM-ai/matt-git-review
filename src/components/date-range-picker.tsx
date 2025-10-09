@@ -480,13 +480,13 @@ export function DateRangePicker({
             onBlur={handleCustomDateChange}
             max={format(today, "yyyy-MM-dd")}
             disabled={disabled}
-            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg [&::-webkit-calendar-picker-indicator]:hidden ${
+            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg [&::-webkit-calendar-picker-indicator]:hidden w-full ${
               disabled
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : "bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             }`}
           />
-          <span className="text-gray-500 text-sm">to</span>
+          <span className="text-gray-500 text-sm">to </span>
           <input
             type="date"
             value={customEndDate}
@@ -495,7 +495,7 @@ export function DateRangePicker({
             min={customStartDate}
             max={format(today, "yyyy-MM-dd")}
             disabled={disabled}
-            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg [&::-webkit-calendar-picker-indicator]:hidden ${
+            className={`px-3 py-2 text-sm border border-gray-300 rounded-lg [&::-webkit-calendar-picker-indicator]:hidden  w-full  ${
               disabled
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : "bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

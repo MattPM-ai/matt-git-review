@@ -197,7 +197,7 @@ export function ActivityFilters({
                     searchParams.get("dateTo") || ""
                   )
                 }
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0"
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0 lg:[&::-webkit-calendar-picker-indicator]:hidden"
                 id="date-range-filter"
                 aria-label="Date range filter"
                 name="date-range-filter-from"
@@ -212,7 +212,7 @@ export function ActivityFilters({
                 onChange={(e) =>
                   handleDateRangeFilter(selectedDateFrom || "", e.target.value)
                 }
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0"
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-1.5 flex-grow w-full min-w-0 lg:[&::-webkit-calendar-picker-indicator]:hidden"
                 id="date-range-filter"
                 aria-label="Date range filter"
                 name="date-range-filter-to"

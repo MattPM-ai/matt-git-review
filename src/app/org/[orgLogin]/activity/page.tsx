@@ -1,30 +1,32 @@
 import { auth } from "@/lib/auth";
 import { QueryAuthHandler } from "@/components/query-auth-handler";
-import { OrgStandupClientContent } from "@/components/org-standup-client-content";
+import { OrgActivityClientContent } from "@/components/org-activity-client-content";
 
-interface StandupPageProps {
+interface OrgActivityPageProps {
   params: Promise<{
-    orgName: string;
+    orgLogin: string;
   }>;
   searchParams: Promise<{
+    user?: string;
+    type?: string;
     dateFrom?: string;
     dateTo?: string;
   }>;
 }
 
-export default async function StandupPage({
+export default async function OrgActivityPage({
   params,
   searchParams,
-}: StandupPageProps) {
-  const { orgName } = await params;
+}: OrgActivityPageProps) {
+  const paramsData = await params;
   const searchParamsData = await searchParams;
   const session = await auth();
 
   if (!session) {
     return (
-      <QueryAuthHandler requiredOrg={orgName}>
-        <OrgStandupClientContent 
-          orgName={orgName}
+      <QueryAuthHandler requiredOrg={paramsData.orgLogin}>
+        <OrgActivityClientContent
+          orgName={paramsData.orgLogin}
           searchParams={searchParamsData}
         />
       </QueryAuthHandler>
@@ -32,10 +34,9 @@ export default async function StandupPage({
   }
 
   return (
-    <OrgStandupClientContent 
-      orgName={orgName}
+    <OrgActivityClientContent
+      orgName={paramsData.orgLogin}
       searchParams={searchParamsData}
     />
   );
 }
-

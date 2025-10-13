@@ -67,6 +67,7 @@ export function OrgPageWrapper({
   return (
     <DashboardLayout
       orgName={orgName}
+      orgLogin={orgLogin}
       title="Performance & Standup"
       currentView="performance"
     >

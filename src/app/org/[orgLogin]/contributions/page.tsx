@@ -5,7 +5,7 @@ import { QueryAuthHandler } from "@/components/query-auth-handler";
 
 interface ContributionsPageProps {
   params: Promise<{
-    orgName: string;
+    orgLogin: string;
   }>;
   searchParams: Promise<{
     period?: "weekly" | "monthly";
@@ -18,42 +18,43 @@ export default async function ContributionsPage({
   params,
   searchParams,
 }: ContributionsPageProps) {
-  const { orgName } = await params;
+  const { orgLogin } = await params;
   const session = await auth();
 
   if (!session) {
     return (
-      <QueryAuthHandler requiredOrg={orgName}>
-        <ContributionsPageContent params={{orgName}} searchParams={searchParams} />
+      <QueryAuthHandler requiredOrg={orgLogin}>
+        <ContributionsPageContent params={{orgLogin}} searchParams={searchParams} />
       </QueryAuthHandler>
     );
   }
 
-  return <ContributionsPageContent params={{orgName}} searchParams={searchParams} />;
+  return <ContributionsPageContent params={{orgLogin}} searchParams={searchParams} />;
 }
 
 async function ContributionsPageContent({
   params,
   searchParams,
 }: {
-  params: { orgName: string };
+  params: { orgLogin: string };
   searchParams: Promise<{
     period?: "weekly" | "monthly";
     dateFrom?: string;
     dateTo?: string;
   }>;
 }) {
-  const { orgName } = params;
+  const { orgLogin } = params;
   const { period = "weekly", dateFrom, dateTo } = await searchParams;
 
   return (
     <DashboardLayout
-      orgName={orgName}
+      orgName={orgLogin}
+      orgLogin={orgLogin}
       title="Contributions"
       currentView="contributions"
     >
-      <ContributionsChart 
-        orgName={orgName} 
+      <ContributionsChart
+        orgName={orgLogin}
         initialPeriod={period}
         initialDateFrom={dateFrom}
         initialDateTo={dateTo}

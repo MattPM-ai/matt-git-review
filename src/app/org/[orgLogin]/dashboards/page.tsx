@@ -5,28 +5,28 @@ import Link from "next/link";
 
 interface DashboardsPageProps {
   params: Promise<{
-    orgName: string;
+    orgLogin: string;
   }>;
 }
 
 export default async function DashboardsPage({ params }: DashboardsPageProps) {
-  const { orgName } = await params;
+  const { orgLogin } = await params;
   const session = await auth();
 
   // Only redirect if no session AND no query auth is being processed
   if (!session) {
     // Allow query auth to be processed client-side
     return (
-      <QueryAuthHandler requiredOrg={orgName}>
-        <DashboardsPageContent orgName={orgName} />
+      <QueryAuthHandler requiredOrg={orgLogin}>
+        <DashboardsPageContent orgLogin={orgLogin} />
       </QueryAuthHandler>
     );
   }
 
-  return <DashboardsPageContent orgName={orgName} />;
+  return <DashboardsPageContent orgLogin={orgLogin} />;
 }
 
-function DashboardsPageContent({ orgName }: { orgName: string }) {
+function DashboardsPageContent({ orgLogin }: { orgLogin: string }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -50,7 +50,7 @@ function DashboardsPageContent({ orgName }: { orgName: string }) {
                 </svg>
               </a>
               <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate min-w-0">
-                {orgName}
+                {orgLogin}
               </h1>
             </div>
             <div className="flex-shrink-0">
@@ -66,14 +66,14 @@ function DashboardsPageContent({ orgName }: { orgName: string }) {
             Choose a Dashboard
           </h2>
           <p className="text-gray-600">
-            Select which view you&apos;d like to see for {orgName}
+            Select which view you&apos;d like to see for {orgLogin}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Activity Dashboard Card */}
           <Link
-            href={`/org/${orgName}/activity`}
+            href={`/org/${orgLogin}/activity`}
             className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
           >
             <div className="flex flex-col items-center text-center">
@@ -120,7 +120,7 @@ function DashboardsPageContent({ orgName }: { orgName: string }) {
 
           {/* Performance & Standup Card */}
           <Link
-            href={`/org/${orgName}/performance`}
+            href={`/org/${orgLogin}/performance`}
             className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
           >
             <div className="flex flex-col items-center text-center">
@@ -167,7 +167,7 @@ function DashboardsPageContent({ orgName }: { orgName: string }) {
 
           {/* Contributions Card */}
           <Link
-            href={`/org/${orgName}/contributions`}
+            href={`/org/${orgLogin}/contributions`}
             className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
           >
             <div className="flex flex-col items-center text-center">

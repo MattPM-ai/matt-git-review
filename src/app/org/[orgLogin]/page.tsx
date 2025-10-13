@@ -4,7 +4,7 @@ import { OrgPageWrapper } from "@/components/org-page-wrapper";
 
 interface OrgPageProps {
   params: Promise<{
-    orgName: string;
+    orgLogin: string;
   }>;
   searchParams: Promise<{
     period?: "daily" | "weekly" | "monthly";
@@ -17,15 +17,15 @@ export default async function OrgPage({
   params,
   searchParams,
 }: OrgPageProps) {
-  const { orgName } = await params;
+  const { orgLogin } = await params;
   const { period = "weekly", dateFrom, dateTo } = await searchParams;
   const session = await auth();
 
   if (!session) {
     return (
-      <QueryAuthHandler requiredOrg={orgName}>
+      <QueryAuthHandler requiredOrg={orgLogin}>
         <OrgPageWrapper
-          orgName={orgName}
+          orgName={orgLogin}
           initialPeriod={period}
           initialDateFrom={dateFrom}
           initialDateTo={dateTo}
@@ -36,7 +36,7 @@ export default async function OrgPage({
 
   return (
     <OrgPageWrapper
-      orgName={orgName}
+      orgName={orgLogin}
       initialPeriod={period}
       initialDateFrom={dateFrom}
       initialDateTo={dateTo}

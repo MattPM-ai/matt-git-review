@@ -14,7 +14,7 @@ import {
 
 export default function SubscriptionPage() {
   const params = useParams();
-  const orgLogin = params.orgName as string;
+  const orgLogin = params.orgLogin as string;
   const { orgName } = useOrgConfig(orgLogin);
   const subscriptionId = params.subscriptionId as string;
   const { data: session, status } = useSession();
@@ -108,7 +108,7 @@ export default function SubscriptionPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <DashboardLayout orgName={orgName} title="Subscription Management">
+      <DashboardLayout orgName={orgName} orgLogin={orgLogin} title="Subscription Management">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <svg
@@ -139,7 +139,7 @@ export default function SubscriptionPage() {
 
   if (error && !subscription) {
     return (
-      <DashboardLayout orgName={orgName} title="Subscription Management">
+      <DashboardLayout orgName={orgName} orgLogin={orgLogin} title="Subscription Management">
         <div className="flex items-center justify-center h-64">
           <div className="text-center max-w-md">
             <div className="mb-4">
@@ -175,7 +175,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <DashboardLayout orgName={orgName} title="Subscription Management">
+    <DashboardLayout orgName={orgName} orgLogin={orgLogin} title="Subscription Management">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">

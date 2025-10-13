@@ -117,6 +117,7 @@ export function OrgStandupClientContent({
   return (
     <DashboardLayout
       orgName={orgName}
+      orgLogin={orgLogin}
       title="Standup"
       currentView="standup"
       sidebar={

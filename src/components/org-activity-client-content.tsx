@@ -143,6 +143,7 @@ export function OrgActivityClientContent({
   return (
     <DashboardLayout
       orgName={orgName}
+      orgLogin={orgLogin}
       title="Activity"
       currentView="activity"
       sidebar={

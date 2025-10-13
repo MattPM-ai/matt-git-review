@@ -18,7 +18,7 @@ import Image from "next/image";
 
 export default function OrgMembersPage() {
   const params = useParams();
-  const orgLogin = params.orgName as string;
+  const orgLogin = params.orgLogin as string;
   const { data: session, status } = useSession();
   const { orgName } = useOrgConfig(orgLogin);
 
@@ -124,6 +124,7 @@ export default function OrgMembersPage() {
     return (
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Members & Subscriptions"
         currentView="members"
       >
@@ -141,6 +142,7 @@ export default function OrgMembersPage() {
     return (
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Members & Subscriptions"
         currentView="members"
       >
@@ -167,6 +169,7 @@ export default function OrgMembersPage() {
     return (
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Members & Subscriptions"
         currentView="members"
       >
@@ -197,6 +200,7 @@ export default function OrgMembersPage() {
     <>
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Members & Subscriptions"
         currentView="members"
       >

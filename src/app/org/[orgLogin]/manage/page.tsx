@@ -8,7 +8,7 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 
 export default function OrgManagePage() {
   const params = useParams();
-  const orgLogin = params.orgName as string;
+  const orgLogin = params.orgLogin as string;
   const { orgName } = useOrgConfig(orgLogin);
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -20,6 +20,7 @@ export default function OrgManagePage() {
     return (
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Organization Settings"
         currentView="settings"
       >
@@ -37,6 +38,7 @@ export default function OrgManagePage() {
     return (
       <DashboardLayout
         orgName={orgName}
+        orgLogin={orgLogin}
         title="Organization Settings"
         currentView="settings"
       >
@@ -62,6 +64,7 @@ export default function OrgManagePage() {
   return (
     <DashboardLayout
       orgName={orgName}
+      orgLogin={orgLogin}
       title="Organization Settings"
       currentView="settings"
     >

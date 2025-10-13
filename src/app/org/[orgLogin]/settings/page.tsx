@@ -9,7 +9,7 @@ import { OrgInitialSetup } from "@/components/org-initial-setup";
 
 export default function OrgSettingsPage() {
   const params = useParams();
-  const orgName = params.orgName as string;
+  const orgLogin = params.orgLogin as string;
   const { data: session } = useSession();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +33,7 @@ export default function OrgSettingsPage() {
       }
 
       try {
-        const orgConfig = await getOrgConfig(orgName, session.mattJwtToken);
+        const orgConfig = await getOrgConfig(orgLogin, session.mattJwtToken);
         setConfig(orgConfig);
         setIsLoading(false);
       } catch (err) {
@@ -44,7 +44,7 @@ export default function OrgSettingsPage() {
     }
 
     fetchConfig();
-  }, [orgName, session?.mattJwtToken]);
+  }, [orgLogin, session?.mattJwtToken]);
 
   if (isLoading) {
     return (
@@ -72,7 +72,7 @@ export default function OrgSettingsPage() {
 
   return (
     <OrgInitialSetup
-      orgName={orgName}
+      orgName={orgLogin}
       isEditMode={true}
       initialConfig={config || undefined}
     />

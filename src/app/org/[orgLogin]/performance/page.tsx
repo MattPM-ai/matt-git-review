@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 interface PerformancePageProps {
   params: Promise<{
-    orgName: string;
+    orgLogin: string;
   }>;
   searchParams: Promise<{
     period?: "daily" | "weekly" | "monthly";
@@ -15,7 +15,7 @@ export default async function PerformancePage({
   params,
   searchParams,
 }: PerformancePageProps) {
-  const { orgName } = await params;
+  const { orgLogin } = await params;
   const searchParamsResolved = await searchParams;
   
   // Build query string from searchParams
@@ -25,7 +25,7 @@ export default async function PerformancePage({
   if (searchParamsResolved.dateTo) queryString.append("dateTo", searchParamsResolved.dateTo);
   
   const queryPart = queryString.toString() ? `?${queryString.toString()}` : "";
-  
+
   // Redirect to the new org homepage which now shows performance
-  redirect(`/org/${orgName}${queryPart}`);
+  redirect(`/org/${orgLogin}${queryPart}`);
 }

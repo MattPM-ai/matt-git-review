@@ -5,6 +5,7 @@ import { UserProfile } from "@/components/auth/user-profile";
 
 interface DashboardLayoutProps {
   orgName: string;
+  orgLogin?: string;
   title?: string;
   currentView?:
     | "standup"
@@ -19,6 +20,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({
   orgName,
+  orgLogin,
   sidebar,
   children,
 }: DashboardLayoutProps) {
@@ -62,7 +64,7 @@ export function DashboardLayout({
               </h1>
               {process.env.NEXT_PUBLIC_SHOW_ALL_DASHBOARDS === "true" && (
                 <Link
-                  href={`/org/${orgName}/dashboards`}
+                  href={`/org/${orgLogin || orgName}/dashboards`}
                   className="text-sm text-gray-500 hover:text-gray-700 flex-shrink-0"
                 >
                   All

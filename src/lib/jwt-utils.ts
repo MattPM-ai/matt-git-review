@@ -47,6 +47,17 @@ export function validateGitHubOrgJWT(token: string): ValidatedJWT & { orgName?: 
 
   const { payload } = decoded;
 
+  // Check if token has expired
+  if (payload.exp && typeof payload.exp === 'number') {
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (payload.exp < currentTime) {
+      return {
+        isValid: false,
+        error: 'Token has expired'
+      };
+    }
+  }
+
   // Check if token type is 'github_org'
   if (payload.type !== 'github_org') {
     return { 

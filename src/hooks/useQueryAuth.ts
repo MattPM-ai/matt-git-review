@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { validateGitHubOrgJWT, hasOrgAccess } from '@/lib/jwt-utils';
 
@@ -17,11 +17,17 @@ interface UseQueryAuthOptions {
 
 /**
  * Hook to handle authentication via query parameters
+ * 
+ * IMPORTANT: This hook uses primitive dependencies to prevent infinite re-renders.
+ * The authTokenFromUrl is extracted outside useEffect to ensure stable reference.
  */
 export function useQueryAuth(options: UseQueryAuthOptions = {}): QueryAuthState {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { requiredOrg, redirectOnFailure = false } = options;
+
+  // Extract primitive value to prevent infinite re-renders from object reference changes
+  const authTokenFromUrl = searchParams.get('_auth');
 
   const [authState, setAuthState] = useState<QueryAuthState>({
     isQueryAuthenticated: false,
@@ -31,79 +37,75 @@ export function useQueryAuth(options: UseQueryAuthOptions = {}): QueryAuthState 
     isLoading: true,
   });
 
+  // Create stable reference to router to avoid including it in dependencies
+  const routerRef = useRef(router);
   useEffect(() => {
-    const authToken = searchParams.get('_auth');
+    routerRef.current = router;
+  }, [router]);
 
-    if (!authToken) {
+  // Consolidated authentication effect - processes URL params first, then sessionStorage
+  useEffect(() => {
+    // Priority 1: Process URL parameter if present
+    if (authTokenFromUrl) {
+      // Validate the JWT token
+      const validation = validateGitHubOrgJWT(authTokenFromUrl);
+
+      if (!validation.isValid) {
+        const error = validation.error || 'Invalid authentication token';
+        setAuthState({
+          isQueryAuthenticated: false,
+          jwtToken: null,
+          orgName: null,
+          error,
+          isLoading: false,
+        });
+
+        if (redirectOnFailure) {
+          routerRef.current.push('/auth/error?error=InvalidToken');
+        }
+        return;
+      }
+
+      // Check org access if required
+      if (requiredOrg && !hasOrgAccess(authTokenFromUrl, requiredOrg)) {
+        const error = `Access denied to organization: ${requiredOrg}`;
+        setAuthState({
+          isQueryAuthenticated: false,
+          jwtToken: null,
+          orgName: validation.orgName || null,
+          error,
+          isLoading: false,
+        });
+
+        if (redirectOnFailure) {
+          routerRef.current.push('/auth/error?error=AccessDenied');
+        }
+        return;
+      }
+
+      // Store token in sessionStorage for persistence
+      if (typeof window !== 'undefined' && sessionStorage) {
+        sessionStorage.setItem('query_jwt_token', authTokenFromUrl);
+        sessionStorage.setItem('query_org_name', validation.orgName || '');
+      }
+
       setAuthState({
-        isQueryAuthenticated: false,
-        jwtToken: null,
-        orgName: null,
+        isQueryAuthenticated: true,
+        jwtToken: authTokenFromUrl,
+        orgName: validation.orgName || null,
         error: null,
         isLoading: false,
       });
+
+      // Clean up URL by removing _auth parameter
+      const url = new URL(window.location.href);
+      url.searchParams.delete('_auth');
+      window.history.replaceState({}, '', url.toString());
       return;
     }
 
-    // Validate the JWT token
-    const validation = validateGitHubOrgJWT(authToken);
-
-    if (!validation.isValid) {
-      const error = validation.error || 'Invalid authentication token';
-      setAuthState({
-        isQueryAuthenticated: false,
-        jwtToken: null,
-        orgName: null,
-        error,
-        isLoading: false,
-      });
-
-      if (redirectOnFailure) {
-        router.push('/auth/error?error=InvalidToken');
-      }
-      return;
-    }
-
-    // Check org access if required
-    if (requiredOrg && !hasOrgAccess(authToken, requiredOrg)) {
-      const error = `Access denied to organization: ${requiredOrg}`;
-      setAuthState({
-        isQueryAuthenticated: false,
-        jwtToken: null,
-        orgName: validation.orgName || null,
-        error,
-        isLoading: false,
-      });
-
-      if (redirectOnFailure) {
-        router.push('/auth/error?error=AccessDenied');
-      }
-      return;
-    }
-
-    // Store token in sessionStorage for persistence
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('query_jwt_token', authToken);
-      sessionStorage.setItem('query_org_name', validation.orgName || '');
-    }
-
-    setAuthState({
-      isQueryAuthenticated: true,
-      jwtToken: authToken,
-      orgName: validation.orgName || null,
-      error: null,
-      isLoading: false,
-    });
-
-    // Clean up URL by removing _auth parameter
-    const url = new URL(window.location.href);
-    url.searchParams.delete('_auth');
-    window.history.replaceState({}, '', url.toString());
-  }, [searchParams, requiredOrg, redirectOnFailure, router]);
-
-  // Load from sessionStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !searchParams.get('_auth')) {
+    // Priority 2: Check sessionStorage only if no URL parameter
+    if (typeof window !== 'undefined' && sessionStorage) {
       const storedToken = sessionStorage.getItem('query_jwt_token');
       const storedOrgName = sessionStorage.getItem('query_org_name');
 
@@ -141,10 +143,11 @@ export function useQueryAuth(options: UseQueryAuthOptions = {}): QueryAuthState 
           sessionStorage.removeItem('query_org_name');
         }
       }
-
-      setAuthState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [requiredOrg, searchParams]);
+
+    // Priority 3: No authentication found
+    setAuthState(prev => ({ ...prev, isLoading: false }));
+  }, [authTokenFromUrl, requiredOrg, redirectOnFailure]); // Only primitive dependencies
 
   return authState;
 }

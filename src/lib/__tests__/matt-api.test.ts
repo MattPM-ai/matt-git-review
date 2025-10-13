@@ -463,10 +463,16 @@ describe('MattAPIClient', () => {
 
       // ACT
       const promise = mattAPI.pollStandupTask(validJWT, taskId);
-      await vi.runAllTimersAsync();
+      
+      // Run timers and assert rejection simultaneously to avoid unhandled rejection
+      const [, rejection] = await Promise.all([
+        vi.runAllTimersAsync(),
+        promise.catch(error => error)
+      ]);
 
       // ASSERT
-      await expect(promise).rejects.toThrow('Generation failed');
+      expect(rejection).toBeInstanceOf(Error);
+      expect(rejection.message).toBe('Generation failed');
     });
 
     it('should_continue_polling_when_status_is_PENDING', async () => {
@@ -596,10 +602,16 @@ describe('MattAPIClient', () => {
 
       // ACT
       const promise = mattAPI.pollStandupTask(validJWT, taskId);
-      await vi.runAllTimersAsync();
+      
+      // Run timers and assert rejection simultaneously to avoid unhandled rejection
+      const [, rejection] = await Promise.all([
+        vi.runAllTimersAsync(),
+        promise.catch(error => error)
+      ]);
 
       // ASSERT
-      await expect(promise).rejects.toThrow('Task completed but no result found');
+      expect(rejection).toBeInstanceOf(Error);
+      expect(rejection.message).toBe('Task completed but no result found');
     });
   });
 });

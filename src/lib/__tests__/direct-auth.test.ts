@@ -37,7 +37,7 @@
  * ============================================================================
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createDirectAuthSession, clearDirectAuthSession } from '../direct-auth';
 import { createMockJWT } from '@/test/utils/test-utils';
 
@@ -82,8 +82,12 @@ describe('Direct Authentication', () => {
     // Default successful token signing
     mockSign.mockResolvedValue('signed-session-token-abc123');
     // Set NODE_ENV to development by default
-    process.env.NODE_ENV = 'development';
-    process.env.NEXTAUTH_SECRET = 'test-secret-key-for-testing';
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('NEXTAUTH_SECRET', 'test-secret-key-for-testing');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   // ========================================================================
@@ -121,7 +125,7 @@ describe('Direct Authentication', () => {
 
     it('should_create_session_cookie_with_correct_development_name', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const jwtToken = createValidOrgJWT('test-org');
 
       // ACT
@@ -145,7 +149,7 @@ describe('Direct Authentication', () => {
 
     it('should_create_session_cookie_with_correct_production_name', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       const jwtToken = createValidOrgJWT('test-org');
 
       // ACT
@@ -182,7 +186,7 @@ describe('Direct Authentication', () => {
 
     it('should_set_Secure_flag_in_production', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       const jwtToken = createValidOrgJWT('test-org');
 
       // ACT
@@ -201,7 +205,7 @@ describe('Direct Authentication', () => {
 
     it('should_not_set_Secure_flag_in_development', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const jwtToken = createValidOrgJWT('test-org');
 
       // ACT
@@ -408,10 +412,16 @@ describe('Direct Authentication', () => {
         })
       );
 
-      const callArgs = vi.mocked(SignJWT).mock.calls[0][0];
-      expect(callArgs.iat).toBeGreaterThanOrEqual(beforeTime);
-      expect(callArgs.iat).toBeLessThanOrEqual(afterTime);
-      expect(callArgs.exp).toBeGreaterThan(callArgs.iat);
+      const callArgs = vi.mocked(SignJWT).mock.calls[0]?.[0];
+      expect(callArgs).toBeDefined();
+      
+      // Type assertion after verification
+      const iat = callArgs!.iat as number;
+      const exp = callArgs!.exp as number;
+      
+      expect(iat).toBeGreaterThanOrEqual(beforeTime);
+      expect(iat).toBeLessThanOrEqual(afterTime);
+      expect(exp).toBeGreaterThan(iat);
     });
   });
 
@@ -568,7 +578,7 @@ describe('Direct Authentication', () => {
   describe('clearDirectAuthSession', () => {
     it('should_delete_cookie_with_development_name', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       // ACT
       await clearDirectAuthSession();
@@ -579,7 +589,7 @@ describe('Direct Authentication', () => {
 
     it('should_delete_cookie_with_production_name', async () => {
       // ARRANGE
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       // ACT
       await clearDirectAuthSession();

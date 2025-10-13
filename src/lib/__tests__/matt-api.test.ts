@@ -151,7 +151,7 @@ describe('MattAPIClient', () => {
 
       // ASSERT
       expect(capturedRequest).not.toBeNull();
-      expect(capturedRequest?.method).toBe('POST');
+      expect(capturedRequest!.method).toBe('POST');
     });
 
     it('should_include_access_token_in_request_body', async () => {

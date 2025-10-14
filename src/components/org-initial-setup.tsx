@@ -237,9 +237,13 @@ export function OrgInitialSetup({
       // Success - stop loading state before redirect
       setIsSubmitting(false);
 
-      if (isEditMode) {
-        router.push(`/org/${orgName}`);
-      } else {
+      // if (isEditMode) {
+      //   router.push(`/org/${orgName}`);
+      // } else {
+      //   // For initial setup, force a refresh to re-check setup status
+      //   window.location.reload();
+      // }
+      if (!isEditMode) {
         // For initial setup, force a refresh to re-check setup status
         window.location.reload();
       }

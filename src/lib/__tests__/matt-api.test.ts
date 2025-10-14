@@ -9,8 +9,8 @@
  * 
  * AUTHOR: Test Suite Generator
  * CREATED: 2025-10-10
- * LAST MODIFIED: 2025-10-10
- * VERSION: 1.0.0
+ * LAST MODIFIED: 2025-10-14
+ * VERSION: 1.1.0
  * 
  * DESCRIPTION:
  * Comprehensive test suite for the MattAPIClient class which handles all
@@ -132,7 +132,7 @@ describe('MattAPIClient', () => {
 
     it('should_call_correct_endpoint_with_POST_method', async () => {
       // ARRANGE
-      let capturedRequest: Request | null = null;
+      let capturedRequest: any = null;
       
       server.use(
         http.post(`${MATT_API_BASE}/users/auth`, ({ request }) => {
@@ -151,7 +151,7 @@ describe('MattAPIClient', () => {
 
       // ASSERT
       expect(capturedRequest).not.toBeNull();
-      expect(capturedRequest!.method).toBe('POST');
+      expect(capturedRequest?.method).toBe('POST');
     });
 
     it('should_include_access_token_in_request_body', async () => {

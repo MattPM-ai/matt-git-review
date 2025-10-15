@@ -217,7 +217,7 @@ export default function OrgMembersPage() {
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        orgName={orgName}
+        orgName={orgLogin}
         dateFrom={dateRange.dateFrom}
         dateTo={dateRange.dateTo}
         period={period}

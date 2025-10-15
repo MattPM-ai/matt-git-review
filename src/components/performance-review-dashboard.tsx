@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { Clock, AlertTriangle, ChartNoAxesCombined } from "lucide-react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { useSession } from "next-auth/react";
@@ -395,10 +396,13 @@ export function PerformanceReviewDashboard({
                           <span className="text-sm font-medium text-gray-500 w-6">
                             #{index + 1}
                           </span>
-                          <img
+                          <Image
                             src={user.avatar_url}
                             alt={user.username}
-                            className="w-8 h-8 rounded-full"
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                            unoptimized
                           />
                         </div>
 

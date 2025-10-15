@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Loader2, RefreshCw, Mail, Clock, FileText, LayoutGrid } from "lucide-react";
 import { format, subDays } from "date-fns";
 import type { ActivitiesResponseDto } from "@/lib/matt-api";
@@ -295,10 +296,13 @@ export function StandupDashboard({
                 className="bg-white rounded-lg shadow p-6"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <img
+                  <Image
                     src={summary.avatar_url}
                     alt={summary.name}
-                    className="w-12 h-12 rounded-full"
+                    width={48}
+                    height={48}
+                    className="rounded-full"
+                    unoptimized
                   />
                   <div>
                     <h3 className="font-semibold text-gray-900">
@@ -379,10 +383,13 @@ export function StandupDashboard({
                 className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start gap-3">
-                  <img
+                  <Image
                     src={summary.avatar_url}
                     alt={summary.username}
-                    className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
+                    width={48}
+                    height={48}
+                    className="rounded-full border-2 border-white shadow-sm"
+                    unoptimized
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">

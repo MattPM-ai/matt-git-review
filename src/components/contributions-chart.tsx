@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { Clock } from "lucide-react";
 import {
   format,
@@ -421,10 +422,13 @@ export function ContributionsChart({
                   {/* Contributor header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-4">
-                      <img
+                      <Image
                         src={contributor.avatar_url}
                         alt={contributor.username}
-                        className="w-12 h-12 rounded-full"
+                        width={48}
+                        height={48}
+                        className="rounded-full"
+                        unoptimized
                       />
                       <div>
                         <h3 className="font-semibold text-gray-900">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import {
   format,
@@ -191,10 +192,13 @@ export function StandupSidebar({
             return (
               <div key={member.id} className="flex items-center gap-3">
                 <div className="relative">
-                  <img
+                  <Image
                     src={member.avatar_url}
                     alt={member.login}
-                    className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    unoptimized
                   />
                   {hasCommitted && (
                     <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">

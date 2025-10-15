@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { UserDetailsContent } from "./user-details-content";
 
 interface PerformanceData {
@@ -54,10 +55,13 @@ export function UserDetailedView({ selectedUser }: UserDetailedViewProps) {
       {/* User header - fixed */}
       <div className="flex-shrink-0 p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <img
+          <Image
             src={selectedUser.avatar_url}
             alt={selectedUser.username}
-            className="w-12 h-12 rounded-full"
+            width={48}
+            height={48}
+            className="rounded-full"
+            unoptimized
           />
           <div>
             <h3 className="font-semibold text-gray-900">

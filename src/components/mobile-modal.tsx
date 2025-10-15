@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { X } from "lucide-react";
 import { UserDetailsContent } from "./user-details-content";
 
@@ -64,10 +65,13 @@ export function MobileModal({
         {/* Modal Header */}
         <div className="flex-shrink-0 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <img
+            <Image
               src={selectedUser.avatar_url}
               alt={selectedUser.username}
-              className="w-10 h-10 rounded-full flex-shrink-0"
+              width={40}
+              height={40}
+              className="rounded-full flex-shrink-0"
+              unoptimized
             />
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-gray-900 truncate">

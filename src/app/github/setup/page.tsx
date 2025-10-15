@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { AlertTriangle, CircleCheck } from "lucide-react";
 
 interface SetupPageProps {
   searchParams: Promise<{
@@ -59,19 +60,7 @@ export default async function GitHubSetupPage({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-lg shadow p-6 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-red-600 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-600 mb-4" />
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
               Installation Not Found
             </h1>
@@ -97,19 +86,7 @@ export default async function GitHubSetupPage({
           <div className="px-6 py-8">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-4">
-                <svg
-                  className="h-12 w-12 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <CircleCheck className="h-12 w-12 text-green-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Installation Successful!

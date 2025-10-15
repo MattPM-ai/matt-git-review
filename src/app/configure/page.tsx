@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { AlertTriangle } from "lucide-react";
 
 interface ConfigurePageProps {
   searchParams: Promise<{
@@ -96,19 +97,7 @@ export default async function ConfigurePage({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-lg shadow p-6 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-red-600 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-600 mb-4" />
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
               {error}
             </h1>

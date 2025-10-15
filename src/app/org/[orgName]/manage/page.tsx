@@ -43,7 +43,7 @@ export default function OrgManagePage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center max-w-md">
             <div className="mb-4">
-              <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
+              <AlertTriangle className="mx-auto h-12 w-12 text-red-600" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Access Restricted

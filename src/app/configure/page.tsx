@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, BookMarked } from "lucide-react";
 
 interface ConfigurePageProps {
   searchParams: Promise<{
@@ -161,17 +161,7 @@ export default async function ConfigurePage({
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <svg
-                              className="h-5 w-5 text-gray-400"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                            <BookMarked className="h-5 w-5 text-gray-400" />
                             <div>
                               <h3 className="font-medium text-gray-900">
                                 {repo.name}

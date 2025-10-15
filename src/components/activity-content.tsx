@@ -8,7 +8,7 @@ import type {
   SimplifiedActivityDto,
   ActivitiesResponseDto,
 } from "@/lib/matt-api";
-import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardList, GitPullRequestArrow, CircleAlert, GitCommitHorizontal } from "lucide-react";
 import GithubIcon from "@/components/Icon/github";
 
 function ActivityItem({
@@ -28,50 +28,19 @@ function ActivityItem({
       case "commit":
         return (
           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-
-            <svg
-              className="w-4 h-4 text-green-600"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <GitCommitHorizontal className="w-4 h-4 text-green-600" />
           </div>
         );
       case "issue":
         return (
           <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-red-600"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <CircleAlert className="w-4 h-4 text-red-600" />
           </div>
         );
       case "pull":
         return (
           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-blue-600"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <GitPullRequestArrow className="w-4 h-4 text-blue-600" />
           </div>
         );
     }

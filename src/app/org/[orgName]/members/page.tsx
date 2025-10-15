@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Loader2, AlertTriangle, Mail } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
 import { useOrgConfig } from "@/hooks/use-org-config";
@@ -15,6 +16,19 @@ import {
   type MembersResponse,
 } from "@/lib/members-api";
 import Image from "next/image";
+import { ShareModal } from "@/components/share-modal";
+import { type PeriodType } from "@/components/date-range-picker";
+
+const getDefaultWeeklyRange = () => {
+  const today = new Date();
+  const lastWeekStart = startOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+  const lastWeekEnd = endOfWeek(subWeeks(today, 1), { weekStartsOn: 1 });
+  
+  return {
+    dateFrom: format(lastWeekStart, "yyyy-MM-dd"),
+    dateTo: format(lastWeekEnd, "yyyy-MM-dd"),
+  };
+};
 
 export default function OrgMembersPage() {
   const params = useParams();
@@ -40,6 +54,11 @@ export default function OrgMembersPage() {
     string | undefined
   >();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // Default date range and period for ShareModal
+  const [dateRange] = useState(getDefaultWeeklyRange());
+  const [period] = useState<PeriodType>("weekly");
 
   // Check if user has github_user token (not github_org)
   const hasGitHubUserAccess = session?.user && !session.isSubscriptionAuth;
@@ -195,6 +214,14 @@ export default function OrgMembersPage() {
 
   return (
     <>
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        orgName={orgName}
+        dateFrom={dateRange.dateFrom}
+        dateTo={dateRange.dateTo}
+        period={period}
+      />
       <DashboardLayout
         orgName={orgName}
         title="Members & Subscriptions"
@@ -293,9 +320,21 @@ export default function OrgMembersPage() {
 
           {/* External Emails Section */}
           <div>
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              External Emails ({externalEmails.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">
+                External Emails ({externalEmails.length})
+              </h2>
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="hidden sm:block p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
+                title="Invite external email"
+              >
+                <svg fill="#000000" viewBox="-2 -2 24 24" className="w-5 h-5">
+                  <path d="M16 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7.928 9.24a4.02 4.02 0 0 1-.026 1.644l5.04 2.537a4 4 0 1 1-.867 1.803l-5.09-2.562a4 4 0 1 1 .083-5.228l5.036-2.522a4 4 0 1 1 .929 1.772L7.928 9.24zM4 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                </svg>
+              </button>
+            </div>
+
             <div className="bg-white shadow rounded-lg overflow-hidden">
               {externalEmails.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">

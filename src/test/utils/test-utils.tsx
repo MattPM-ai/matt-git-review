@@ -33,7 +33,7 @@ export const createMockSession = (overrides?: Partial<Session>): Session => {
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     mattJwtToken: 'mock-jwt-token',
     mattUser: {
-      id: 'user-123',
+      id: 123,
       login: 'testuser',
       name: 'Test User',
       avatar_url: 'https://avatar.test/user.png',

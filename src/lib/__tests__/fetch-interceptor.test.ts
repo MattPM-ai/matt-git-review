@@ -784,7 +784,7 @@ describe('Fetch Interceptor', () => {
       const malformedToken = 'header.payload.signature.extra';
 
       // ACT
-      const result = checkTokenExpiration(malformedToken);
+      checkTokenExpiration(malformedToken);
 
       // ASSERT - Should still work (splits on first dot, takes second part)
       // This is actually valid for the current implementation

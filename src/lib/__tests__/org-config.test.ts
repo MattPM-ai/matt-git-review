@@ -321,7 +321,7 @@ describe('Organization Config API Client', () => {
 
     it('should_send_all_config_params_in_request_body', async () => {
       // ARRANGE
-      let requestBody: any = null;
+      let requestBody: unknown = null;
 
       server.use(
         http.put(`${MATT_API_BASE}/organizations/test-org/config`, async ({ request }) => {
@@ -344,14 +344,15 @@ describe('Organization Config API Client', () => {
       await updateOrgConfig('test-org', updateParams, validJWT);
 
       // ASSERT
+      const body = requestBody as Record<string, unknown>;
       expect(requestBody).toEqual(updateParams);
-      expect(requestBody.country).toBe('UK');
-      expect(requestBody.timezone).toBe('Europe/London');
-      expect(requestBody.preferredEmailTime).toBe('08:00');
-      expect(requestBody.dailyReport).toBe(true);
-      expect(requestBody.weeklyReport).toBe(true);
-      expect(requestBody.monthlyReport).toBe(true);
-      expect(requestBody.sendEmptyWeekdayReports).toBe(true);
+      expect(body.country).toBe('UK');
+      expect(body.timezone).toBe('Europe/London');
+      expect(body.preferredEmailTime).toBe('08:00');
+      expect(body.dailyReport).toBe(true);
+      expect(body.weeklyReport).toBe(true);
+      expect(body.monthlyReport).toBe(true);
+      expect(body.sendEmptyWeekdayReports).toBe(true);
     });
 
     it('should_return_updated_OrgConfig', async () => {
@@ -497,7 +498,7 @@ describe('Organization Config API Client', () => {
 
     it('should_handle_boolean_flags_correctly', async () => {
       // ARRANGE
-      let requestBody: any = null;
+      let requestBody: unknown = null;
 
       server.use(
         http.put(`${MATT_API_BASE}/organizations/test-org/config`, async ({ request }) => {
@@ -520,10 +521,11 @@ describe('Organization Config API Client', () => {
       await updateOrgConfig('test-org', updateParams, validJWT);
 
       // ASSERT
-      expect(requestBody.dailyReport).toBe(false);
-      expect(requestBody.weeklyReport).toBe(false);
-      expect(requestBody.monthlyReport).toBe(false);
-      expect(requestBody.sendEmptyWeekdayReports).toBe(false);
+      const body = requestBody as Record<string, unknown>;
+      expect(body.dailyReport).toBe(false);
+      expect(body.weeklyReport).toBe(false);
+      expect(body.monthlyReport).toBe(false);
+      expect(body.sendEmptyWeekdayReports).toBe(false);
     });
   });
 });

@@ -122,7 +122,7 @@ describe('useOrgConfig Hook', () => {
         status: 'authenticated',
       });
 
-      let resolveConfig: ((value: any) => void) | null = null;
+      let resolveConfig: ((value: Response) => void) | null = null;
       server.use(
         http.get(`${MATT_API_BASE}/organizations/test-org/config`, () => {
           return new Promise((resolve) => {
@@ -141,7 +141,7 @@ describe('useOrgConfig Hook', () => {
 
       // Complete the fetch
       if (resolveConfig) {
-        (resolveConfig as (value: any) => void)(HttpResponse.json(mockOrgConfig));
+        resolveConfig(HttpResponse.json(mockOrgConfig));
       }
 
       await waitFor(() => {
@@ -495,7 +495,7 @@ describe('useOrgConfig Hook', () => {
       );
 
       // ACT
-      const { result, rerender } = renderHook(
+      const { rerender } = renderHook(
         ({ orgLogin }) => useOrgConfig(orgLogin),
         { initialProps: { orgLogin: 'org-1' } }
       );

@@ -132,7 +132,7 @@ describe('MattAPIClient', () => {
 
     it('should_call_correct_endpoint_with_POST_method', async () => {
       // ARRANGE
-      let capturedRequest: any = null;
+      let capturedRequest: Request | null = null;
       
       server.use(
         http.post(`${MATT_API_BASE}/users/auth`, ({ request }) => {
@@ -156,7 +156,7 @@ describe('MattAPIClient', () => {
 
     it('should_include_access_token_in_request_body', async () => {
       // ARRANGE
-      let requestBody: any = null;
+      let requestBody: unknown = null;
       
       server.use(
         http.post(`${MATT_API_BASE}/users/auth`, async ({ request }) => {
@@ -266,11 +266,11 @@ describe('MattAPIClient', () => {
       const result = await mattAPI.fetchActivities(validJWT, validFilter);
 
       // ASSERT
-      const activity = result.activities[0];
+      const activity = result.activities[0] as Record<string, unknown>;
       expect(activity.created_at).toBeInstanceOf(Date);
-      expect((activity as any).updated_at).toBeInstanceOf(Date);
-      expect((activity as any).merged_at).toBeInstanceOf(Date);
-      expect((activity as any).closed_at).toBeInstanceOf(Date);
+      expect(activity.updated_at).toBeInstanceOf(Date);
+      expect(activity.merged_at).toBeInstanceOf(Date);
+      expect(activity.closed_at).toBeInstanceOf(Date);
     });
 
     it('should_send_Authorization_header_with_Bearer_token', async () => {
@@ -356,7 +356,7 @@ describe('MattAPIClient', () => {
 
     it('should_send_correct_request_body', async () => {
       // ARRANGE
-      let requestBody: any = null;
+      let requestBody: unknown = null;
       
       server.use(
         http.post(`${MATT_API_BASE}/standup/generate`, async ({ request }) => {

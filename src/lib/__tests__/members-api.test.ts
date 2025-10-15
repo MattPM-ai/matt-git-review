@@ -440,7 +440,7 @@ describe('Members API Client', () => {
 
     it('should_send_correct_request_body', async () => {
       // ARRANGE
-      let requestBody: any = null;
+      let requestBody: unknown = null;
 
       server.use(
         http.put(`${MATT_API_BASE}/email-subscriptions/:subscriptionId`, async ({ request }) => {

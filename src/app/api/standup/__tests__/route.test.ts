@@ -41,6 +41,7 @@ import { NextRequest } from 'next/server';
 import { server } from '@/test/mocks/server';
 import { http, HttpResponse } from 'msw';
 import { createMockJWT } from '@/test/utils/test-utils';
+import type { Session } from 'next-auth';
 
 const MATT_API_BASE = 'https://api.test.mattpm.ai';
 
@@ -76,7 +77,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123', name: 'Test User' },
       // No mattJwtToken
-    } as any);
+    } as Partial<Session>);
 
     const request = new NextRequest('http://localhost:3000/api/standup', {
       method: 'POST',
@@ -126,7 +127,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     const request = new NextRequest('http://localhost:3000/api/standup', {
       method: 'POST',
@@ -151,7 +152,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     const request = new NextRequest('http://localhost:3000/api/standup', {
       method: 'POST',
@@ -180,7 +181,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     const request = new NextRequest('http://localhost:3000/api/standup', {
       method: 'POST',
@@ -206,9 +207,9 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
-    let requestBody: any = null;
+    let requestBody: unknown = null;
     server.use(
       http.post(`${MATT_API_BASE}/standup/generate`, async ({ request }) => {
         requestBody = await request.json();
@@ -228,9 +229,10 @@ describe('POST /api/standup', () => {
     await POST(request);
 
     // ASSERT
-    expect(requestBody.organizationLogin).toBe('test-org');
-    expect(requestBody.dateFrom).toBe('2025-01-15');
-    expect(requestBody.dateTo).toBe('2025-01-15');
+    const body = requestBody as Record<string, unknown>;
+    expect(body.organizationLogin).toBe('test-org');
+    expect(body.dateFrom).toBe('2025-01-15');
+    expect(body.dateTo).toBe('2025-01-15');
   });
 
   it('should_use_dateRange_when_provided', async () => {
@@ -239,9 +241,9 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
-    let requestBody: any = null;
+    let requestBody: unknown = null;
     server.use(
       http.post(`${MATT_API_BASE}/standup/generate`, async ({ request }) => {
         requestBody = await request.json();
@@ -265,9 +267,10 @@ describe('POST /api/standup', () => {
     await POST(request);
 
     // ASSERT
-    expect(requestBody.organizationLogin).toBe('test-org');
-    expect(requestBody.dateFrom).toBe('2025-01-01');
-    expect(requestBody.dateTo).toBe('2025-01-31');
+    const body = requestBody as Record<string, unknown>;
+    expect(body.organizationLogin).toBe('test-org');
+    expect(body.dateFrom).toBe('2025-01-01');
+    expect(body.dateTo).toBe('2025-01-31');
   });
 
   it('should_call_mattAPI_generateStandup_with_correct_parameters', async () => {
@@ -276,7 +279,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     let capturedAuthHeader: string | null = null;
     server.use(
@@ -307,7 +310,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     const mockTaskId = 'custom-task-id-123';
     server.use(
@@ -342,7 +345,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     server.use(
       http.post(`${MATT_API_BASE}/standup/generate`, () => {
@@ -374,7 +377,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     server.use(
       http.post(`${MATT_API_BASE}/standup/generate`, () => {
@@ -407,7 +410,7 @@ describe('POST /api/standup', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-123' },
       mattJwtToken: validJWT,
-    } as any);
+    } as Partial<Session>);
 
     server.use(
       http.post(`${MATT_API_BASE}/standup/generate`, () => {

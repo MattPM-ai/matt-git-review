@@ -44,7 +44,7 @@ import { useStandupData } from '../useStandupData';
 import { server } from '@/test/mocks/server';
 import { http, HttpResponse } from 'msw';
 import { createMockJWT } from '@/test/utils/test-utils';
-import { TaskStatus, NoActivityError } from '@/lib/matt-api';
+import { TaskStatus } from '@/lib/matt-api';
 
 const MATT_API_BASE = 'https://api.test.mattpm.ai';
 
@@ -234,7 +234,7 @@ describe('useStandupData Hook', () => {
         status: 'authenticated',
       });
 
-      let requestBody: any = null;
+      let requestBody: unknown = null;
       server.use(
         http.post(`${MATT_API_BASE}/standup/generate`, async ({ request }) => {
           requestBody = await request.json();
@@ -255,8 +255,9 @@ describe('useStandupData Hook', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(requestBody.dateFrom).toBe('2025-01-15');
-        expect(requestBody.dateTo).toBe('2025-01-01'); // Original
+        const body = requestBody as Record<string, unknown>;
+        expect(body.dateFrom).toBe('2025-01-15');
+        expect(body.dateTo).toBe('2025-01-01'); // Original
       });
     });
   });
@@ -274,7 +275,7 @@ describe('useStandupData Hook', () => {
         status: 'authenticated',
       });
 
-      let requestBody: any = null;
+      let requestBody: unknown = null;
       server.use(
         http.post(`${MATT_API_BASE}/standup/generate`, async ({ request }) => {
           requestBody = await request.json();

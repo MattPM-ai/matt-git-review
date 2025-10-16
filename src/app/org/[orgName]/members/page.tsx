@@ -227,7 +227,7 @@ export default function OrgMembersPage() {
         title="Members & Subscriptions"
         currentView="members"
       >
-        <div className="space-y-8">
+        <div className="space-y-8 pb-6">
           {/* Git Members Section */}
           <div>
             <h2 className="text-lg font-medium text-gray-900 mb-4">

@@ -139,6 +139,7 @@ export function OrgInitialSetup({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Auto-detect user's location on component mount
   useEffect(() => {
@@ -236,6 +237,7 @@ export function OrgInitialSetup({
       await updateOrgConfig(orgName, config, session.mattJwtToken);
 
       // Success - stop loading state before redirect
+      setSuccessMessage("Settings updated successfully!");
       setIsSubmitting(false);
 
       // if (isEditMode) {
@@ -249,6 +251,7 @@ export function OrgInitialSetup({
         window.location.reload();
       }
     } catch (err) {
+      setSuccessMessage("");
       setError(
         err instanceof Error ? err.message : "Failed to save configuration"
       );
@@ -257,7 +260,7 @@ export function OrgInitialSetup({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className={isEditMode ? "bg-gray-50 flex justify-center p-4" : "min-h-screen bg-gray-50 flex items-center justify-center p-4"}>
       <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -410,6 +413,12 @@ export function OrgInitialSetup({
             </div>
           </div>
 
+          {successMessage && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800">{successMessage}</p>
+            </div>
+          )}
+
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800">{error}</p>
@@ -425,7 +434,7 @@ export function OrgInitialSetup({
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium hover:cursor-pointer"
                 disabled={isSubmitting}
               >
-                Cancel
+                Back
               </button>
             )}
             <button

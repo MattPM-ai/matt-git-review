@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { getOrgConfig } from "@/lib/org-config";
 import { OrgInitialSetup } from "@/components/org-initial-setup";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export default function OrgSettingsPage() {
   const params = useParams();
@@ -71,10 +72,12 @@ export default function OrgSettingsPage() {
   }
 
   return (
-    <OrgInitialSetup
-      orgName={orgName}
-      isEditMode={true}
-      initialConfig={config || undefined}
-    />
+    <DashboardLayout orgName={orgName} currentView="settings">
+      <OrgInitialSetup
+        orgName={orgName}
+        isEditMode={true}
+        initialConfig={config || undefined}
+      />
+    </DashboardLayout>
   );
 }

@@ -13,7 +13,7 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 
 export default function SubscriptionPage() {
   const params = useParams();
-  const orgLogin = params.orgName as string;
+  // const orgLogin = params.orgName as string;
   const subscriptionId = params.subscriptionId as string;
   const { data: session, status } = useSession();
 

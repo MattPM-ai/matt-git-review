@@ -12,6 +12,8 @@ interface ShareModalProps {
   dateFrom: string;
   dateTo: string;
   period: string;
+  showSubscriptionOption?: boolean;
+  onSuccess?: () => void;
 }
 
 export function ShareModal({
@@ -21,6 +23,8 @@ export function ShareModal({
   dateFrom,
   dateTo,
   period,
+  showSubscriptionOption = true,
+  onSuccess,
 }: ShareModalProps) {
   const { data: session } = useSession();
   const [email, setEmail] = useState("");
@@ -58,6 +62,13 @@ export function ShareModal({
     }
   }, [isOpen, orgConfig, orgName, session?.mattJwtToken]);
 
+  // Enforce subscription when option is hidden
+  useEffect(() => {
+    if (!showSubscriptionOption) {
+      setSubscribeToReports(true);
+    }
+  }, [showSubscriptionOption]);
+
   const handleShare = useCallback(async () => {
     setIsSharing(true);
     setShareError("");
@@ -93,6 +104,7 @@ export function ShareModal({
       }
 
       setShareSuccess(true);
+      onSuccess?.();
       setTimeout(() => {
         onClose();
         // Reset state after closing
@@ -119,6 +131,7 @@ export function ShareModal({
     period,
     session?.mattJwtToken,
     onClose,
+    onSuccess,
   ]);
 
   if (!isOpen) return null;
@@ -168,7 +181,7 @@ export function ShareModal({
                 />
               </div>
 
-              {hasAnyReports && !isLoadingConfig && (
+              {showSubscriptionOption && hasAnyReports && !isLoadingConfig && (
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"

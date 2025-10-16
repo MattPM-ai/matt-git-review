@@ -221,6 +221,8 @@ export default function OrgMembersPage() {
         dateFrom={dateRange.dateFrom}
         dateTo={dateRange.dateTo}
         period={period}
+        showSubscriptionOption={false}
+        onSuccess={handleModalSuccess}
       />
       <DashboardLayout
         orgName={orgName}

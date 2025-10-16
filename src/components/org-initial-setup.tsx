@@ -260,7 +260,7 @@ export function OrgInitialSetup({
   };
 
   return (
-    <div className={ "min-h-screen bg-gray-50 flex items-center justify-center p-4"}>
+    <div>
       <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">

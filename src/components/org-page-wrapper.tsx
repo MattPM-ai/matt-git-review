@@ -61,7 +61,11 @@ export function OrgPageWrapper({
   }
 
   if (needsSetup) {
-    return <OrgInitialSetup orgName={orgLogin} />;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <OrgInitialSetup orgName={orgLogin} />
+      </div>
+    )
   }
 
   return (

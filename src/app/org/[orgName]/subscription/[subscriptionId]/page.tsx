@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useOrgConfig } from "@/hooks/use-org-config";
 import {
   getSubscription,
   updateSubscription,
@@ -15,7 +14,6 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 export default function SubscriptionPage() {
   const params = useParams();
   const orgLogin = params.orgName as string;
-  const { orgName } = useOrgConfig(orgLogin);
   const subscriptionId = params.subscriptionId as string;
   const { data: session, status } = useSession();
 

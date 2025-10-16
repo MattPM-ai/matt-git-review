@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
-import { useOrgConfig } from "@/hooks/use-org-config";
 import {
   getOrgMembers,
   getExternalSubscriptions,
@@ -33,7 +32,6 @@ export default function OrgMembersPage() {
   const params = useParams();
   const orgLogin = params.orgName as string;
   const { data: session, status } = useSession();
-  const { orgName } = useOrgConfig(orgLogin);
 
   const [membersData, setMembersData] = useState<MembersResponse | null>(null);
   const [externalSubscriptions, setExternalSubscriptions] = useState<

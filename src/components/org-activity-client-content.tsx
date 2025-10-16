@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
-import { useOrgConfig } from "@/hooks/use-org-config";
 import { ActivityFilters } from "@/components/activity-filters";
 import { ActivityContent } from "@/components/activity-content";
 import {
@@ -26,7 +25,6 @@ export function OrgActivityClientContent({
   searchParams,
 }: OrgActivityClientContentProps) {
   const { data: session, status } = useValidatedSession();
-  const { orgName } = useOrgConfig(orgLogin);
   const [activityData, setActivityData] =
     useState<ActivitiesResponseDto | null>(null);
   const [error, setError] = useState<string | null>(null);

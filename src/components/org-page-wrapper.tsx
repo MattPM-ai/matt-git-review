@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { getOrgConfig } from "@/lib/org-config";
-import { useOrgConfig } from "@/hooks/use-org-config";
 import { OrgInitialSetup } from "./org-initial-setup";
-import { DashboardLayout } from "./dashboard-layout";
 import { PerformanceReviewDashboard } from "./performance-review-dashboard";
 
 interface OrgPageWrapperProps {
@@ -23,7 +21,6 @@ export function OrgPageWrapper({
   initialDateTo,
 }: OrgPageWrapperProps) {
   const { data: session } = useSession();
-  const { orgName } = useOrgConfig(orgLogin);
   const [isLoading, setIsLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
 
@@ -69,17 +66,11 @@ export function OrgPageWrapper({
   }
 
   return (
-    <DashboardLayout
-      orgName={orgName}
-      title="Performance & Standup"
-      currentView="performance"
-    >
-      <PerformanceReviewDashboard
-        orgName={orgLogin}
-        initialPeriod={initialPeriod}
-        initialDateFrom={initialDateFrom}
-        initialDateTo={initialDateTo}
-      />
-    </DashboardLayout>
+    <PerformanceReviewDashboard
+      orgName={orgLogin}
+      initialPeriod={initialPeriod}
+      initialDateFrom={initialDateFrom}
+      initialDateTo={initialDateTo}
+    />
   );
 }

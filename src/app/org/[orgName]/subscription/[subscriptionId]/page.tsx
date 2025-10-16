@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useOrgConfig } from "@/hooks/use-org-config";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import {
   getSubscription,
   updateSubscription,
@@ -109,35 +108,31 @@ export default function SubscriptionPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <DashboardLayout orgName={orgName} title="Subscription Management">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
-            <p className="mt-4 text-gray-600">Loading subscription...</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
+          <p className="mt-4 text-gray-600">Loading subscription...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (error && !subscription) {
     return (
-      <DashboardLayout orgName={orgName} title="Subscription Management">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center max-w-md">
-            <div className="mb-4">
-              <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
-            </div>
-            <p className="text-gray-900 font-medium">{error}</p>
-            <button
-              onClick={() => fetchSubscription()}
-              className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium hover:cursor-pointer"
-            >
-              Try Again
-            </button>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
           </div>
+          <p className="text-gray-900 font-medium">{error}</p>
+          <button
+            onClick={() => fetchSubscription()}
+            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium hover:cursor-pointer"
+          >
+            Try Again
+          </button>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
@@ -146,8 +141,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <DashboardLayout orgName={orgName} title="Subscription Management">
-      <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
@@ -244,7 +238,6 @@ export default function SubscriptionPage() {
             </div>
           </div>
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

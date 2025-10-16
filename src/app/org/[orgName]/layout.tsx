@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { getOrgConfig } from "@/lib/org-config";
+import { AppHeader } from "@/components/app-header";
 
 interface OrgLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,22 @@ export async function generateMetadata({ params }: { params: Promise<{ orgName: 
   };
 }
 
-export default async function OrgLayout({ children }: OrgLayoutProps) {
-  return <>{children}</>;
+export default async function OrgLayout({ children, params }: OrgLayoutProps) {
+  const { orgName } = await params;
+
+  return (
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <AppHeader 
+        variant="org" 
+        orgName={orgName}
+        showBackButton={true}
+        showAllDashboardsLink={process.env.NEXT_PUBLIC_SHOW_ALL_DASHBOARDS === "true"}
+      />
+      <main className="flex-1 overflow-y-auto bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 h-full">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }

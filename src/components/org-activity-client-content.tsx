@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { useOrgConfig } from "@/hooks/use-org-config";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import { ActivityFilters } from "@/components/activity-filters";
 import { ActivityContent } from "@/components/activity-content";
 import {
@@ -141,45 +140,50 @@ export function OrgActivityClientContent({
     : [];
 
   return (
-    <DashboardLayout
-      orgName={orgName}
-      title="Activity"
-      currentView="activity"
-      sidebar={
-        <ActivityFilters
-          members={members}
-          selectedUser={selectedUser}
-          selectedType={selectedType}
-          selectedDateFrom={selectedDateFrom}
-          selectedDateTo={selectedDateTo}
-          commitDates={commitDates}
-          allActivities={allActivities}
-        />
-      }
-    >
-      {error && (
-        <div className="rounded-md bg-red-50 p-4 mb-4">
-          <p className="text-sm text-red-800">{error}</p>
+    <div className="flex flex-col lg:flex-row h-full -mx-4 -my-6 sm:-mx-6 lg:-mx-8">
+      {/* Sidebar */}
+      <div className="w-full lg:w-80 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0 overflow-y-auto">
+        <div className="p-4 lg:p-6">
+          <ActivityFilters
+            members={members}
+            selectedUser={selectedUser}
+            selectedType={selectedType}
+            selectedDateFrom={selectedDateFrom}
+            selectedDateTo={selectedDateTo}
+            commitDates={commitDates}
+            allActivities={allActivities}
+          />
         </div>
-      )}
+      </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading activities...</p>
-          </div>
+      {/* Main content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8">
+          {error && (
+            <div className="rounded-md bg-red-50 p-4 mb-4">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading activities...</p>
+              </div>
+            </div>
+          ) : (
+            <ActivityContent
+              allActivities={allActivities}
+              users={activityData?.users || {}}
+              repositories={activityData?.repositories || {}}
+              selectedUser={selectedUser}
+              selectedType={selectedType}
+              selectedDateFrom={selectedDateFrom}
+            />
+          )}
         </div>
-      ) : (
-        <ActivityContent
-          allActivities={allActivities}
-          users={activityData?.users || {}}
-          repositories={activityData?.repositories || {}}
-          selectedUser={selectedUser}
-          selectedType={selectedType}
-          selectedDateFrom={selectedDateFrom}
-        />
-      )}
-    </DashboardLayout>
+      </div>
+    </div>
   );
 }

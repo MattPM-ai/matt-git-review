@@ -5,7 +5,6 @@ import { Loader2, AlertTriangle, Mail, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
 import { useOrgConfig } from "@/hooks/use-org-config";
 import {
@@ -141,69 +140,51 @@ export default function OrgMembersPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <DashboardLayout
-        orgName={orgName}
-        title="Members & Subscriptions"
-        currentView="members"
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
-            <p className="mt-4 text-gray-600">Loading members...</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
+          <p className="mt-4 text-gray-600">Loading members...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (!hasGitHubUserAccess) {
     return (
-      <DashboardLayout
-        orgName={orgName}
-        title="Members & Subscriptions"
-        currentView="members"
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center max-w-md">
-            <div className="mb-4">
-              <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Access Restricted
-            </h3>
-            <p className="text-gray-600">
-              This page is only accessible to users authenticated with GitHub.
-              Please sign in with your GitHub account to manage organization
-              members and subscriptions.
-            </p>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
           </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Access Restricted
+          </h3>
+          <p className="text-gray-600">
+            This page is only accessible to users authenticated with GitHub.
+            Please sign in with your GitHub account to manage organization
+            members and subscriptions.
+          </p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <DashboardLayout
-        orgName={orgName}
-        title="Members & Subscriptions"
-        currentView="members"
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center max-w-md">
-            <div className="mb-4">
-              <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
-            </div>
-            <p className="text-gray-900 font-medium">{error}</p>
-            <button
-              onClick={() => fetchData()}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium hover:cursor-pointer"
-            >
-              Try Again
-            </button>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
           </div>
+          <p className="text-gray-900 font-medium">{error}</p>
+          <button
+            onClick={() => fetchData()}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium hover:cursor-pointer"
+          >
+            Try Again
+          </button>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
@@ -224,11 +205,7 @@ export default function OrgMembersPage() {
         showSubscriptionOption={false}
         onSuccess={handleModalSuccess}
       />
-      <DashboardLayout
-        orgName={orgName}
-        title="Members & Subscriptions"
-        currentView="members"
-      >
+      <div>
         <div className="space-y-8 pb-6">
           {/* Git Members Section */}
           <div>
@@ -416,7 +393,7 @@ export default function OrgMembersPage() {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </div>
 
       {/* Manage Subscription Modal */}
       <ManageSubscriptionModal

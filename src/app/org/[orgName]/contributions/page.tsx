@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import { ContributionsChart } from "@/components/contributions-chart";
 import { QueryAuthHandler } from "@/components/query-auth-handler";
 
@@ -47,17 +46,11 @@ async function ContributionsPageContent({
   const { period = "weekly", dateFrom, dateTo } = await searchParams;
 
   return (
-    <DashboardLayout
-      orgName={orgName}
-      title="Contributions"
-      currentView="contributions"
-    >
-      <ContributionsChart 
-        orgName={orgName} 
-        initialPeriod={period}
-        initialDateFrom={dateFrom}
-        initialDateTo={dateTo}
-      />
-    </DashboardLayout>
+    <ContributionsChart 
+      orgName={orgName} 
+      initialPeriod={period}
+      initialDateFrom={dateFrom}
+      initialDateTo={dateTo}
+    />
   );
 }

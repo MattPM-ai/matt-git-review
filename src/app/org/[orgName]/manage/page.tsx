@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2, AlertTriangle, Settings, Users, ArrowLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useOrgConfig } from "@/hooks/use-org-config";
-import { DashboardLayout } from "@/components/dashboard-layout";
 
 export default function OrgManagePage() {
   const params = useParams();
@@ -18,54 +17,37 @@ export default function OrgManagePage() {
 
   if (status === "loading") {
     return (
-      <DashboardLayout
-        orgName={orgName}
-        title="Organization Settings"
-        currentView="settings"
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto text-indigo-600" />
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (!hasGitHubUserAccess) {
     return (
-      <DashboardLayout
-        orgName={orgName}
-        title="Organization Settings"
-        currentView="settings"
-      >
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center max-w-md">
-            <div className="mb-4">
-              <AlertTriangle className="mx-auto h-12 w-12 text-red-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Access Restricted
-            </h3>
-            <p className="text-gray-600">
-              Organization settings are only accessible to users authenticated
-              with GitHub. Please sign in with your GitHub account to manage
-              organization settings.
-            </p>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-600" />
           </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Access Restricted
+          </h3>
+          <p className="text-gray-600">
+            Organization settings are only accessible to users authenticated
+            with GitHub. Please sign in with your GitHub account to manage
+            organization settings.
+          </p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout
-      orgName={orgName}
-      title="Organization Settings"
-      currentView="settings"
-    >
-      <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
         <div className="bg-white shadow rounded-lg border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
@@ -136,7 +118,6 @@ export default function OrgManagePage() {
             Back to {orgName}
           </button>
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

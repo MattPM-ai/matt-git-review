@@ -62,10 +62,11 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
       
       if (!jwtToken) {
         if (finalOptions.useMockWhenUnauthenticated) {
-          // DEBUG: console.log("No JWT token found, using mock data");
           data = loadMockStandup();
         } else {
           setError("Not authenticated. Please sign in.");
+          setIsLoading(false);
+          fetchInProgressRef.current = false;
           return;
         }
       } else {
@@ -85,7 +86,6 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
           taskResponse.taskId,
           (task: StandupTask) => {
             setCurrentTask(task);
-            // DEBUG: console.log(`Standup task ${task.id} status: ${task.status}`);
           }
         );
       }

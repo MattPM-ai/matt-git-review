@@ -110,7 +110,7 @@ export function ContributionsChart({
   // Transform standup data into contributor data whenever standupData changes
   useEffect(() => {
     if (standupData.length > 0) {
-      console.log("Fetched standup data:", standupData);
+      // DEBUG: console.log("Fetched standup data:", standupData);
 
       // Transform standup data into contributor data
       const contributorMap = new Map<string, ContributorData>();
@@ -119,14 +119,14 @@ export function ContributionsChart({
         const avgManHours =
           (user.standup.totalManHoursMin + user.standup.totalManHoursMax) / 2;
 
-        console.log(`Processing user ${user.username}:`, {
-          totalManHoursMin: user.standup.totalManHoursMin,
-          totalManHoursMax: user.standup.totalManHoursMax,
-          avgManHours,
-          hasDailyStandups:
-            user.standup.dailyStandups && user.standup.dailyStandups.length > 0,
-          dailyStandupsCount: user.standup.dailyStandups?.length || 0,
-        });
+        // DEBUG: console.log(`Processing user ${user.username}:`, {
+        //   totalManHoursMin: user.standup.totalManHoursMin,
+        //   totalManHoursMax: user.standup.totalManHoursMax,
+        //   avgManHours,
+        //   hasDailyStandups:
+        //     user.standup.dailyStandups && user.standup.dailyStandups.length > 0,
+        //   dailyStandupsCount: user.standup.dailyStandups?.length || 0,
+        // });
 
         // Get all days in the period
         const startDate = new Date(dateRange.dateFrom);
@@ -175,13 +175,13 @@ export function ContributionsChart({
           activities: dailyActivitiesMap.get(format(day, "yyyy-MM-dd")) || 0,
         }));
 
-        console.log(
-          `${user.username} daily hours:`,
-          dailyHours.map((d) => ({
-            date: format(d.date, "yyyy-MM-dd"),
-            hours: d.hours,
-          }))
-        );
+        // DEBUG: console.log(
+        //   `${user.username} daily hours:`,
+        //   dailyHours.map((d) => ({
+        //     date: format(d.date, "yyyy-MM-dd"),
+        //     hours: d.hours,
+        //   }))
+        // );
 
         contributorMap.set(user.username, {
           username: user.username,

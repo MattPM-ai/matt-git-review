@@ -268,7 +268,7 @@ export function PerformanceReviewDashboard({
                   className="hidden sm:block p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
                   title="Share report"
                 >
-                  <Share2 className="w-5 h-5" /> 
+                  <Share2 className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -284,7 +284,7 @@ export function PerformanceReviewDashboard({
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                  <AlertTriangle className="h-5 w-5 text-yellow-500" />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-800">

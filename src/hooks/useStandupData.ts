@@ -42,7 +42,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
   const fetchStandupData = useCallback(async (overrideOptions?: Partial<UseStandupDataOptions>) => {
     // Prevent concurrent fetches
     if (fetchInProgressRef.current) {
-      console.log("Standup fetch already in progress, skipping...");
+      // DEBUG: console.log("Standup fetch already in progress, skipping...");
       return;
     }
 
@@ -62,7 +62,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
       
       if (!jwtToken) {
         if (finalOptions.useMockWhenUnauthenticated) {
-          console.log("No JWT token found, using mock data");
+          // DEBUG: console.log("No JWT token found, using mock data");
           data = loadMockStandup();
         } else {
           setError("Not authenticated. Please sign in.");
@@ -85,7 +85,7 @@ export function useStandupData(options: UseStandupDataOptions): UseStandupDataRe
           taskResponse.taskId,
           (task: StandupTask) => {
             setCurrentTask(task);
-            console.log(`Standup task ${task.id} status: ${task.status}`);
+            // DEBUG: console.log(`Standup task ${task.id} status: ${task.status}`);
           }
         );
       }

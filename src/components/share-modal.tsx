@@ -57,7 +57,6 @@ export function ShareModal({
       setIsLoadingConfig(true);
       getOrgConfig(orgName, session.mattJwtToken)
         .then(setOrgConfig)
-        .catch(console.error)
         .finally(() => setIsLoadingConfig(false));
     }
   }, [isOpen, orgConfig, orgName, session?.mattJwtToken]);

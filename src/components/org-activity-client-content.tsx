@@ -30,8 +30,6 @@ export function OrgActivityClientContent({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log("session", session);
-
   const {
     user: selectedUser,
     type: selectedType,
@@ -103,7 +101,6 @@ export function OrgActivityClientContent({
         });
 
         setActivityData(data);
-        console.log("activity", data);
       } catch (err) {
         console.error("Failed to fetch activities:", err);
         setError("Failed to fetch organization data");

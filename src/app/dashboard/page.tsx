@@ -88,10 +88,6 @@ export default function DashboardPage() {
 
               // Force resync if lists are different
               if (!areEqual) {
-                console.log('Organization lists differ, forcing resync:', {
-                  github: githubLogins,
-                  matt: mattLogins
-                });
                 await forceResync();
               }
             }
@@ -121,10 +117,8 @@ export default function DashboardPage() {
       
       try {
         setIsResyncing(true);
-        console.log('Forcing resync with Matt API...');
         
         await mattAPI.authenticateUser(session.accessToken);
-        console.log('Resync completed successfully');
       } catch (error) {
         console.error('Failed to resync organizations:', error);
         // Don't show error to user as this is an automatic background process

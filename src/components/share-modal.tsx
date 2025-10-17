@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { getOrgConfig, type OrgConfig } from "@/lib/org-config";
+import { mattAPI, type OrgConfig } from "@/lib/api";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -83,8 +83,11 @@ export function ShareModal({
   useEffect(() => {
     if (isOpen && !orgConfig && session?.mattJwtToken) {
       setIsLoadingConfig(true);
-      getOrgConfig(orgName, session.mattJwtToken)
+      mattAPI.getOrgConfig(orgName, session.mattJwtToken)
         .then(setOrgConfig)
+        .catch((error) => {
+          console.error('Failed to load org config:', error);
+        })
         .finally(() => setIsLoadingConfig(false));
     }
   }, [isOpen, orgConfig, orgName, session?.mattJwtToken]);
@@ -101,33 +104,24 @@ export function ShareModal({
     setShareError("");
 
     try {
-      const endpoint = subscribeToReports
-        ? `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/invite-and-send`
-        : `${process.env.NEXT_PUBLIC_GIT_API_HOST}/email-subscriptions/send-performance-email`;
-
-      const body = {
+      const params = {
         email,
         organizationLogin: orgName,
-        subscribe: subscribeToReports,
         dateFrom,
         dateTo,
         timeframe: period,
       };
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.mattJwtToken && {
-            Authorization: `Bearer ${session.mattJwtToken}`,
-          }),
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to share report");
+      if (subscribeToReports) {
+        await mattAPI.inviteAndSendReport(
+          { ...params, subscribe: true },
+          session?.mattJwtToken
+        );
+      } else {
+        await mattAPI.sendPerformanceEmail(
+          params,
+          session?.mattJwtToken
+        );
       }
 
       setShareSuccess(true);

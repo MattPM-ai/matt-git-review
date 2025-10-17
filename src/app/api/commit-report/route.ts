@@ -4,7 +4,7 @@ import {
   mattAPI,
   type ActivityFilterDto,
   type SimplifiedCommitDto,
-} from "@/lib/matt-api";
+} from "@/lib/api";
 import { subDays, parseISO } from "date-fns";
 
 interface n8nCommitStruct {

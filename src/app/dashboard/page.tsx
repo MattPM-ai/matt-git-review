@@ -6,25 +6,14 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { mattAPI } from "@/lib/matt-api";
+import { mattAPI, githubAPI, type GitHubOrganization } from "@/lib/api";
 
-interface Organization {
-  id: number;
-  login: string;
-  description?: string;
-  avatar_url: string;
-}
-
-interface MattOrganization {
-  id: string;
-  login: string;
-  name: string;
-}
+// Types are now imported from @/lib/api
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<GitHubOrganization[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isResyncing, setIsResyncing] = useState(false);
@@ -42,19 +31,8 @@ export default function DashboardPage() {
       if (!session?.accessToken) return;
 
       try {
-        // Fetch organizations from GitHub API
-        const githubResponse = await fetch("https://api.github.com/user/orgs", {
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        });
-
-        if (!githubResponse.ok) {
-          throw new Error("Failed to fetch organizations from GitHub");
-        }
-
-        const githubOrgs: Organization[] = await githubResponse.json();
+        // Fetch organizations from GitHub API using githubAPI client
+        const githubOrgs = await githubAPI.getUserOrganizations(session.accessToken);
         
         // Extract and sort GitHub org logins in lowercase
         const githubLogins = githubOrgs
@@ -64,32 +42,20 @@ export default function DashboardPage() {
         // Fetch organizations from Matt API if we have a JWT token
         if (session?.mattJwtToken) {
           try {
-            const mattResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_GIT_API_HOST}/organizations`,
-              {
-                headers: {
-                  Authorization: `Bearer ${session.mattJwtToken}`,
-                  Accept: "application/json",
-                },
-              }
-            );
-
-            if (mattResponse.ok) {
-              const mattOrgs: MattOrganization[] = await mattResponse.json();
+            const mattOrgs = await mattAPI.getOrganizations(session.mattJwtToken);
               
-              // Extract and sort Matt API org logins in lowercase
-              const mattLogins = mattOrgs
-                .map(org => org.login.toLowerCase())
-                .sort();
+            // Extract and sort Matt API org logins in lowercase
+            const mattLogins = mattOrgs
+              .map(org => org.login.toLowerCase())
+              .sort();
 
-              // Compare the lists
-              const areEqual = githubLogins.length === mattLogins.length &&
-                githubLogins.every((login, index) => login === mattLogins[index]);
+            // Compare the lists
+            const areEqual = githubLogins.length === mattLogins.length &&
+              githubLogins.every((login, index) => login === mattLogins[index]);
 
-              // Force resync if lists are different
-              if (!areEqual) {
-                await forceResync();
-              }
+            // Force resync if lists are different
+            if (!areEqual) {
+              await forceResync();
             }
           } catch (mattError) {
             console.warn('Failed to fetch or compare Matt API organizations:', mattError);
@@ -168,7 +134,7 @@ export default function DashboardPage() {
       {!error && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Existing Organizations */}
-          {organizations.map((org: Organization) => (
+          {organizations.map((org) => (
             <div
               key={org.id}
               className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"

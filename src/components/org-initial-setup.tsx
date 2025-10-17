@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { updateOrgConfig, type UpdateOrgConfigParams } from "@/lib/org-config";
+import { mattAPI, type UpdateOrgConfigParams } from "@/lib/api";
 import { timezones } from "@/lib/timezones";
 import countries from "@/lib/iso3166.json";
 import { Loader2 } from "lucide-react";
@@ -226,7 +226,7 @@ export function OrgInitialSetup({
         sendEmptyWeekdayReports,
       };
 
-      await updateOrgConfig(orgName, config, session.mattJwtToken);
+      await mattAPI.updateOrgConfig(orgName, config, session.mattJwtToken);
 
       // Success - stop loading state before redirect
       setSuccessMessage("Settings updated successfully!");

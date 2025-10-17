@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useValidatedSession } from '@/hooks/useValidatedSession';
-import type { StandupResponse, StandupTask, StandupRequest } from '@/lib/matt-api';
-import { mattAPI, NoActivityError } from '@/lib/matt-api';
+import type { StandupResponse, StandupTask, StandupRequest } from '@/lib/api';
+import { mattAPI, NoActivityError } from '@/lib/api';
 import { loadMockStandup } from '@/lib/mock/mockStandup';
 
 interface UseStandupDataOptions {

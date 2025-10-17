@@ -5,7 +5,7 @@ import { CalendarDatePicker } from "./calendar-date-picker";
 import type {
   SimplifiedActivityDto,
   ActivitiesResponseDto,
-} from "@/lib/matt-api";
+} from "@/lib/api";
 
 interface ActivityFiltersProps {
   members: ActivitiesResponseDto["users"][string][];

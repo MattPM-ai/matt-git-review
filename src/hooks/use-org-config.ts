@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { getOrgConfig, type OrgConfig } from "@/lib/org-config";
+import { mattAPI, type OrgConfig } from "@/lib/api";
 
 export function useOrgConfig(orgLogin: string) {
   const { data: session } = useSession();
@@ -19,7 +19,7 @@ export function useOrgConfig(orgLogin: string) {
 
       try {
         setError(null);
-        const config = await getOrgConfig(orgLogin, session.mattJwtToken);
+        const config = await mattAPI.getOrgConfig(orgLogin, session.mattJwtToken);
         setOrgConfig(config);
       } catch (err) {
         console.error("Failed to fetch org config:", err);

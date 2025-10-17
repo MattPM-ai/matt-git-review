@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { getOrgConfig } from "@/lib/org-config";
+import { mattAPI } from "@/lib/api";
 import { OrgInitialSetup } from "./org-initial-setup";
 import { PerformanceReviewDashboard } from "./performance-review-dashboard";
 
@@ -32,7 +32,7 @@ export function OrgPageWrapper({
       }
 
       try {
-        const config = await getOrgConfig(orgLogin, session.mattJwtToken);
+        const config = await mattAPI.getOrgConfig(orgLogin, session.mattJwtToken);
         setNeedsSetup(!config.initialSetupAt);
         setIsLoading(false);
       } catch (err) {

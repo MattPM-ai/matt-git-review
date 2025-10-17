@@ -1,6 +1,6 @@
 "use client";
 
-import type { StandupTask, TaskStatus } from "@/lib/matt-api";
+import type { StandupTask, TaskStatus } from "@/lib/api";
 
 interface TaskLoadingStateProps {
   task: StandupTask | null;

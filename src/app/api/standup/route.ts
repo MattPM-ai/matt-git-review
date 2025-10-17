@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { mattAPI, type StandupRequest } from '@/lib/matt-api';
+import { mattAPI, type StandupRequest } from '@/lib/api';
 
 export async function POST(request: NextRequest) {
   try {

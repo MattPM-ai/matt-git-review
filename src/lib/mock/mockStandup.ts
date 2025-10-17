@@ -1,5 +1,5 @@
 import standupData from "./standup.json";
-import { StandupResponse } from "@/lib/matt-api";
+import { StandupResponse } from "@/lib/api";
 
 /**
  * Loads the standup.json mock data and returns it as StandupResponse[].

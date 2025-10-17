@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Loader2, RefreshCw, Mail, Clock, FileText, LayoutGrid } from "lucide-react";
 import { format, subDays } from "date-fns";
-import type { ActivitiesResponseDto } from "@/lib/matt-api";
+import type { ActivitiesResponseDto } from "@/lib/api";
 import { TaskLoadingState } from "./task-loading-state";
 import { useStandupData } from "@/hooks/useStandupData";
 

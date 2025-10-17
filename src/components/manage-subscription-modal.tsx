@@ -3,9 +3,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
-  updateSubscription,
+  mattAPI,
   type UpdateSubscriptionParams,
-} from "@/lib/members-api";
+} from "@/lib/api";
 import { Loader2, X } from "lucide-react";
 
 interface ManageSubscriptionModalProps {
@@ -67,7 +67,7 @@ export function ManageSubscriptionModal({
         monthlyReport: monthlyReport,
       };
 
-      await updateSubscription(subscription.id, params, session.mattJwtToken);
+      await mattAPI.updateSubscription(subscription.id, params, session.mattJwtToken);
       onSuccess();
       onClose();
     } catch (err) {

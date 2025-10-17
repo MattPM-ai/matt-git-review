@@ -4,11 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  getSubscription,
-  updateSubscription,
+  mattAPI,
   type ExternalSubscription,
   type UpdateSubscriptionParams,
-} from "@/lib/members-api";
+} from "@/lib/api";
 import { AlertTriangle, Loader2 } from "lucide-react";
 
 export default function SubscriptionPage() {
@@ -37,7 +36,7 @@ export default function SubscriptionPage() {
 
     try {
       setError(null);
-      const data = await getSubscription(subscriptionId, session.mattJwtToken);
+        const data = await mattAPI.getSubscription(subscriptionId, session.mattJwtToken);
       setSubscription(data);
 
       // Set form states
@@ -73,7 +72,7 @@ export default function SubscriptionPage() {
         monthlyReport,
       };
 
-      await updateSubscription(subscriptionId, params, session.mattJwtToken);
+      await mattAPI.updateSubscription(subscriptionId, params, session.mattJwtToken);
 
       // Show success message
       const successMessage = document.createElement("div");

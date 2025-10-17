@@ -7,12 +7,10 @@ import { useSession } from "next-auth/react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { ManageSubscriptionModal } from "@/components/manage-subscription-modal";
 import {
-  getOrgMembers,
-  getExternalSubscriptions,
-  deleteSubscription,
+  mattAPI,
   type ExternalSubscription,
   type MembersResponse,
-} from "@/lib/members-api";
+} from "@/lib/api";
 import Image from "next/image";
 import { ShareModal } from "@/components/share-modal";
 import { type PeriodType } from "@/components/date-range-picker";
@@ -69,8 +67,8 @@ export default function OrgMembersPage() {
     try {
       setError(null);
       const [membersResponse, externalsResponse] = await Promise.all([
-        getOrgMembers(orgLogin, session.mattJwtToken),
-        getExternalSubscriptions(orgLogin, session.mattJwtToken),
+        mattAPI.getOrgMembers(orgLogin, session.mattJwtToken),
+        mattAPI.getExternalSubscriptions(orgLogin, session.mattJwtToken),
       ]);
 
       setMembersData(membersResponse);
@@ -118,7 +116,7 @@ export default function OrgMembersPage() {
 
       setDeletingId(subscriptionId);
       try {
-        await deleteSubscription(subscriptionId, session.mattJwtToken);
+        await mattAPI.deleteSubscription(subscriptionId, session.mattJwtToken);
         await fetchData(); // Refresh data
       } catch (err) {
         console.error("Failed to delete subscription:", err);

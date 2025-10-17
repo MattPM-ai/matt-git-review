@@ -14,7 +14,7 @@ import {
   subDays,
 } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ActivitiesResponseDto } from "@/lib/matt-api";
+import type { ActivitiesResponseDto } from "@/lib/api";
 
 // Define local types to replace the old GitHub API types
 type GitHubUser = ActivitiesResponseDto["users"][string];

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
-import { getOrgConfig } from "@/lib/org-config";
+import { mattAPI } from "@/lib/api";
 import { AppHeader } from "@/components/app-header";
 
 interface OrgLayoutProps {
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgName: 
   try {
     const session = await auth();
     if (session?.mattJwtToken) {
-      const orgConfig = await getOrgConfig(orgName, session.mattJwtToken);
+      const orgConfig = await mattAPI.getOrgConfig(orgName, session.mattJwtToken);
       const displayName = orgConfig.name || orgName;
       
       return {

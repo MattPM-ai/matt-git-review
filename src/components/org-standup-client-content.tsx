@@ -5,7 +5,7 @@ import { useValidatedSession } from "@/hooks/useValidatedSession";
 import { useOrgConfig } from "@/hooks/use-org-config";
 import { StandupDashboard } from "@/components/standup-dashboard";
 import { StandupSidebar } from "@/components/standup-sidebar";
-import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/matt-api";
+import { mattAPI, type ActivityFilterDto, type ActivitiesResponseDto } from "@/lib/api";
 
 interface OrgStandupClientContentProps {
   orgName: string;

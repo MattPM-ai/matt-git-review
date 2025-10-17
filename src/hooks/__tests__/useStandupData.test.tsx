@@ -44,7 +44,6 @@ import { useStandupData } from '../useStandupData';
 import { server } from '@/test/mocks/server';
 import { http, HttpResponse } from 'msw';
 import { createMockJWT } from '@/test/utils/test-utils';
-import { TaskStatus } from '@/lib/matt-api';
 
 const MATT_API_BASE = 'https://api.test.mattpm.ai';
 
@@ -107,7 +106,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -139,7 +138,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -243,7 +242,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -284,7 +283,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -324,12 +323,12 @@ describe('useStandupData Hook', () => {
           if (currentCount < 3) {
             return HttpResponse.json({
               id: 'task-123',
-              status: TaskStatus.PROCESSING,
+              status: 'processing',
             });
           }
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -369,12 +368,12 @@ describe('useStandupData Hook', () => {
           if (pollCount < 2) {
             return HttpResponse.json({
               id: 'task-123',
-              status: TaskStatus.PROCESSING,
+              status: 'processing',
             });
           }
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -427,7 +426,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: mockResult,
           });
         })
@@ -458,7 +457,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -605,7 +604,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -659,7 +658,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/:taskId`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -720,7 +719,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/:taskId`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })
@@ -759,7 +758,7 @@ describe('useStandupData Hook', () => {
         http.get(`${MATT_API_BASE}/standup/task/task-123`, () => {
           return HttpResponse.json({
             id: 'task-123',
-            status: TaskStatus.COMPLETED,
+            status: 'completed',
             result: [],
           });
         })

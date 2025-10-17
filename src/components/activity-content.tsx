@@ -7,7 +7,7 @@ import Image from "next/image";
 import type {
   SimplifiedActivityDto,
   ActivitiesResponseDto,
-} from "@/lib/matt-api";
+} from "@/lib/api";
 import { ChevronDown, ChevronUp, ClipboardList, GitPullRequestArrow, CircleAlert, GitCommitHorizontal } from "lucide-react";
 import GithubIcon from "@/components/Icon/github";
 

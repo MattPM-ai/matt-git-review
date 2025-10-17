@@ -8,7 +8,7 @@ import {
   mattAPI,
   type ActivityFilterDto,
   type ActivitiesResponseDto,
-} from "@/lib/matt-api";
+} from "@/lib/api";
 
 interface OrgActivityClientContentProps {
   orgName: string;

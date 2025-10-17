@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { getOrgConfig } from "@/lib/org-config";
+import { mattAPI } from "@/lib/api";
 import { OrgInitialSetup } from "@/components/org-initial-setup";
 
 export default function OrgSettingsPage() {
@@ -33,7 +33,7 @@ export default function OrgSettingsPage() {
       }
 
       try {
-        const orgConfig = await getOrgConfig(orgName, session.mattJwtToken);
+        const orgConfig = await mattAPI.getOrgConfig(orgName, session.mattJwtToken);
         setConfig(orgConfig);
         setIsLoading(false);
       } catch (err) {

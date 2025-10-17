@@ -72,12 +72,10 @@ function detectTimezoneFromBrowser(): string | null {
   try {
     // Get the current timezone identifier from the browser
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // DEBUG: console.log("Browser detected timezone:", timeZone);
 
     // Check if this timezone is in our supported list
     const supportedTimezone = timezones.find((tz) => tz.value === timeZone);
     if (supportedTimezone) {
-      // DEBUG: console.log("Found exact match:", timeZone);
       return timeZone;
     }
 
@@ -104,19 +102,16 @@ function detectTimezoneFromBrowser(): string | null {
       fallbackMappings[timeZone] &&
       timezones.find((tz) => tz.value === fallbackMappings[timeZone])
     ) {
-      // DEBUG: console.log(`Mapping ${timeZone} to ${fallbackMappings[timeZone]}`);
       return fallbackMappings[timeZone];
     }
 
     // Return null if not supported - user will need to select manually
-    // DEBUG: console.log(
-    //   `Browser timezone "${timeZone}" not in supported list, user will need to select manually`
-    // );
+    console.info(
+      `Browser timezone "${timeZone}" not in supported list, user will need to select manually`
+    );
     return null;
-  } 
-  catch {
-    // catch (err) {
-    // DEBUG: console.log("Timezone detection failed:", err);
+  } catch (err) {
+    console.warn("Timezone detection failed:", err);
     return null;
   }
 }
@@ -164,9 +159,8 @@ export function OrgInitialSetup({
         if (detectedOffset !== null) {
           setTimezone(detectedOffset);
         }
-      } catch {
-        // catch (err) {
-        // DEBUG: console.log("Could not auto-detect timezone:", err);
+      } catch (err) {
+        console.warn("Could not auto-detect timezone:", err);
       }
 
       // Auto-detect country - prioritize timezone-based detection for consistency
@@ -175,36 +169,29 @@ export function OrgInitialSetup({
         try {
           const browserTimezone =
             Intl.DateTimeFormat().resolvedOptions().timeZone;
-          // DEBUG: console.log(
-          //   "Using browser timezone for country detection:",
-          //   browserTimezone
-          // );
           const detectedCountry = getCountryFromTimezone(browserTimezone);
           if (detectedCountry) {
-            // DEBUG: console.log("Country detected from timezone:", detectedCountry);
+            console.info("Country detected from timezone:", detectedCountry);
             setCountry(detectedCountry);
             return; // Success, consistent with timezone
           }
-        } catch {
-          // catch (err) {
-          // DEBUG: console.log("Timezone-based country detection failed:", err);
+        } catch (err) {
+          console.info("Timezone-based country detection failed, falling back to IP detection:", err);
         }
 
         // Fallback: Try IP-based detection
         try {
-          // DEBUG: console.log("Falling back to IP-based country detection");
           const response = await fetch("https://ipapi.co/json/");
           if (response.ok) {
             const data = await response.json();
             if (data.country_code) {
-              // DEBUG: console.log("Country detected from IP:", data.country_code);
+              console.info("Country detected from IP:", data.country_code);
               setCountry(data.country_code);
               return;
             }
           }
-        } catch {
-          // catch (err) {
-          // DEBUG: console.log("IP-based country detection failed:", err);
+        } catch (err) {
+          console.warn("IP-based country detection failed, user will need to select manually:", err);
         }
       }
 

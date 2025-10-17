@@ -48,6 +48,34 @@ export function ShareModal({
   const smallestFrequency = getSmallestReportFrequency();
   const hasAnyReports = smallestFrequency !== null;
 
+  // Get dynamic text based on smallest frequency
+  const getReportFrequencyText = useCallback(() => {
+    switch (smallestFrequency) {
+      case "daily":
+        return {
+          label: "Send daily reports to this email",
+          description: "They'll receive daily summaries of team activity and progress",
+        };
+      case "weekly":
+        return {
+          label: "Send weekly reports to this email",
+          description: "They'll receive weekly summaries of team activity and progress",
+        };
+      case "monthly":
+        return {
+          label: "Send monthly reports to this email",
+          description: "They'll receive monthly summaries of team activity and progress",
+        };
+      default:
+        return {
+          label: "Subscribe to reports",
+          description: "They'll receive team activity summaries",
+        };
+    }
+  }, [smallestFrequency]);
+
+  const reportText = getReportFrequencyText();
+
   // Validate email format
   const isEmailValid = email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -190,9 +218,9 @@ export function ShareModal({
                     disabled={isSharing}
                   />
                   <span className="text-sm text-gray-700">
-                    Send daily reports to this email
+                    {reportText.label}
                     <span className="block text-xs text-gray-500 mt-1">
-                      They&apos;ll receive daily summaries of team activity and progress
+                      {reportText.description}
                     </span>
                   </span>
                 </label>

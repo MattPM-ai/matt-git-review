@@ -113,7 +113,9 @@ function detectTimezoneFromBrowser(): string | null {
     //   `Browser timezone "${timeZone}" not in supported list, user will need to select manually`
     // );
     return null;
-  } catch (err) {
+  } 
+  catch {
+    // catch (err) {
     // DEBUG: console.log("Timezone detection failed:", err);
     return null;
   }
@@ -162,7 +164,8 @@ export function OrgInitialSetup({
         if (detectedOffset !== null) {
           setTimezone(detectedOffset);
         }
-      } catch (err) {
+      } catch {
+        // catch (err) {
         // DEBUG: console.log("Could not auto-detect timezone:", err);
       }
 
@@ -182,7 +185,8 @@ export function OrgInitialSetup({
             setCountry(detectedCountry);
             return; // Success, consistent with timezone
           }
-        } catch (err) {
+        } catch {
+          // catch (err) {
           // DEBUG: console.log("Timezone-based country detection failed:", err);
         }
 
@@ -198,7 +202,8 @@ export function OrgInitialSetup({
               return;
             }
           }
-        } catch (err) {
+        } catch {
+          // catch (err) {
           // DEBUG: console.log("IP-based country detection failed:", err);
         }
       }

@@ -2,59 +2,12 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { AlertTriangle, BookMarked } from "lucide-react";
+import { githubAPI, type GitHubRepository, type GitHubInstallation } from "@/lib/api";
 
 interface ConfigurePageProps {
   searchParams: Promise<{
     installation_id?: string;
   }>;
-}
-
-interface Repository {
-  id: number;
-  name: string;
-  description: string | null;
-  language: string | null;
-  visibility: string;
-  updated_at: string;
-}
-
-async function getInstallationRepos(
-  accessToken: string,
-  installationId: string
-) {
-  const response = await fetch(
-    `https://api.github.com/user/installations/${installationId}/repositories`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch repositories");
-  }
-
-  return response.json();
-}
-
-async function getInstallation(accessToken: string, installationId: string) {
-  const response = await fetch("https://api.github.com/user/installations", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch installations");
-  }
-
-  const data = await response.json();
-  return data.installations.find(
-    (inst: { id: number }) => inst.id === parseInt(installationId)
-  );
 }
 
 export default async function ConfigurePage({
@@ -73,20 +26,23 @@ export default async function ConfigurePage({
     redirect("/dashboard");
   }
 
-  let installation = null;
-  let repositories = [];
-  let error = null;
+  let installation: GitHubInstallation | undefined = undefined;
+  let repositories: GitHubRepository[] = [];
+  let error: string | null = null;
 
   try {
-    installation = await getInstallation(session.accessToken!, installation_id);
+    const installations = await githubAPI.getUserInstallations(session.accessToken!);
+    installation = installations.find(
+      (inst) => inst.id === parseInt(installation_id)
+    );
+    
     if (!installation) {
       error = "Installation not found";
     } else {
-      const repoData = await getInstallationRepos(
+      repositories = await githubAPI.getInstallationRepositories(
         session.accessToken!,
         installation_id
       );
-      repositories = repoData.repositories || [];
     }
   } catch {
     error = "Failed to load installation data";
@@ -154,7 +110,7 @@ export default async function ConfigurePage({
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {repositories.map((repo: Repository) => (
+                    {repositories.map((repo) => (
                       <div
                         key={repo.id}
                         className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"

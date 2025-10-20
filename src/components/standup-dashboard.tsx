@@ -99,7 +99,7 @@ export function StandupDashboard({
           orgName,
           date: formattedDate,
           users: members,
-          email: email || "alex@turbo.ing", // fallback to default email
+          email: email,
         }),
       });
 

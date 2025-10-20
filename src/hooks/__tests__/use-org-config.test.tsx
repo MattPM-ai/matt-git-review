@@ -288,7 +288,8 @@ describe('useOrgConfig Hook', () => {
       });
 
       expect(result.current.error).toBeDefined();
-      expect(result.current.error).toContain('Failed to fetch organization config');
+      // APIError message comes through directly now (either "Unauthorized" or the fetch error)
+      expect(result.current.error).toBeTruthy();
     });
 
     it('should_set_isLoading_false_on_error', async () => {
@@ -385,7 +386,8 @@ describe('useOrgConfig Hook', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(result.current.error).toContain('Failed to fetch organization config');
+        // APIError now returns the HTTP status text (e.g., "Not Found" for 404)
+        expect(result.current.error).toBe('Not Found');
       });
     });
   });

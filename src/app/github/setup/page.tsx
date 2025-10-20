@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { AlertTriangle, CircleCheck } from "lucide-react";
+import { githubAPI } from "@/lib/api";
 
 interface SetupPageProps {
   searchParams: Promise<{
@@ -38,19 +39,10 @@ export default async function GitHubSetupPage({
   let error = null;
 
   try {
-    const response = await fetch("https://api.github.com/user/installations", {
-      headers: {
-        Authorization: `Bearer ${session.accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      installationData = data.installations.find(
-        (inst: { id: number }) => inst.id === parseInt(installation_id)
-      );
-    }
+    const installations = await githubAPI.getUserInstallations(session.accessToken!);
+    installationData = installations.find(
+      (inst) => inst.id === parseInt(installation_id)
+    );
   } catch {
     error = "Failed to verify installation access";
   }

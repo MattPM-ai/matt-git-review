@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
         // Auto sign out after showing error briefly
         setTimeout(() => {
-          signOut({ callbackUrl: "/" });
+          signOut({ redirectTo: "/" });
         }, 2000);
       } finally {
         setIsLoading(false);
